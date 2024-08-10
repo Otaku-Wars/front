@@ -1,0 +1,64 @@
+.character-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #0e0e10;
+    color: white;
+    padding: 20px;
+}
+
+.character-card {
+    width: 100%;
+    max-width: 600px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    color: black;
+}
+
+.character-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid black;
+    background-color: #ffffff;
+}
+
+.character-name {
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    font-size: 1.5rem;
+}
+
+.character-rank {
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    font-size: 1.2rem;
+}
+
+.character-stats {
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+}
+
+.stat-bars p {
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    background-color: #ffd700 !important;
+}
+
+.character-ownership {
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+}
+
+.buy-button, .sell-button {
+    width: 48%;
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    color: black;
+}

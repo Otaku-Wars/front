@@ -1,0 +1,36 @@
+.activity-card {
+    background-color: #0e0e10;
+    border-radius: 10px;
+    max-width: 300px; /* Adjust width according to your layout */
+    height: 100%; /* Adjust height according to your layout */
+    border: none; /* Remove default border */
+    overflow: hidden; /* Prevent scrollbars outside the card */
+}
+
+.activity-card .activity-list-container {
+    max-height: 400px; /* Set a height to allow scrolling */
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.activity-list-item {
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    padding: 10px 15px;
+    border-bottom: 1px solid #ffd700; /* Divider color */
+}
+
+.activity-list-item:last-child {
+    border-bottom: none; /* Remove bottom border for the last item */
+}
+
+.bg-dark {
+    background-color: #0e0e10 !important; /* Consistent dark background */
+}
+
+.text-white {
+    color: white !important;
+}
+
+.text-warning {
+    color: #ffd700 !important;
+}

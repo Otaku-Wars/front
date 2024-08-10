@@ -1,0 +1,65 @@
+.user-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #0e0e10;
+    color: white;
+}
+
+.user-card {
+    width: 100%;
+    max-width: 400px;
+    background-color: #0e0e10;
+    border: none;
+    padding: 20px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.avatar-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #fff;
+    margin-right: 20px;
+}
+
+.user-name {
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    font-size: 1.5rem;
+}
+
+.wallet-info, .deposit-info, .balance-info, .portfolio-info {
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    color: white;
+}
+
+.wallet-label, .wallet-address {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.copy-button, .withdraw-button, .logout-button {
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.portfolio-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    color: black;
+}
+
+.logout {
+    text-align: center;
+}

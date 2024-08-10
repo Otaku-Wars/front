@@ -1,0 +1,80 @@
+body {
+    font-family: "Roboto", sans-serif;
+    background: #0e0e10 !important;
+    color: white !important;
+}
+
+.nav-custom {
+    background: #0e0e10 !important;
+    color: white !important;
+}
+
+.nav-brand-custom {
+    color: white !important;
+}
+
+.nav-custom {
+    background-color: #0e0e10; /* Background color from the image */
+}
+
+.logo-custom {
+    width: 40px; /* Adjust the size of the logo */
+    height: auto;
+}
+
+.brand-text-custom {
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace; /* Ensure you have the font available */
+    font-size: 1.5rem;
+    color: white; /* White color for the brand name */
+    font-weight: bold;
+}
+
+.nav-link-custom {
+    color: #ffd700 !important; /* Yellow color for links */
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace; /* Font for links */
+    font-size: 1rem;
+    margin-right: 15px; /* Space between the links */
+}
+
+.nav-link-custom:hover {
+    color: #ffcc00; /* Slightly lighter yellow on hover */
+}
+
+.login-btn-custom {
+    background-color: #ffd700;
+    color: black;
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+}
+
+.login-btn-custom:hover {
+    background-color: #ffcc00;
+    color: black;
+}
+
+
+.character-list-card {
+    background-color: #0e0e10;
+    max-width: 300px; /* Adjust width according to your layout */
+    height: 100%; /* Adjust height according to your layout */
+    border: none; /* Remove default border */
+    overflow-y: auto;
+}
+
+.character-list-item {
+    background-color: #0e0e10 !important; /* Ensure background color matches card */
+    border-bottom: 1px solid #ffd700; /* Yellow divider */
+    padding: 10px 15px;
+}
+
+.character-list-item:last-child {
+    border-bottom: none; /* Remove bottom border for the last item */
+}
+
+.bg-dark {
+    background-color: #0e0e10 !important; /* Consistent dark background */
+}

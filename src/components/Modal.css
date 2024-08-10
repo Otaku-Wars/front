@@ -1,0 +1,14 @@
+.modal-content {
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    color: black;
+}
+
+.modal-header {
+    border-bottom: none;
+}
+
+.modal-footer {
+    border-top: none;
+}
