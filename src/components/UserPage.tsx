@@ -1,17 +1,20 @@
 import React, { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import Card from 'react-bootstrap/Card';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import ListGroup from 'react-bootstrap/ListGroup';
-import { ModalWithdraw } from './ModalWithdraw'; // Import the WithdrawModal component
+import { ModalWithdraw } from './ModalWithdraw'; 
 import './UserPage.css';
 import { useAddress, useBalance } from '../hooks/user';
 import { truncateWallet } from './NavBar';
 import { useQuery } from '@tanstack/react-query';
 import { apiUrl } from '../main';
-import { convertWeiToEth, useGetSellPrices, useSellPrice } from '../hooks/contract';
+import { convertWeiToEth, useGetSellPrices } from '../hooks/contract';
+import Jazzicon from 'react-jazzicon'
+
+
 
 export const UserPage = () => {
+    const navigate = useNavigate()
     const { id } = useParams();
     const [showModal, setShowModal] = useState(false);
     const address = useAddress();
@@ -26,87 +29,97 @@ export const UserPage = () => {
         refetchInterval: 1000,
     });
 
-    const userData: any = useMemo(() => {
+    const userData = useMemo(() => {
         if (isLoading || isError) return null;
         return data?.users?.find((u: any) => u?.address?.toLowerCase() === id?.toLowerCase()) ?? null;
     }, [data, isLoading, isError, id]);
 
-    const characters: any = useMemo(() => {
-        if (isLoading || isError ) return null;
+    const characters = useMemo(() => {
+        if (isLoading || isError) return null;
         return data?.characters;
-    }, [data, isLoading, isError])
+    }, [data, isLoading, isError]);
 
     const { data: sellPrices } = useGetSellPrices(
-            userData?.
-                balances.
-                    map((b: any) => {
-                        return { 
-                            characterId: b.character, 
-                            amount: b.balance
-                        }
-                    }) ?? []) ?? [];
-    
-    const netWorth = useMemo(() => {
-        //add all sellPrices[].result together
-        return sellPrices?.reduce((acc: number, curr: any) => acc + (convertWeiToEth(curr.result)), 0) ?? 0;
-    }, [sellPrices]);
+        userData?.balances?.map((b: any) => ({
+            characterId: b.character,
+            amount: b.balance
+        })) ?? []
+    );
 
-    console.log("sellPrices", sellPrices);
+    const netWorth = useMemo(() => {
+        return sellPrices?.reduce((acc: number, curr: any) => acc + convertWeiToEth(curr.result), 0) ?? 0;
+    }, [sellPrices]);
 
     const handleShowModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
 
     return (
         <div className="user-page-container">
-            <Card className="user-card bg-dark">
-                <Card.Body>
-                    <div className="user-info">
-                        <div className="avatar-placeholder"></div>
-                        <h4 className="user-name">{id}</h4>
+            <div className='user-card'>
+                <div className="user-info">
+                    <Jazzicon diameter={50} seed={parseInt(id, 16)} />
+                    <h4 className="user-name">{truncateWallet(id)}</h4>
+                </div>
+                <div className="wallet-info mt-3">
+                    <div>
+                    <p className="wallet-label">Wallet Address:</p>
+                    <p className="wallet-address">{truncateWallet(address)}</p>
+
                     </div>
-                    <div className="wallet-info mt-3">
-                        <p className="wallet-label">Wallet Address: {address}</p>
-                        <p className="wallet-address">{truncateWallet(address)}</p>
-                        <Button variant="warning" onClick={() => {
-                            navigator.clipboard.writeText(address);
-                        }} className="copy-button">Copy</Button>
-                    </div>
-                    <div className="deposit-info mt-4">
-                        <p>How to Deposit: Copy your wallet address. Send funds to it. Wait for balance to appear within UI. You are ready to buy your favorite character.</p>
-                    </div>
-                    <div className="balance-info mt-4">
-                        <p>Wallet Balance: {userBalance} ETH</p>
-                        <Button variant="warning" className="withdraw-button" onClick={handleShowModal}>
-                            Withdraw
-                        </Button>
-                    </div>
-                    <div className="portfolio-info mt-4">
-                        <p>Net worth: {netWorth} ETH</p>
-                        <ListGroup variant="flush">
-                            {userData?.balances.map((balance: any | null, index: number) => {
-                                const value = sellPrices && sellPrices[index] ? convertWeiToEth(sellPrices[index].result as bigint) : 0;
-                                return <ListGroup.Item key={index} className="portfolio-item bg-warning">
-                                    <span className="item-name">{characters?.find((c: any) => c.id === balance.character)?.name ?? "Loading"}</span>
-                                    <span className="item-details">{balance.balance} SHARES</span>
-                                    <span className='item-value'>{value} ETH</span>
+                    <Button 
+                        variant="outline-light" 
+                        onClick={() => navigator.clipboard.writeText(address)} 
+                        className="copy-button"
+                    >
+                        Copy
+                    </Button>
+                </div>
+                <div className="deposit-info mt-4">
+                    <p>How to Deposit: Copy your wallet address. Send funds to it. Wait for balance to appear within UI. You are ready to buy your favorite character.</p>
+                </div>
+                <div className="balance-info mt-4">
+                    <p >Balance: {userBalance} ETH </p>
+                    <Button 
+                        variant="warning" 
+                        className="withdraw-button" 
+                        onClick={handleShowModal}
+                    >
+                        Withdraw
+                    </Button>
+                </div>
+                <div className="portfolio-info mt-4">
+                    <p>Portfolio: {netWorth} ETH</p>
+                    <ListGroup variant="flush">
+                        {userData?.balances?.map((balance: any, index: number) => {
+                            const value = sellPrices && sellPrices[index] ? convertWeiToEth(sellPrices[index].result) : 0;
+                            return (
+                                <ListGroup.Item 
+                                    key={index} 
+                                    className="portfolio-item bg-warning"
+                                    onClick={() => navigate(`/character/${characters?.find((c: any) => c.id === balance.character)?.name}`)}
+                                >
+                                    <span className="item-name"> {balance.balance}  "{characters?.find((c: any) => c.id === balance.character)?.name ?? "Loading"}"  </span>
+                                    <span className="item-details">SHARES </span>
+                                    <span className='item-value'> worth  {value} ETH  </span>
                                 </ListGroup.Item>
-                            })}
-                            {userData?.balances.length === 0 && (
-                                <ListGroup.Item className="portfolio-item bg-warning">
-                                    <span className="item-name">No characters owned.</span>
-                                </ListGroup.Item>
-                            )}
-                        </ListGroup>
-                    </div>
-                    <div className="logout mt-4">
-                        <Button 
-                            variant="warning" 
-                            className="logout-button"
-                            
-                        >Logout</Button>
-                    </div>
-                </Card.Body>
-            </Card>
+                            );
+                        })}
+                        {userData?.balances?.length === 0 && (
+                            <ListGroup.Item className="portfolio-item">
+                                <span className="">No characters owned.</span>
+                            </ListGroup.Item>
+                        )}
+                    </ListGroup>
+                </div>
+                <div className="logout mt-4">
+                    <Button 
+                        variant="outline-light" 
+                        className="logout-button"
+                    >
+                        Logout
+                    </Button>
+                </div>
+            </div>
 
             {/* Render the WithdrawModal */}
             <ModalWithdraw 

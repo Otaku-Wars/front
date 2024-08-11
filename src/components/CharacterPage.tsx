@@ -49,87 +49,106 @@ export const CharacterPage = () => {
     return (
         <div className="character-page-container">
             <Card className="character-card">
-                <Card.Body>
-                    <div className="character-header d-flex justify-content-between align-items-center">
-                        <div className="d-flex align-items-center">
-                            <div className="avatar-placeholder"></div>
-                            <Image src={character?.pfp} alt="Character Avatar" className="avatar" />
-                            <h4 className="character-name ms-3"> {character?.name ?? id} </h4>
-                        </div>
-                        <h5 className="character-rank">Rank: {character?.rank ?? "Loading"}</h5>
+                <Card.Body className='flex flex-row w-100 gap-30 justify-content-between'>
+                <div className="d-flex justify-content-between align-items-center w-100 gap-50"
+                    style={{ justifyContent: 'space-between !important' }}
+                >
+                            <div className="d-flex align-items-center">
+                                <Image 
+                                    src={character?.pfp} 
+                                    alt="Character Avatar" 
+                                    className="avatar" 
+                                    roundedCircle
+                                    width={200}
+                                    height={200}
+                                />
+                                <h1 className="ms-3"> {character?.name ?? id} </h1>
+                            </div>
+                            <h5 className="character-rank">Rank: #{character?.rank ?? "Loading"}</h5>
                     </div>
-                    <div className="character-stats mt-4">
-                        <h5>Stats</h5>
-                        <Table borderless className="mb-4">
-                            <thead>
-                                <tr>
-                                    <th>Matches</th>
-                                    <th>Wins</th>
-                                    <th>Losses</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>{character?.matchCount ?? "Loading..." }</td>
-                                    <td>{character?.winCount ?? "Loading..." }</td>
-                                    <td>{character?.lossCount ?? "Loading..." }</td>
-                                </tr>
-                            </tbody>
-                        </Table>
-                        <div className="stat-bars">
-                            <div className="mb-2">
-                                <p>Health</p>
-                                <ProgressBar now={character?.health ?? 0} label={`${character?.health ?? 0}`} className="bg-warning" />
+                    <div className='d-flex flex-row w-100 gap-10 justify-content-between'
+                        style={{ justifyContent: 'space-between !important' }}
+                    >
+                        <div style={{ width: '400px' }}>
+                            
+                            <div className="character-stats mt-4">
+                                <h5>Stats</h5>
+                                <Table borderless className="mb-4 character-stats">
+                                    <thead>
+                                        <tr>
+                                            <th>Matches</th>
+                                            <th>Wins</th>
+                                            <th>Losses</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{character?.matchCount ?? "Loading..." }</td>
+                                            <td>{character?.winCount ?? "Loading..." }</td>
+                                            <td>{character?.lossCount ?? "Loading..." }</td>
+                                        </tr>
+                                    </tbody>
+                                </Table>
+                                <div className="stat-bars">
+                                    <div className="mb-2">
+                                        <p>Health</p>
+                                        <ProgressBar now={character?.health ?? 0} label={`${character?.health ?? 0}`} className="bg-warning" />
+                                    </div>
+                                    <div className="mb-2">
+                                        <p>Power</p>
+                                        <ProgressBar now={character?.power ?? 0} label={`${character?.power ?? 0}`} className="bg-warning" />
+                                    </div>
+                                    <div className="mb-2">
+                                        <p>Attack</p>
+                                        <ProgressBar now={character?.attack ?? 0} label={`${character?.attack ?? 0}`} className="bg-warning" />
+                                    </div>
+                                    <div className="mb-2">
+                                        <p>Defence</p>
+                                        <ProgressBar now={character?.defence ?? 0} label={`${character?.defence ?? 0}`} className="bg-warning" />
+                                    </div>
+                                    <div className="mb-2">
+                                        <p>Speed</p>
+                                        <ProgressBar now={character?.speed ?? 0} label={`${character?.speed ?? 0}`} className="bg-warning" />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="mb-2">
-                                <p>Power</p>
-                                <ProgressBar now={character?.power ?? 0} label={`${character?.power ?? 0}`} className="bg-warning" />
-                            </div>
-                            <div className="mb-2">
-                                <p>Attack</p>
-                                <ProgressBar now={character?.attack ?? 0} label={`${character?.attack ?? 0}`} className="bg-warning" />
-                            </div>
-                            <div className="mb-2">
-                                <p>Defence</p>
-                                <ProgressBar now={character?.defence ?? 0} label={`${character?.defence ?? 0}`} className="bg-warning" />
-                            </div>
-                            <div className="mb-2">
-                                <p>Speed</p>
-                                <ProgressBar now={character?.speed ?? 0} label={`${character?.speed ?? 0}`} className="bg-warning" />
+                        </div>
+                
+                        <div className="character-ownership mt-4"
+                            style={{ width: '400px' }}
+                        >
+                            <h5>You Own: {yourShares as number ?? "Loading..."} shares of {id}</h5>
+                            <Table borderless className="mb-3">
+                                <thead>
+                                    <tr>
+                                        <th>Price</th>
+                                        <th>Market Cap</th>
+                                        <th>Supply</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{character?.price ?? "Loading..."}</td>
+                                        <td>{character?.value ?? "Loading..."}</td>
+                                        <td>{character?.supply ?? "Loading..."}</td>
+                                    </tr>
+                                </tbody>
+                            </Table>
+                            <div className="d-flex justify-content-between">
+                                <Button variant="outline-dark" className="buy-button" onClick={() => handleShowModal('Buy')}
+                                    disabled={isLoading}
+                                >
+                                    Buy
+                                </Button>
+                                <Button 
+                                    disabled={isLoading}
+                                variant="outline-dark" className="sell-button" onClick={() => handleShowModal('Sell')}>
+                                    Sell
+                                </Button>
                             </div>
                         </div>
                     </div>
-                    <div className="character-ownership mt-4">
-                        <h5>You Own: {yourShares as number ?? "Loading..."} shares of {id}</h5>
-                        <Table borderless className="mb-3">
-                            <thead>
-                                <tr>
-                                    <th>Price</th>
-                                    <th>Market Cap</th>
-                                    <th>Supply</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>{character?.price ?? "Loading..."}</td>
-                                    <td>{character?.value ?? "Loading..."}</td>
-                                    <td>{character?.supply ?? "Loading..."}</td>
-                                </tr>
-                            </tbody>
-                        </Table>
-                        <div className="d-flex justify-content-between">
-                            <Button variant="outline-dark" className="buy-button" onClick={() => handleShowModal('Buy')}
-                                disabled={isLoading}
-                            >
-                                Buy
-                            </Button>
-                            <Button 
-                                disabled={isLoading}
-                            variant="outline-dark" className="sell-button" onClick={() => handleShowModal('Sell')}>
-                                Sell
-                            </Button>
-                        </div>
-                    </div>
+                    
                 </Card.Body>
             </Card>
 

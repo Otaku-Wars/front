@@ -1,34 +1,25 @@
 .character-page-container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: start;
     min-height: 100vh;
-    background-color: #0e0e10;
-    color: white;
+    background-color: #0e0e10 !important;
+    color: white !important;
     padding: 20px;
 }
 
 .character-card {
     width: 100%;
-    max-width: 600px;
-    background-color: #ffffff;
-    border-radius: 10px;
+    max-width: 1000px;
     padding: 20px;
-    color: black;
+    color: white !important;
+    background-color: #0e0e10 !important;
 }
 
 .character-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.avatar-placeholder {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 2px solid black;
-    background-color: #ffffff;
 }
 
 .character-name {
@@ -43,6 +34,7 @@
 
 .character-stats {
     font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    background-color: #0e0e10 !important;
 }
 
 .stat-bars p {
@@ -50,7 +42,7 @@
 }
 
 .progress-bar {
-    background-color: #ffd700 !important;
+    background-color: #f6e359 !important;
 }
 
 .character-ownership {
@@ -60,5 +52,13 @@
 .buy-button, .sell-button {
     width: 48%;
     font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
-    color: black;
+    color: white !important;
+}
+
+.buy-button {
+    background-color: #28a745 !important;
+}
+
+.sell-button {
+    background-color: #dc3545 !important;
 }

@@ -1,12 +1,11 @@
 .withdraw-modal-body {
-    background-color: #f5f5f5;
     border-radius: 10px;
     padding: 20px;
     font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
-    color: black;
 }
 
 .max-button {
+    color: black !important;
     margin-top: 10px;
 }
 

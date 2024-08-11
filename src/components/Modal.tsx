@@ -5,8 +5,12 @@ import './Modal.css';
 
 export const DefaultModal = ({ show, handleClose, title, children }: { show: boolean, handleClose: () => void, title: string, children: React.ReactNode }) => {
     return (
-        <Modal show={show} onHide={handleClose}
-        className='bg-dark' centered>
+        <Modal 
+            show={show} 
+            onHide={handleClose}
+            className='custom-modal-content'
+            centered
+        >
             <Modal.Header closeButton>
                 <Modal.Title>{title}</Modal.Title>
             </Modal.Header>

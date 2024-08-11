@@ -27,7 +27,15 @@ export const getPlaybackSource = async (playbackId: string): Promise<Src[] | nul
 
 export const StreamEmbed = () => {
     return (
-      <iframe src="https://lvpr.tv?v=6950nisrggh4cvk1" frameBorder="0" allowFullScreen allow="autoplay; encrypted-media; picture-in-picture" sandbox="allow-same-origin allow-scripts"></iframe>
+      <iframe 
+        src="https://lvpr.tv?v=6950nisrggh4cvk1" 
+        frameBorder="0" 
+        height={"100%"}
+        allowFullScreen 
+        allow="autoplay; encrypted-media; picture-in-picture" 
+        sandbox="allow-same-origin allow-scripts">
+
+      </iframe>
     )
 }
 

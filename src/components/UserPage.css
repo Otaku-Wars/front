@@ -1,7 +1,8 @@
 .user-page-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     min-height: 100vh;
     background-color: #0e0e10;
     color: white;
@@ -9,33 +10,48 @@
 
 .user-card {
     width: 100%;
-    max-width: 400px;
+    max-width: 550px;
     background-color: #0e0e10;
-    border: none;
+    border-radius: 10px;
     padding: 20px;
 }
 
 .user-info {
     display: flex;
     align-items: center;
+    /* set spacing between the avatar and user info by 2px */
+    margin-bottom: 20px;
+    gap: 20px;
+
 }
 
 .avatar-placeholder {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     background-color: #fff;
     margin-right: 20px;
 }
 
 .user-name {
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    font-family: 'Cascadia Code', monospace;
     font-size: 1.5rem;
 }
 
-.wallet-info, .deposit-info, .balance-info, .portfolio-info {
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+.wallet-info, .deposit-info, .balance-info{
+    font-family: 'Cascadia Code', monospace;
     color: white;
+    margin-top: 1rem;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.wallet-info {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+    margin-bottom: 50px;
 }
 
 .wallet-label, .wallet-address {
@@ -44,20 +60,26 @@
 }
 
 .copy-button, .withdraw-button, .logout-button {
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    font-family: 'Cascadia Code', monospace;
     width: 100%;
-    margin-top: 10px;
+    max-width: 100px;
+    padding: 10px;
 }
 
 .portfolio-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
-    padding: 10px;
+    font-size: medium;
+    align-content: center;
+    font-family: 'Cascadia Code', monospace;
     margin-bottom: 10px;
-    border-radius: 5px;
     color: black;
+    /* set pointer cursor on hover */
+    cursor: pointer;
+    border-radius: 8px !important;
+    border-bottom: none !important;
+    height: 60px;
 }
 
 .logout {

@@ -7,6 +7,7 @@ import { BigNumber } from 'ethers';
 import { useBuyShares, useBuyPrice, useCharacterSharesBalance, convertEthToWei, useSellShares, useSellPrice } from '../hooks/contract'; // Import your hooks
 import { useWallets } from '@privy-io/react-auth';
 import { useAddress } from '../hooks/user';
+import { DefaultModal } from './Modal';
 
 export const ModalBuySell = ({ show, handleClose, actionType, characterName, characterId }: 
   { show: boolean, handleClose: () => void, actionType: string, characterName: string, characterId: number }) => {
@@ -76,62 +77,103 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
 
 
     return (
-        <Modal show={show} onHide={
-            handleClose
-            } centered>
-            <Modal.Body className="buy-sell-modal-body">
-                <h4 className="text-center">You Own: {yourShares?.toString() ?? 0} Shares of {characterName}</h4>
-                <div className="text-center mb-3">
-                    <Button 
-                      variant={actionType === 'Buy' ? 'secondary' : 'outline-secondary'} 
-                      className="buy-sell-button"
-                      onClick={() => setAmount(0)} // Reset amount on Buy/Sell switch
-                    >
-                        Buy
-                    </Button>
-                    <Button 
-                      variant={actionType === 'Sell' ? 'secondary' : 'outline-secondary'} 
-                      className="buy-sell-button"
-                      onClick={() => setSellAmount(0)} // Reset amount on Buy/Sell switch
-                    >
-                        Sell
-                    </Button>
-                </div>
-                <Form.Group controlId="formAmount" className="mb-3">
-                    <Form.Label>Amount</Form.Label>
-                    <Form.Control 
-                        type="number" 
-                        value={actionType === 'Buy' ? amount : sellAmount} 
-                        onChange={handleAmountChange} />
-                    <Button variant="outline-dark" className="max-button">Max</Button>
-                </Form.Group>
-                <div className="text-center">
-                    <Button 
-                      variant="dark" 
-                      className="place-trade-button" 
-                      onClick={handlePlaceTrade}
-                      disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}
-                    >
-                        {isBuying ? 'Buying...' : isSelling ? 'Selling...' : 'Place Trade'}
-                    </Button>
-                </div>
-                <p className="text-center mt-3 text-muted">
-                    {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : actionType === 'Buy' ? `Buy Price: ${buyPrice} ETH` : `Sell Price: ${sellPrice} ETH`}
-                </p>
+        // <Modal show={show} onHide={
+        //     handleClose
+        //     } centered>
+        //     <Modal.Body className="">
+        //         <h4 className="text-center">You Own: {yourShares?.toString() ?? 0} Shares of {characterName}</h4>
+        //         <div className="text-center mb-3">
+        //             <Button 
+        //               variant={actionType === 'Buy' ? 'secondary' : 'outline-secondary'} 
+        //               className="buy-sell-button"
+        //               onClick={() => setAmount(0)} // Reset amount on Buy/Sell switch
+        //             >
+        //                 Buy
+        //             </Button>
+        //             <Button 
+        //               variant={actionType === 'Sell' ? 'secondary' : 'outline-secondary'} 
+        //               className="buy-sell-button"
+        //               onClick={() => setSellAmount(0)} // Reset amount on Buy/Sell switch
+        //             >
+        //                 Sell
+        //             </Button>
+        //         </div>
+        //         <Form.Group controlId="formAmount" className="mb-3">
+        //             <Form.Label>Amount</Form.Label>
+        //             <Form.Control 
+        //                 type="number" 
+        //                 value={actionType === 'Buy' ? amount : sellAmount} 
+        //                 onChange={handleAmountChange} />
+        //             <Button variant="outline-dark" className="max-button">Max</Button>
+        //         </Form.Group>
+        //         <div className="text-center">
+        //             <Button 
+        //               variant="dark" 
+        //               className="place-trade-button" 
+        //               onClick={handlePlaceTrade}
+        //               disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}
+        //             >
+        //                 {isBuying ? 'Buying...' : isSelling ? 'Selling...' : 'Place Trade'}
+        //             </Button>
+        //         </div>
+        //         <p className="text-center mt-3 text-muted">
+        //             {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : actionType === 'Buy' ? `Buy Price: ${buyPrice} ETH` : `Sell Price: ${sellPrice} ETH`}
+        //         </p>
 
-                {actionType == 'Buy' && <>
-                {buyError && <p className="text-danger text-center mt-3">Error: {buyError.message}</p>}
-                {priceError && <p className="text-danger text-center mt-3">Error: {priceError.message}</p>}
-                {buySuccess && <p className="text-success text-center mt-3">Buy order Successful!</p>}
-                </>}
+        //         {actionType == 'Buy' && <>
+        //         {buyError && <p className="text-danger text-center mt-3">Error: {buyError.message}</p>}
+        //         {priceError && <p className="text-danger text-center mt-3">Error: {priceError.message}</p>}
+        //         {buySuccess && <p className="text-success text-center mt-3">Buy order Successful!</p>}
+        //         </>}
 
-                {actionType == 'Sell' && <>
-                    {sellPriceError && <p className="text-danger text-center mt-3">Error: {sellPriceError.message}</p>}
-                    {sellError && <p className="text-danger text-center mt-3">Error: {sellError.message}</p>}
-                    {sellSuccess && <p className="text-success text-center mt-3">Sell order Successful!</p>}
-                </>}
+        //         {actionType == 'Sell' && <>
+        //             {sellPriceError && <p className="text-danger text-center mt-3">Error: {sellPriceError.message}</p>}
+        //             {sellError && <p className="text-danger text-center mt-3">Error: {sellError.message}</p>}
+        //             {sellSuccess && <p className="text-success text-center mt-3">Sell order Successful!</p>}
+        //         </>}
                 
-            </Modal.Body>
-        </Modal>
+        //     </Modal.Body>
+        // </Modal>
+
+        <DefaultModal
+            title={`${actionType} Shares of ${characterName}`}
+            show={show}
+            handleClose={handleClose}
+        >   
+            <h4 className="text-center">You Own: {yourShares?.toString() ?? 0} Shares of {characterName}</h4>
+            <Form.Group controlId="formAmount" className="mb-3">
+                <Form.Label>Amount</Form.Label>
+                <Form.Control 
+                    type="number" 
+                    value={actionType === 'Buy' ? amount : sellAmount} 
+                    onChange={handleAmountChange} />
+                <Button variant="light" className="max-button">Max</Button>
+            </Form.Group>
+            <div className="text-center">
+                <Button 
+                    variant= {actionType === 'Buy' ? 'success' : 'danger'}
+                    className="place-trade-button" 
+                    onClick={handlePlaceTrade}
+                    disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}
+                >
+                    {isBuying ? 'Buying...' : isSelling ? 'Selling...' : 'Place Trade'}
+                </Button>
+            </div>
+            <p className="text-center mt-3 text-stats">
+                {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : actionType === 'Buy' ? `Buy Price: ${buyPrice} ETH` : `Sell Price: ${sellPrice} ETH`}
+            </p>
+
+            {actionType == 'Buy' && <>
+            {buyError && <p className="text-danger text-center mt-3">Error: {buyError.message}</p>}
+            {priceError && <p className="text-danger text-center mt-3">Error: {priceError.message}</p>}
+            {buySuccess && <p className="text-success text-center mt-3">Buy order Successful!</p>}
+            </>}
+
+            {actionType == 'Sell' && <>
+                {sellPriceError && <p className="text-danger text-center mt-3">Error: {sellPriceError.message}</p>}
+                {sellError && <p className="text-danger text-center mt-3">Error: {sellError.message}</p>}
+                {sellSuccess && <p className="text-success text-center mt-3">Sell order Successful!</p>}
+            </>}
+        </DefaultModal>
     );
 };

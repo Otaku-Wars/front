@@ -28,18 +28,18 @@ export const NavBar = () => {
 
     return (
         <>
-            <Navbar expand="lg" className="nav-custom">
-                <Container>
+            <Navbar expand="lg" className="nav-custom w-100">
+                <Container fluid>
                     <Navbar.Brand href="/" className="d-flex align-items-center">
                         <Image
-                            src="https://cdn.discordapp.com/attachments/1264677515239358505/1270843771713617920/gb.gif?ex=66b7273e&is=66b5d5be&hm=cc83d0edd82b04ebadd3d3c26b023687f90434fa546b879d9b51964b7048a84c&" 
+                            src="/logo.png"
+                            height={"25px"}
                             alt="MemeClash.Tv Logo"
-                            className="logo-custom"
                         />
-                        <span className="ms-2 brand-text-custom">MemeClash.Tv</span>
+                        {/* <span className="ms-2 brand-text-custom">MemeClash<span className="tv-symbol">.Tv</span></span> */}
                     </Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                    <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
+                    <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end gap-5">
                         <Nav.Link as="button" className="nav-link-custom" onClick={handleHowToModalShow}>
                             How It Works
                         </Nav.Link>
@@ -47,6 +47,7 @@ export const NavBar = () => {
                         {authenticated && (
                             <Button 
                                 variant="warning" 
+                                style={{ paddingLeft: '40px', paddingRight: '40px' }} // Custom padding via inline styles
                                 className="login-btn-custom"
                                 onClick={() => {
                                     navigate(`/user/${address}`);
@@ -58,6 +59,7 @@ export const NavBar = () => {
                         {!authenticated && (
                             <Button 
                                 variant="warning" 
+                                style={{ paddingLeft: '40px', paddingRight: '40px' }} // Custom padding via inline styles
                                 className="login-btn-custom"
                                 onClick={login}
                             >

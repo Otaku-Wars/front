@@ -1,12 +1,26 @@
-body {
-    font-family: "Roboto", sans-serif;
-    background: #0e0e10 !important;
-    color: white !important;
+/* Font face for Cascadia */
+@font-face {
+    font-family: 'Cascadia';
+    src: url('/Cascadia.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 }
 
+/* Body styling  disable overflow */
+body {
+    font-family: 'Cascadia', sans-serif !important;
+    background: #0e0e10 !important;
+    color: white !important;
+    overflow-x: hidden; /* Disable horizontal scrolling */
+    overflow-y: hidden; /* Disable vertical scrolling */
+}
+
+/* Navbar custom styles */
 .nav-custom {
     background: #0e0e10 !important;
     color: white !important;
+    height: 100px !important;
+    padding: 0 30px !important;
 }
 
 .nav-brand-custom {
@@ -23,15 +37,15 @@ body {
 }
 
 .brand-text-custom {
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace; /* Ensure you have the font available */
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
     font-size: 1.5rem;
     color: white; /* White color for the brand name */
     font-weight: bold;
 }
 
 .nav-link-custom {
-    color: #ffd700 !important; /* Yellow color for links */
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace; /* Font for links */
+    color: #f6e359 !important; /* Yellow color for links */
+    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
     font-size: 1rem;
     margin-right: 15px; /* Space between the links */
 }
@@ -40,15 +54,20 @@ body {
     color: #ffcc00; /* Slightly lighter yellow on hover */
 }
 
+.tv-symbol {
+    color: #f6e359; /* Yellow color for the TV symbol */
+}
+
+/* Login button custom styles */
 .login-btn-custom {
-    background-color: #ffd700;
+    background-color: #f6e359;
     color: black;
     font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
     padding: 8px 16px;
     font-size: 1rem;
     font-weight: bold;
     text-transform: uppercase;
-    border: none;
+    border: none 
 }
 
 .login-btn-custom:hover {
@@ -56,18 +75,10 @@ body {
     color: black;
 }
 
-
-.character-list-card {
-    background-color: #0e0e10;
-    max-width: 300px; /* Adjust width according to your layout */
-    height: 100%; /* Adjust height according to your layout */
-    border: none; /* Remove default border */
-    overflow-y: auto;
-}
-
+/* Character list item styles */
 .character-list-item {
-    background-color: #0e0e10 !important; /* Ensure background color matches card */
-    border-bottom: 1px solid #ffd700; /* Yellow divider */
+    background-color: #0e0e10 !important;
+    border-bottom: 1px solid #f6e359;
     padding: 10px 15px;
 }
 
@@ -75,6 +86,49 @@ body {
     border-bottom: none; /* Remove bottom border for the last item */
 }
 
+/* Background dark styles */
 .bg-dark {
-    background-color: #0e0e10 !important; /* Consistent dark background */
+    background-color: #0e0e10 !important;
+}
+
+.character-list-header {
+    padding: 10px 15px;
+    font-size: 25px !important;
+    border-bottom: 0.5px solid white !important;
+}
+
+/* Character list card styles */
+.character-list-card {
+    border: none !important; /* Remove default border */
+    border-radius: 20px !important;
+}
+
+/* Character list scrollbar styling */
+.character-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    width: 100%; /* Ensures the list itself takes up full width of the card */
+    scrollbar-width: thin;
+}
+
+.character-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.character-list::-webkit-scrollbar-track {
+    background: #1c1c1f; /* Track color */
+    border-radius: 10px; /* Rounded corners for the track */
+}
+
+.character-list::-webkit-scrollbar-thumb {
+    background-color: #f6e359; /* Scrollbar color */
+    border-radius: 10px; /* Rounded corners for the scrollbar */
+    border: 2px solid #1c1c1f; /* Padding around the scrollbar thumb */
+}
+
+/* Custom scrollbar for Firefox */
+.character-list {
+    scrollbar-color: #f6e359 #1c1c1f; /* Scrollbar thumb and track color */
+    scrollbar-width: thin; /* Thin scrollbar */
+
 }

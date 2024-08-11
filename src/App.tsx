@@ -13,17 +13,34 @@ import './App.css';
 
 function Home() {
   return (
-    <Container fluid className="mt-3">
-      <Row>
-        <Col md={3}>
+    <Container 
+      fluid 
+      style={{ 
+        height: 'calc(100vh - 140px)',
+        width: 'calc(100vw - 60px)',
+      }}
+    >
+      <Row className="h-100 mx-60 mt-10">
+        <Col 
+          md="auto" 
+          className="d-flex flex-column h-100 align-items-center" 
+          style={{ flexBasis: '21%' }} // 25% width
+        >
           <CharacterList />
         </Col>
-        <Col md={6}>
+        <Col 
+          md="auto" 
+          className="d-flex flex-column h-100 px-0 justify-content-between" 
+          style={{ flexBasis: '58%' }} 
+        >
           <StreamView />
           <WorldStateView />
-
         </Col>
-        <Col md={3}>
+        <Col 
+          md="auto" 
+          className="d-flex flex-column h-100" 
+          style={{ flexBasis: '21%' }} // 25% width
+        >
           <ActivityBar />
         </Col>
       </Row>
