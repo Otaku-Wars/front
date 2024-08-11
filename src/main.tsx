@@ -9,19 +9,23 @@ import {PrivyProvider} from '@privy-io/react-auth';
 import { WagmiProvider } from '@privy-io/wagmi';
 import { createConfig, http } from 'wagmi';
 import { defineChain } from 'viem';
+import { baseSepolia } from 'viem/chains';
 
-export const currentChain = defineChain({
-  id: 31337,
-  name: 'Localhost',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Ether',
-    symbol: 'ETH',
-  },
-  rpcUrls: {
-    default: { http: [import.meta.env.VITE_HTTP_RPC_URL ?? 'http://localhost:8545'] },
-  },
-})
+const isProd = import.meta.env.PROD;
+export const currentChain = isProd ?
+  baseSepolia :
+  defineChain({
+    id: 31337,
+    name: 'Localhost',
+    nativeCurrency: {
+      decimals: 18,
+      name: 'Ether',
+      symbol: 'ETH',
+    },
+    rpcUrls: {
+      default: { http: [import.meta.env.VITE_HTTP_RPC_URL ?? 'http://localhost:8545'] },
+    },
+  })
 
 export const apiUrl = import.meta.env.VITE_API_URL as string
 export const httpRpc = import.meta.env.VITE_HTTP_RPC_URL as string
@@ -32,6 +36,8 @@ console.log('apiUrl', apiUrl)
 console.log('httpRpc', httpRpc)
 console.log('contractAddress', contractAddress)
 console.log('wsApiUrl', wsApiUrl)
+console.log('currentChain', currentChain.name)
+console.log('isProd', isProd)
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
