@@ -25,9 +25,16 @@ export const getPlaybackSource = async (playbackId: string): Promise<Src[] | nul
   return src;
 };
 
+export const StreamEmbed = () => {
+    return (
+      <iframe src="https://lvpr.tv?v=6950nisrggh4cvk1" frameBorder="0" allowFullScreen allow="autoplay; encrypted-media; picture-in-picture" sandbox="allow-same-origin allow-scripts"></iframe>
+    )
+}
+
 export const StreamPlayer = ({ src }: { src: Src[] | null }) => {
     return (
         <Player.Root 
+            lowLatency={true}
             autoPlay={true}
             src={src}
         >
@@ -539,5 +546,5 @@ export default () => {
     if (!src) {
         return <div>Loading...</div>;
     }
-    return <StreamPlayer src={src} />;
+    return <StreamEmbed />;
 }

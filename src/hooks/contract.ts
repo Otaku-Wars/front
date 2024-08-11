@@ -14,7 +14,7 @@ export const convertWeiToEth = (wei: bigint): number => {
 }
 
 export const convertEthToWei = (eth: number): bigint => {
-    return BigInt(eth * 10**18)
+    return BigInt(parseInt((eth * 10**18).toString()))
 }
 
 // Hook to read the user's balance of shares for a character
