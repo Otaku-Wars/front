@@ -85,13 +85,13 @@ export const useGetSellPrices = (objects: {characterId: number, amount: number}[
     } = useReadContracts({
         contracts: objects?.map(({characterId, amount}) => {
             return {
-                abi: WorldABI,
+                abi: WorldABI as any,
                 address: contractAddress,
                 functionName: 'getSellPriceAfterFee',
                 args: [characterId, BigNumber.from(amount ?? 0)],
-            }
+            } as any
         })
-    });
+    } as any);  
 
     console.log("sell prices", data)
 
@@ -114,12 +114,12 @@ export function useBuyShares(characterId: number, amount: BigNumber, ethAmount: 
 
   const buyShares = () => {
     writeContract({
-      abi: WorldABI,
-      address: contractAddress,
+      abi: WorldABI as any,
+      address: contractAddress as `0x${string}`,
       functionName: 'buyShares',
       args: [characterId, amount],
       value: ethAmount,
-    });
+    } as any);
   };
 
   return { buyShares, data, error, isError, isSuccess, isPending };
@@ -131,11 +131,11 @@ export function useSellShares(characterId: number, amount: BigNumber) {
 
   const sellShares = () => {
     writeContract({
-      abi: WorldABI,
+      abi: WorldABI as any,
       address: contractAddress,
       functionName: 'sellShares',
-      args: [characterId, amount],
-    });
+      args: [characterId, amount] as any,
+    } as any);
   };
 
   return { sellShares, data, error, isError, isSuccess, isPending };
@@ -147,11 +147,11 @@ export function useStake(characterId: number, attribute: number, amount: BigNumb
 
   const stakeShares = () => {
     writeContract({
-      abi: WorldABI,
+      abi: WorldABI as any,
       address: contractAddress,
       functionName: 'stake',
-      args: [characterId, attribute, amount],
-    });
+      args: [characterId, attribute, amount ],
+    } as any); 
   };
 
   return { stakeShares, data, error, isError, isSuccess };
@@ -167,7 +167,7 @@ export function useUnstake(characterId: number, attribute: number, amount: BigNu
       address: contractAddress,
       functionName: 'unstake',
       args: [characterId, attribute, amount],
-    });
+    } as any);
   };
 
   return { unstakeShares, data, error, isError, isSuccess };

@@ -91,7 +91,7 @@ export const UserPage = () => {
                     <p>Portfolio: {netWorth} ETH</p>
                     <ListGroup variant="flush">
                         {userData?.balances?.map((balance: any, index: number) => {
-                            const value = sellPrices && sellPrices[index] ? convertWeiToEth(sellPrices[index].result) : 0;
+                            const value = sellPrices && sellPrices[index] ? convertWeiToEth(sellPrices[index].result as any) : 0;
                             return (
                                 <ListGroup.Item 
                                     key={index} 

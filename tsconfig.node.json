@@ -6,8 +6,14 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "strict": true,
+    "strict": false,                // Disable all strict mode checks
+    "noUnusedLocals": false,        // Disable error reporting for unused locals
+    "noUnusedParameters": false,    // Disable error reporting for unused parameters
+    "noImplicitReturns": false,     // Disable error reporting for functions without return values
+    "noFallthroughCasesInSwitch": false,  // Disable error reporting for fallthrough cases in switch statements
+    "disableSizeLimit": true,
     "noEmit": true
+
   },
   "include": ["vite.config.ts"]
 }

@@ -42,7 +42,7 @@ export const CharacterPage = () => {
         return data?.characters?.find((c: any) => c?.name.toLowerCase() == id?.toLowerCase())
     }, [id, data, isLoading, isError])
 
-    const { isLoading : isLoadingYourShares, data: yourShares } = useCharacterSharesBalance(character?.id ?? 0, address)
+    const { data: yourShares } = useCharacterSharesBalance(character?.id ?? 0, address)
     
     console.log("your shares", yourShares)
 
