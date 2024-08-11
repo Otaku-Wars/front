@@ -24,8 +24,14 @@ export const currentChain = defineChain({
 })
 
 export const apiUrl = import.meta.env.VITE_API_URL as string
+export const httpRpc = import.meta.env.VITE_HTTP_RPC_URL as string
+export const wsApiUrl = import.meta.env.VITE_WS_API_URL as string
+export const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS as string
 const queryClient = new QueryClient()
 console.log('apiUrl', apiUrl)
+console.log('httpRpc', httpRpc)
+console.log('contractAddress', contractAddress)
+console.log('wsApiUrl', wsApiUrl)
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
