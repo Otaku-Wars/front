@@ -62,7 +62,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           chains: [currentChain],
           transports: {
             [currentChain.id]: http()
-          }})}
+          } as any})}
         >
           <App />
         </WagmiProvider>
