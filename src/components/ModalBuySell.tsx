@@ -109,7 +109,7 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
             <div className="d-flex flex-row justify-content-between">
                 <p className="text-stats">You Own: {yourShares} shares of {characterName}</p>
                 <Button 
-                    className="max-button"
+                    className="max-button-main"
                     onClick={() => setAmount(Number(defaultActionType === 'Buy' ? 1: yourShares??0))}
                 >
                     Max
@@ -125,7 +125,7 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
                 <div className="increment-button" onClick={incrementAmount}>+</div>
             </Form.Group>
             <p className="text-stats">
-                You have {parseFloat(userBalance?.balance)?.toFixed(5)} ETH ({convertEthToUsd(parseFloat(userBalance?.balance ?? "0"))}) available to trade
+                You have ${convertEthToUsd(parseFloat(userBalance?.balance ?? "0"))} ({parseFloat(userBalance?.balance)?.toFixed(5)} ETH) available to trade
                 </p>
 
             
@@ -139,7 +139,7 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
             </Button>
 
             <p className="text-stats">
-                {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : defaultActionType === 'Buy' ? `Est. cost ${buyPrice.toExponential(3)}ETH (${convertEthToUsd(buyPrice)})` : `Est. cost ${sellPrice.toExponential(3)} ETH (${convertEthToUsd(sellPrice)})`}
+                {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : defaultActionType === 'Buy' ? `Est. cost $${convertEthToUsd(buyPrice)} (${buyPrice.toExponential(3)} ETH)` : `Est. cost $${convertEthToUsd(sellPrice)} (${sellPrice.toExponential(3)} ETH)`}
             </p>
         </DefaultModal>
     );
