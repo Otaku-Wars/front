@@ -6,12 +6,14 @@ import { BigNumber } from 'ethers';
 import { useBuyShares, useBuyPrice, useCharacterSharesBalance, convertEthToWei, useSellShares, useSellPrice } from '../hooks/contract'; // Import your hooks
 import { useAddress, useBalance } from '../hooks/user';
 import { DefaultModal } from './Modal';
+import { convertEthToUsd } from './CharacterList';
 
 export const ModalBuySell = ({ show, handleClose, actionType, characterName, characterId }: 
   { show: boolean, handleClose: () => void, actionType: string, characterName: string, characterId: number }) => {
     const [amount, setAmount] = useState(0);
     const [sellAmount, setSellAmount] = useState(0);
     const address = useAddress();
+    const [defaultActionType, setDefaultActionType] = useState(actionType);
 
     // Get the buy price for the given character and amount
     const { 
@@ -60,12 +62,12 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
 
     const handleAmountChange = (e: any) => {
         const value = parseInt(e.target.value === '' ? '0' : e.target.value);
-        if (actionType === 'Buy') setAmount(value);
+        if (defaultActionType === 'Buy') setAmount(value);
         else setSellAmount(value);
     };
 
     const handlePlaceTrade = () => {
-        if (actionType === 'Buy') {
+        if (defaultActionType === 'Buy') {
             buyShares(); // Call the buy shares function when the button is clicked
         } else {
             sellShares(); // Call the sell shares function when the button is clicked
@@ -73,13 +75,13 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
     };
 
     const incrementAmount = () => {
-        if (actionType === 'Buy') setAmount(amount + 1);
+        if (defaultActionType === 'Buy') setAmount(amount + 1);
         else setSellAmount(sellAmount + 1);
     };
 
     const decrementAmount = () => {
-        if (actionType === 'Buy' && amount > 0) setAmount(amount - 1);
-        else if (actionType === 'Sell' && sellAmount > 0) setSellAmount(sellAmount - 1);
+        if (defaultActionType === 'Buy' && amount > 0) setAmount(amount - 1);
+        else if (defaultActionType === 'Sell' && sellAmount > 0) setSellAmount(sellAmount - 1);
     };
 
     const {data: yourShares} = useCharacterSharesBalance(characterId ?? 0, address)
@@ -92,14 +94,14 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
         >   
             <div className="buy-sell-button-group">
                 <Button 
-                  className={`buy-sell-button ${actionType === 'Buy' ? 'buy-sell-button-active' : ''}`} 
-                  onClick={() => setAmount(0)}
+                  className={`buy-sell-button ${defaultActionType === 'Buy' ? 'buy-sell-button-active' : ''}`} 
+                  onClick={() => setDefaultActionType('Buy')}
                 >
                     Buy
                 </Button>
                 <Button 
-                  className={`buy-sell-button ${actionType === 'Sell' ? 'buy-sell-button-active' : ''}`} 
-                  onClick={() => setSellAmount(0)}
+                  className={`buy-sell-button ${defaultActionType === 'Sell' ? 'buy-sell-button-active' : ''}`} 
+                  onClick={() => setDefaultActionType('Sell')}
                 >
                     Sell
                 </Button>
@@ -117,13 +119,13 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
                 <div className="decrement-button" onClick={decrementAmount}>-</div>
                 <Form.Control 
                     type="number" 
-                    value={actionType === 'Buy' ? amount : sellAmount} 
+                    value={defaultActionType === 'Buy' ? amount : sellAmount} 
                     onChange={handleAmountChange} 
                 />
                 <div className="increment-button" onClick={incrementAmount}>+</div>
             </Form.Group>
             <p className="text-stats">
-                You have {userBalance?.balance} available to trade
+                You have {parseFloat(userBalance?.balance)?.toFixed(5)} ETH ({convertEthToUsd(parseFloat(userBalance?.balance ?? "0"))}) available to trade
                 </p>
 
             
@@ -133,11 +135,11 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
                 onClick={handlePlaceTrade}
                 disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}
             >
-                {isBuying ? 'Buying...' : isSelling ? 'Selling...' : actionType}
+                {isBuying ? 'Buying...' : isSelling ? 'Selling...' : defaultActionType}
             </Button>
 
             <p className="text-stats">
-                {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : actionType === 'Buy' ? `Est. amount of shares ${buyPrice}` : `Est. amount of shares ${sellPrice}`}
+                {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : defaultActionType === 'Buy' ? `Est. cost ${buyPrice.toExponential(3)}ETH (${convertEthToUsd(buyPrice)})` : `Est. cost ${sellPrice.toExponential(3)} ETH (${convertEthToUsd(sellPrice)})`}
             </p>
         </DefaultModal>
     );

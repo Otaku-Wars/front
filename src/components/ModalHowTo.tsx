@@ -5,11 +5,11 @@ export const HowToModal = ({ show, handleClose }: { show: boolean, handleClose: 
     return (
         <DefaultModal show={show} handleClose={handleClose} title="How It Works">
             <div className="how-to-content">
-                <p>MemeClash.TV is a non-stop livestream of characters fighting in a simulated world.</p>
-                <p>Endless Battles: Matches happen 24/7 with auto matchmaking.</p>
-                <p>Win and Earn: Characters earn a percentage of the opponent’s liquidity when they win.</p>
-                <p>Trade Shares: You can buy and sell shares of your favorite character.</p>
-                <p>Market Impact: Characters become stronger as their market cap increases.</p>
+                <p>MemeClash.Tv is a non stop livestream where virtual characters battle for market dominance.</p>
+                <p><strong>Endless Battles: </strong>Characters battle 24/7.</p>
+                <p><strong>Win and Earn: </strong>Characters earn a percentage of their opponent’s value (market cap) when they win.</p>
+                <p><strong>Buy Shares: </strong>You can buy shares of your favorite characters to gain access to their potential upside</p>
+                <p><strong>Make profit: </strong>Sell at any time to lock in your profits/losses</p>
             </div>
         </DefaultModal>
     );

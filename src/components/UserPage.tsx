@@ -14,6 +14,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { Image } from 'react-bootstrap';
 
 import Identicon from 'identicon.js';
+import { convertEthToUsd } from './CharacterList';
 
 
 export const UserPage = () => {
@@ -89,7 +90,7 @@ export const UserPage = () => {
                     <p>How to Deposit: Copy your wallet address. Send funds to it. Wait for balance to appear within UI. You are ready to buy your favorite character.</p>
                 </div>
                 <div className="balance-info">
-                    <p >Cash: {userBalance} ETH </p>
+                    <p >Cash: ${convertEthToUsd(userBalance)} ({userBalance} ETH)</p>
                     <Button 
                     variant='outline-light'
                         className="withdraw-button" 
@@ -99,7 +100,7 @@ export const UserPage = () => {
                     </Button>
                 </div>
                 <div className="portfolio-info">
-                    <p>Portfolio: {netWorth} ETH</p>
+                    <p>Portfolio: ${convertEthToUsd(netWorth)} ({netWorth} ETH)</p>
                     <ListGroup variant="flush">
                         {userData?.balances?.map((balance: any, index: number) => {
                             const value = sellPrices && sellPrices[index] ? convertWeiToEth(sellPrices[index].result as any) : 0;
@@ -111,7 +112,7 @@ export const UserPage = () => {
                                 >
                                     <div className=''>{characters?.find((c: any) => c.id === balance.character)?.name ?? "Loading"}</div>
                                     <div className="item-name">{balance.balance} Shares</div>
-                                    <div className='item-value'>{value} ETH</div>
+                                    <div className='item-value'>${convertEthToUsd(value)}</div>
                                 </ListGroup.Item>
                             );
                         })}

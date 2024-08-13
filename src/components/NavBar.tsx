@@ -44,7 +44,13 @@ export const NavBar = () => {
                         <Nav.Link as="button" className="nav-link-custom" onClick={handleHowToModalShow}>
                             How It Works
                         </Nav.Link>
-                        <Nav.Link href="#discord" className="nav-link-custom">Chat</Nav.Link>
+                        <Nav.Link 
+                            href="https://discord.gg/uUdQZXXBPf" 
+                            className="nav-link-custom"
+                            target='_blank'
+                        >
+                            Chat
+                        </Nav.Link>
                         {authenticated && (
                             <Button 
                                 variant="warning" 
