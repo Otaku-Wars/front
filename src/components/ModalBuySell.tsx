@@ -110,7 +110,7 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
                 <p className="text-stats">You Own: {yourShares} shares of {characterName}</p>
                 <Button 
                     className="max-button"
-                    onClick={() => setAmount(Number(userBalance?.balance) ?? 0)} // Example logic for Max button, adjust accordingly
+                    onClick={() => setAmount(Number(defaultActionType === 'Buy' ? 1: yourShares??0))}
                 >
                     Max
                 </Button>
