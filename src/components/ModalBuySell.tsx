@@ -4,7 +4,7 @@ import Form from 'react-bootstrap/Form';
 import './ModalBuySell.css';
 import { BigNumber } from 'ethers';
 import { useBuyShares, useBuyPrice, useCharacterSharesBalance, convertEthToWei, useSellShares, useSellPrice } from '../hooks/contract'; // Import your hooks
-import { useAddress } from '../hooks/user';
+import { useAddress, useBalance } from '../hooks/user';
 import { DefaultModal } from './Modal';
 
 export const ModalBuySell = ({ show, handleClose, actionType, characterName, characterId }: 
@@ -44,6 +44,8 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
         BigNumber.from(amount ?? 0), 
         convertEthToWei(buyPrice ?? 0),
     )
+
+    const userBalance = useBalance(address as `0x${string}`);
 
     // Hook to execute the sell shares function
     const { 
@@ -90,19 +92,27 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
         >   
             <div className="buy-sell-button-group">
                 <Button 
-                  className={`buy-sell-button ${actionType === 'Buy' ? 'active' : ''}`} 
+                  className={`buy-sell-button ${actionType === 'Buy' ? 'buy-sell-button-active' : ''}`} 
                   onClick={() => setAmount(0)}
                 >
                     Buy
                 </Button>
                 <Button 
-                  className={`buy-sell-button ${actionType === 'Sell' ? 'active' : ''}`} 
+                  className={`buy-sell-button ${actionType === 'Sell' ? 'buy-sell-button-active' : ''}`} 
                   onClick={() => setSellAmount(0)}
                 >
                     Sell
                 </Button>
             </div>
-
+            <div className="d-flex flex-row justify-content-between">
+                <p className="text-stats">You Own: {yourShares} shares of {characterName}</p>
+                <Button 
+                    className="max-button"
+                    onClick={() => setAmount(Number(userBalance?.balance) ?? 0)} // Example logic for Max button, adjust accordingly
+                >
+                    Max
+                </Button>
+            </div>
             <Form.Group className="form-group">
                 <div className="decrement-button" onClick={decrementAmount}>-</div>
                 <Form.Control 
@@ -112,13 +122,11 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
                 />
                 <div className="increment-button" onClick={incrementAmount}>+</div>
             </Form.Group>
+            <p className="text-stats">
+                You have {userBalance?.balance} available to trade
+                </p>
 
-            <Button 
-                className="max-button"
-                onClick={() => setAmount(100)} // Example logic for Max button, adjust accordingly
-            >
-                Max
-            </Button>
+            
 
             <Button 
                 className="place-trade-button" 
