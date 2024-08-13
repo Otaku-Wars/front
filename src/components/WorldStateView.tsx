@@ -109,10 +109,10 @@ export const WorldStateView = () => {
                         </h4>
                         <p className="text-light">MarketCap: ${convertEthToUsd(character1?.value)}</p>
                         {!winner && <>
-                            <h6 className="if-result">Win: Share price ${price1IfWin} +10%</h6>
+                            <h6 className="if-result">Win: Share price +10%</h6>
                         </>}
-                        {winner && winner == character1?.id && <h6 className="if-result">Won. Price now ${price1IfWin} +10%</h6>}
-                        {winner && winner == character2?.id && <h6 className="if-result-loss">Lost. Price now ${price1IfLoss} -10%</h6>}
+                        {winner && winner == character1?.id && <h6 className="if-result">Won. Price now +10%</h6>}
+                        {winner && winner == character2?.id && <h6 className="if-result-loss">Lost. Price now -10%</h6>}
                         
                     </Col>
                     <Col className="">
@@ -125,10 +125,10 @@ export const WorldStateView = () => {
                         </h4>
                         <p className="text-light">MarketCap: ${convertEthToUsd(character2?.value)}</p>
                         {!winner && <>
-                            <h6 className="if-result">Win: Share Price ${price2IfWin} +10%</h6>
+                            <h6 className="if-result">Win: Share Price +10%</h6>
                         </>}
-                        {winner && winner == character2?.id && <h6 className="if-result">Won. Price now ${price2IfWin} +10%</h6>}
-                        {winner && winner == character1?.id && <h6 className="if-result-loss">Lost. Price now ${price2IfLoss} -10%</h6>}
+                        {winner && winner == character2?.id && <h6 className="if-result">Won. Price now +10%</h6>}
+                        {winner && winner == character1?.id && <h6 className="if-result-loss">Lost. Price now -10%</h6>}
                     </Col>
                 </Row>
             </Card.Body>
