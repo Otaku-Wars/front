@@ -116,7 +116,7 @@ export const WorldStateView = () => {
                         
                     </Col>
                     <Col className="">
-                        <p className="next-match">{isPendingMAtch && `Match starting in ${willStartIn}S`}</p>
+                        <p id="next-match" className="next-match-main">{isPendingMAtch && `Match starting in ${willStartIn}S`}</p>
                         <h4 className="vs-text">VS</h4>
                     </Col>
                     <Col className="">

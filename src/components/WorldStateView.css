@@ -24,11 +24,7 @@
     font-weight: bold !important;
 }
 
-.next-match {
-    color: white !important;
-    font-size: 21px !important;
-    font-weight: normal !important;
-}
+
 
 
 .if-result, .if-result-loss {
@@ -65,4 +61,15 @@
 
 .text-warning {
     color: #f6e359 !important;
+}
+.next-match-main {
+    color: white !important;
+    font-size: 25px !important;
+    font-weight: normal !important;
+}
+
+#next-match {
+    color: white !important;
+    font-size: 22px !important;
+    font-weight: normal !important;
 }
