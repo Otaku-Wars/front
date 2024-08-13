@@ -1,6 +1,6 @@
 .activity-card {
     background-color: #0e0e10;
-    border-radius: 5px !important;
+    border-radius: 29px !important;
     height: 100%; /* Adjust height according to your layout */
     border: none !important; /* Remove default border */
     overflow: hidden; /* Prevent scrollbars outside the card */
@@ -18,14 +18,23 @@
 }
 
 .activity-header {
-    padding: 10px 15px;
-    font-size: 25px !important;
-    border-bottom: 0.5px solid white !important; /* Divider color */
+    padding: 17px 15px 11px 15px !important;
+    text-align: center !important;
+    color: white !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    line-height: 24px !important;
+    border-bottom: 2px solid #545556 !important; /* Divider color */
+}
+
+.activity-card {
+    padding-bottom: 23px !important;
 }
 
 .activity-card .activity-list-container::-webkit-scrollbar-track {
     background: #1c1c1f; /* Track color */
     border-radius: 10px; /* Rounded corners for the track */
+    padding: 10px 20px !important;
 }
 
 .activity-card .activity-list-container::-webkit-scrollbar-thumb {
@@ -41,9 +50,11 @@
 }
 
 .activity-list-item {
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
     padding: 10px 15px;
-    border-top: 1px solid #f6e359; /* Divider color */
+    font-size: 18px !important;
+    color: white !important;
+    border: none !important;
+    margin-left: 5px;
 }
 
 .activity-list-item:last-child {
@@ -52,12 +63,4 @@
 
 .bg-dark {
     background-color: #0e0e10 !important; /* Consistent dark background */
-}
-
-.text-white {
-    color: white !important;
-}
-
-.text-warning {
-    color: #f6e359 !important;
 }

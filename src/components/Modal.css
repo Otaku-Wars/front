@@ -1,10 +1,10 @@
 /* Modal.css */
 
 .custom-modal-content .modal-content {
-    background-color: #1a1a1a; /* Custom background color */
+    background-color: #1F1F23; /* Custom background color */
     color: white;
     border-radius: 15px; /* Adjusted border-radius to match the design */
-    border: white 2px solid; /* Added border with white color */
+    border: white 1px solid; /* Added border with white color */
 }
 
 .custom-modal-content .modal-header {
@@ -16,12 +16,13 @@
 }
 
 .custom-modal-content .modal-header .btn-close {
-    color: black;
+    color: black !important; /* Set the close button color to black */
     border-radius: 50%;
     font-size: 1.5rem; /* Increase size if necessary */
     padding: 0;
-    background: #f6e359; /* Set the background color to yellow */
+    background: #f6e359 !important; /* Set the background color to yellow */
     border: none; /* Remove border */
+    background-color: #f6e359 !important; /* Set the background color to yellow */
 }
 
 .custom-modal-content .modal-header .btn-close:hover {
@@ -45,7 +46,6 @@
 
 .custom-modal-content .modal-title {
     color: #f6e359; /* Set the title color to match the close button */
-    font-family: 'Cascadia Code', monospace; /* Match the font */
 }
 
 .custom-modal-content .btn-secondary {

@@ -7,6 +7,7 @@ import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useNavigate } from 'react-router-dom';
 import { HowToModal } from './ModalHowTo'; // Importing the HowToModal component
 import { useState } from 'react'; // Import useState for modal handling
+import './NavBar.css';
 
 export const truncateWallet = (wallet: string) => {
     if (!wallet) {
@@ -28,7 +29,7 @@ export const NavBar = () => {
 
     return (
         <>
-            <Navbar expand="lg" className="nav-custom w-100">
+            <Navbar className="nav-custom">
                 <Container fluid>
                     <Navbar.Brand href="/" className="d-flex align-items-center">
                         <Image
@@ -43,7 +44,7 @@ export const NavBar = () => {
                         <Nav.Link as="button" className="nav-link-custom" onClick={handleHowToModalShow}>
                             How It Works
                         </Nav.Link>
-                        <Nav.Link href="#discord" className="nav-link-custom">Discord</Nav.Link>
+                        <Nav.Link href="#discord" className="nav-link-custom">Chat</Nav.Link>
                         {authenticated && (
                             <Button 
                                 variant="warning" 

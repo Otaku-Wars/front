@@ -2,7 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom';
 import {PrivyProvider} from '@privy-io/react-auth';
@@ -52,9 +51,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           loginMethods: ['email', 'wallet', 'twitter'],
           // Customize Privy's appearance in your app
           appearance: {
-            theme: 'light',
-            accentColor: '#676FFF',
-            logo: "https://cdn.discordapp.com/attachments/1264677515239358505/1270843771713617920/gb.gif?ex=66b7273e&is=66b5d5be&hm=cc83d0edd82b04ebadd3d3c26b023687f90434fa546b879d9b51964b7048a84c&" // Add your logo image URL here
+            theme: 'dark',
           },
         }}
       >

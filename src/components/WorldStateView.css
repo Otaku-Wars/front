@@ -1,11 +1,12 @@
 .world-state-card {
     background-color: #0e0e10;
-    border-radius: 20px !important;
+    border-radius: 30px !important;
     border: none !important;
     padding: 20px;
     /* max-width: 600px; Adjust this as necessary */
     margin: 0 auto; /* Center align the card */
     height: 100%;
+    margin-top: 25px !important;
 }
 
 .world-state-card .vs-text {
@@ -17,13 +18,37 @@
     height: 100%;
 }
 
-.world-state-card h5 {
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+.world-state-card h4 {
+    color: white !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+}
+
+.next-match {
+    color: white !important;
+    font-size: 21px !important;
+    font-weight: normal !important;
+}
+
+
+.if-result, .if-result-loss {
+    display: inline-block;
+    font-size: 16px !important;
+    font-weight: normal !important;
+}
+
+.if-result {
+    color: #1DCC98 !important;
+}
+
+.if-result-loss {
+    color: #FF5101 !important;
 }
 
 .world-state-card p {
     margin: 0;
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    font-size: 16px !important;
+    font-weight: 700 !important;
 }
 
 .text-light {

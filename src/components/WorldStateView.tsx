@@ -9,6 +9,7 @@ import { apiUrl } from '../main';
 //timeer hook
 import { useEffect, useState } from 'react';
 import { Image } from 'react-bootstrap';
+import { convertEthToUsd, formatFloat } from './CharacterList';
 // Time in seconds that the match will start
 export const useTimeTill = (time: number) => {
     const [timeTill, setTimeTill] = useState(Math.max(0, Math.floor((time - Date.now()) / 1000)));
@@ -71,60 +72,63 @@ export const WorldStateView = () => {
         return data?.lastWinner;
     }, [data])
 
+    const price1IfWin = useMemo(() => {
+        const price = character1?.price;
+        const percentChange = character1?.value/10;
+        return convertEthToUsd(price + percentChange);
+    }, [data])
+
+    const price2IfWin = useMemo(() => {
+        const price = character2?.price;
+        const percentChange = character2?.value/10;
+        return convertEthToUsd(price + percentChange);
+    }, [data])
+
+    const price1IfLoss = useMemo(() => {
+        const price = character1?.price;
+        const percentChange = character1?.value/10;
+        return convertEthToUsd(price - percentChange);
+    }, [data])
+
+    const price2IfLoss = useMemo(() => {
+        const price = character2?.price;
+        const percentChange = character2?.value/10;
+        return convertEthToUsd(price - percentChange);
+    }, [data])
+
     console.log("data will start at", data?.willStartAt)
     const willStartIn = useTimeTill(data?.willStartAt ?? 0);
 
     return (
         <Card className="world-state-card bg-dark w-100">
             <Card.Body className="w-100">
-                <Row className="align-items-center text-center flex-grow-1 w-100">
-                    <Col>
-                        <h5 className="text-light">
-                            <span className="mr-2 text-warning">
-                                <Image
-                                    src={character1?.pfp}
-                                    alt={character1?.name}
-                                    height={50}
-                                    width={50}
-                                    className='mr-10 px-10'
-                                    rounded
-                                />
-                            </span>
+                <Row className="align-items-center text-center w-100 justify-content-evenly">
+                    <Col className='flex flex-col justify-content-start'>
+                        <h4 className="">
                             {character1?.name}
-                        </h5>
-                        <p className="text-light">MarketCap: {character1?.value} ETH</p>
+                        </h4>
+                        <p className="text-light">MarketCap: ${convertEthToUsd(character1?.value)}</p>
                         {!winner && <>
-                            <p className="text-success">If it wins, gain {character1Loss} ETH ➔</p>
-                            <p className="text-danger">If it loses, pay {character1Loss} ETH ➔</p>
+                            <h6 className="if-result">Win: Share price ${price1IfWin}</h6>
                         </>}
-                        {winner && winner == character1?.id && <h4 className="text-success">Won {character1Loss} ETH</h4>}
-                        {winner && winner == character2?.id && <h4 className="text-danger">Lost {character1Loss} ETH</h4>}
+                        {winner && winner == character1?.id && <h6 className="if-result">Won. Price now ${price1IfWin}</h6>}
+                        {winner && winner == character2?.id && <h6 className="if-result-loss">Lost. Price now ${price1IfLoss}</h6>}
                         
                     </Col>
-                    <Col className="vs-text">
-                        {isPendingMAtch && <h4 className="text-warning">Match starting in {willStartIn} seconds</h4> }
-                        <h4 className="text-warning">VS</h4>
+                    <Col className="">
+                        <p className="next-match">{isPendingMAtch && `Match starting in ${willStartIn}S`}</p>
+                        <h4 className="vs-text">VS</h4>
                     </Col>
-                    <Col>
-                        <h5 className="text-light">
-                            <span className="mr-2 text-warning">
-                                <Image
-                                    src={character2?.pfp}
-                                    alt={character2?.name}
-                                    height={50}
-                                    width={50}
-                                    rounded
-                                />
-                            </span>
+                    <Col className="">
+                        <h4 className="">
                             {character2?.name}
-                        </h5>
-                        <p className="text-light">MarketCap: {character2?.value} ETH</p>
+                        </h4>
+                        <p className="text-light">MarketCap: ${convertEthToUsd(character2?.value)}</p>
                         {!winner && <>
-                            <p className="text-success">If it wins, gain {character2Loss} ETH ➔</p>
-                            <p className="text-danger">If it loses, pay {character2Loss} ETH ➔</p>
+                            <h6 className="if-result">Win: Share Price ${price2IfWin}</h6>
                         </>}
-                        {winner && winner == character2?.id && <h4 className="text-success">Won {character2Loss} ETH</h4>}
-                        {winner && winner == character1?.id && <h4 className="text-danger">Lost {character2Loss} ETH</h4>}
+                        {winner && winner == character2?.id && <h6 className="if-result">Won. Price now ${price2IfWin}</h6>}
+                        {winner && winner == character1?.id && <h6 className="if-result-loss">Lost. Price now ${price2IfLoss}</h6>}
                     </Col>
                 </Row>
             </Card.Body>

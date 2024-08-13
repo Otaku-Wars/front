@@ -12,6 +12,7 @@ export const ActivityBar = () => {
 
     // Use the useWebSocket hook to connect to the WebSocket
     const { lastMessage } = useWebSocket(socketUrl, {
+        onMessage: (message) => console.log('WebSocket message received:', message),
         onOpen: () => console.log('WebSocket connection opened'),
         onClose: () => console.log('WebSocket connection closed'),
         onError: (error) => console.error('WebSocket error:', error),
@@ -27,7 +28,7 @@ export const ActivityBar = () => {
 
     return (
         <Card className="activity-card h-100 w-100 d-flex flex-column bg-dark">
-            <Card.Header className="text-center text-warning bg-dark activity-header">
+            <Card.Header className="activity-header">
                 Activity
             </Card.Header>
             <div className="activity-list-container flex-grow-1 d-flex flex-column-reverse overflow-auto">

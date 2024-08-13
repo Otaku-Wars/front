@@ -9,11 +9,12 @@
 }
 
 .character-card {
-    width: 100%;
+    width: 600px;
     max-width: 1000px;
     padding: 20px;
     color: white !important;
     background-color: #0e0e10 !important;
+    align-items: center;
 }
 
 .character-header {
@@ -23,17 +24,16 @@
 }
 
 .character-name {
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
-    font-size: 1.5rem;
+    font-size: 24px !important;
+    font-weight: bold !important;
 }
 
 .character-rank {
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
-    font-size: 1.2rem;
+    font-size: 20px !important;
+    font-weight: bold !important;
 }
 
 .character-stats {
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
     background-color: #0e0e10 !important;
 }
 
@@ -42,23 +42,68 @@
 }
 
 .progress-bar {
-    background-color: #f6e359 !important;
+    background-color: white !important;
 }
 
 .character-ownership {
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
+    display: flex;
+    flex-direction: column;
+    margin: 40px 0 !important;
 }
 
 .buy-button, .sell-button {
     width: 48%;
-    font-family: 'Cascadia Code', 'Cascadia Mono', 'Cascadia', monospace;
     color: white !important;
 }
 
-.buy-button {
-    background-color: #28a745 !important;
+.buy-button, .sell-button {
+    margin: 44px 0 !important;
+    color: black !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+    background-color: #F6E359 !important;
+    padding: 6px 12px !important;
+    border-radius: 10px !important;
 }
 
-.sell-button {
-    background-color: #dc3545 !important;
+.buy-button:hover, .sell-button:hover {
+    background-color: #ffcc00 !important;
+}
+
+
+.character-page-avatar {
+    width: 82px;
+    height: 82px;
+    border-radius: 26px !important;
+}
+
+.attribute-header {
+    color: #545556 !important;
+    font-weight: regular !important;
+    font-size: 20px !important;
+}
+
+.attribute-value {
+    color: white !important;
+    font-weight: bold !important;
+    font-size: 32px !important;
+}
+
+.stats-header {
+    color: #545556 !important;
+    font-weight: bold !important;
+    font-size: 20px !important;
+}
+
+.stats-value {
+    margin-left: 5px !important;
+    margin-top: -10px !important;
+    color: white !important;
+    font-weight: bold !important;
+    font-size: 20px !important;
+}
+
+.character-stats h5 {
+    font-size: 20px !important;
+    font-weight: bold !important;
 }

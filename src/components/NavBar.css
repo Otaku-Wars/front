@@ -1,0 +1,61 @@
+/* Navbar custom styles */
+.nav-custom {
+    color: white !important;
+    padding: 28px 30px !important;
+    margin-bottom: 10px !important;
+    font-weight: 700 !important;
+    font-size: 20px !important;
+}
+
+.nav-brand-custom {
+    color: white !important;
+}
+
+.nav-custom {
+    background-color: #0e0e10; /* Background color from the image */
+}
+
+.logo-custom {
+    width: 40px; /* Adjust the size of the logo */
+    height: auto;
+}
+
+.brand-text-custom {
+    font-size: 1.5rem;
+    color: white; /* White color for the brand name */
+    font-weight: bold;
+}
+
+.nav-link-custom {
+    color: #F6E359 !important; /* Yellow color for links */
+    font-weight: 700 !important;
+    font-size: 20px !important;
+    line-height: 24px !important;
+    margin-right: 8px; /* Space between the links */
+}
+
+.nav-link-custom:hover {
+    color: #ffcc00 !important; /* Slightly lighter yellow on hover */
+}
+
+.tv-symbol {
+    color: #f6e359; /* Yellow color for the TV symbol */
+}
+
+/* Login button custom styles */
+.login-btn-custom {
+    background-color: #f6e359 !important;
+    color: black;
+    border: none;
+    border-radius: 30px !important;
+    font-weight: 700 !important;
+    font-size: 20px !important;
+    padding: 12px 32px !important;
+    line-height: 24px !important;
+    height: fit-content !important;
+}
+
+.login-btn-custom:hover {
+    background-color: #ffcc00 !important; /* Slightly lighter yellow on hover */
+    color: black;
+}

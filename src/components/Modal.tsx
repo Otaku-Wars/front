@@ -17,11 +17,6 @@ export const DefaultModal = ({ show, handleClose, title, children }: { show: boo
             <Modal.Body>
                 {children}
             </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
-                    Close
-                </Button>
-            </Modal.Footer>
         </Modal>
     );
 };

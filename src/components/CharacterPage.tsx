@@ -12,6 +12,7 @@ import { useCharacterSharesBalance } from '../hooks/contract';
 import { useWallets } from '@privy-io/react-auth';
 import { Image } from 'react-bootstrap';
 import { useAddress } from '../hooks/user';
+import { convertEthToUsd } from './CharacterList';
 
 export const CharacterPage = () => {
     const { id } = useParams();
@@ -49,31 +50,70 @@ export const CharacterPage = () => {
     return (
         <div className="character-page-container">
             <Card className="character-card">
-                <Card.Body className='flex flex-row w-100 gap-30 justify-content-between'>
-                <div className="d-flex justify-content-between align-items-center w-100 gap-50"
-                    style={{ justifyContent: 'space-between !important' }}
-                >
-                            <div className="d-flex align-items-center">
+                <Card.Body className='flex flex-col gap-30 align-items-center'>
+                <div className="d-flex align-items-center justify-content-between">
+                
                                 <Image 
                                     src={character?.pfp} 
                                     alt="Character Avatar" 
-                                    className="avatar" 
-                                    roundedCircle
-                                    width={200}
-                                    height={200}
+                                    className="character-page-avatar" 
                                 />
-                                <h1 className="ms-3"> {character?.name ?? id} </h1>
-                            </div>
-                            <h5 className="character-rank">Rank: #{character?.rank ?? "Loading"}</h5>
+                                <h1 className="character-name"> {character?.name ?? id} </h1>
+                            <h5 className="character-rank">Rank #{character?.rank ?? "Loading"}</h5>
                     </div>
-                    <div className='d-flex flex-row w-100 gap-10 justify-content-between'
+                    <div className='flex flex-col w-100 gap-10 justify-content-between'
                         style={{ justifyContent: 'space-between !important' }}
                     >
+                        <div className="character-ownership"
+                        >
+                            {/* <h5>You Own: {yourShares as number ?? "Loading..."} shares of {id}</h5> */}
+                                <div className='d-flex justify-content-between gap-20 mt-20 mb-20'>
+                                    <div className='flex flex-col'>
+                                        <div className="attribute-header">Price</div>
+                                        <div className="attribute-value">${convertEthToUsd(character?.price) ?? "Loading..."}</div>
+                                    </div>
+                                    <div className='flex flex-col'>
+                                        <div className="attribute-header">Market Cap</div>
+                                        <div className="attribute-value">${convertEthToUsd(character?.value) ?? "Loading..."}</div>
+                                    </div>
+                                    <div className='flex flex-col'>
+                                        <div className="attribute-header">Supply</div>
+                                        <div className="attribute-value">{character?.supply ?? "Loading..."}</div>
+                                    </div>
+                                </div>
+                                
+                            <div className="d-flex justify-content-between">
+                                <Button variant="outline-dark" className="buy-button" onClick={() => handleShowModal('Buy')}
+                                    disabled={isLoading}
+                                >
+                                    Buy
+                                </Button>
+                                <Button 
+                                    disabled={isLoading}
+                                variant="outline-dark" className="sell-button" onClick={() => handleShowModal('Sell')}>
+                                    Sell
+                                </Button>
+                            </div>
+                        </div>
                         <div style={{ width: '400px' }}>
                             
-                            <div className="character-stats mt-4">
-                                <h5>Stats</h5>
-                                <Table borderless className="mb-4 character-stats">
+                            <div className="character-stats">
+                                <h5>Key Stats</h5>
+                                <div className="d-flex justify-content-between">
+                                    <div className="flex flex-col align-items-center">
+                                        <p className='stats-header'>Wins</p>
+                                        <p className='stats-value'>{character?.winCount ?? "Loading..."}</p>
+                                    </div>
+                                    <div className="flex flex-col align-items-center">
+                                        <p className="stats-header">Losses</p>
+                                        <p className='stats-value'>{character?.lossCount ?? "Loading..."}</p>
+                                    </div>
+                                    <div className="flex flex-col align-items-center">
+                                        <p className='stats-header'>Matches</p>
+                                        <p className='stats-value'>{character?.matchCount ?? "Loading..."}</p>
+                                    </div>
+                                </div>
+                                {/* <Table borderless className="mb-4 character-stats">
                                     <thead>
                                         <tr>
                                             <th>Matches</th>
@@ -88,65 +128,33 @@ export const CharacterPage = () => {
                                             <td>{character?.lossCount ?? "Loading..." }</td>
                                         </tr>
                                     </tbody>
-                                </Table>
+                                </Table> */}
                                 <div className="stat-bars">
-                                    <div className="mb-2">
+                                    <div className="flex flex-row">
                                         <p>Health</p>
-                                        <ProgressBar now={character?.health ?? 0} label={`${character?.health ?? 0}`} className="bg-warning" />
+                                        <ProgressBar now={100} label={`${character?.health ?? 0}`} className="progress-bar" />
                                     </div>
                                     <div className="mb-2">
                                         <p>Power</p>
-                                        <ProgressBar now={character?.power ?? 0} label={`${character?.power ?? 0}`} className="bg-warning" />
+                                        <ProgressBar now={character?.power ?? 0} label={`${character?.power ?? 0}`} className="progress-bar" />
                                     </div>
                                     <div className="mb-2">
                                         <p>Attack</p>
-                                        <ProgressBar now={character?.attack ?? 0} label={`${character?.attack ?? 0}`} className="bg-warning" />
+                                        <ProgressBar now={character?.attack ?? 0} label={`${character?.attack ?? 0}`} className="progress-bar" />
                                     </div>
                                     <div className="mb-2">
                                         <p>Defence</p>
-                                        <ProgressBar now={character?.defence ?? 0} label={`${character?.defence ?? 0}`} className="bg-warning" />
+                                        <ProgressBar now={character?.defence ?? 0} label={`${character?.defence ?? 0}`} className="progress-bar" />
                                     </div>
                                     <div className="mb-2">
                                         <p>Speed</p>
-                                        <ProgressBar now={character?.speed ?? 0} label={`${character?.speed ?? 0}`} className="bg-warning" />
+                                        <ProgressBar now={character?.speed ?? 0} label={`${character?.speed ?? 0}`} className="progress-bar" />
                                     </div>
                                 </div>
                             </div>
                         </div>
                 
-                        <div className="character-ownership mt-4"
-                            style={{ width: '400px' }}
-                        >
-                            <h5>You Own: {yourShares as number ?? "Loading..."} shares of {id}</h5>
-                            <Table borderless className="mb-3">
-                                <thead>
-                                    <tr>
-                                        <th>Price</th>
-                                        <th>Market Cap</th>
-                                        <th>Supply</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{character?.price ?? "Loading..."}</td>
-                                        <td>{character?.value ?? "Loading..."}</td>
-                                        <td>{character?.supply ?? "Loading..."}</td>
-                                    </tr>
-                                </tbody>
-                            </Table>
-                            <div className="d-flex justify-content-between">
-                                <Button variant="outline-dark" className="buy-button" onClick={() => handleShowModal('Buy')}
-                                    disabled={isLoading}
-                                >
-                                    Buy
-                                </Button>
-                                <Button 
-                                    disabled={isLoading}
-                                variant="outline-dark" className="sell-button" onClick={() => handleShowModal('Sell')}>
-                                    Sell
-                                </Button>
-                            </div>
-                        </div>
+                        
                     </div>
                     
                 </Card.Body>

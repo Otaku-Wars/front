@@ -1,0 +1,113 @@
+.character-card {
+    background-color: #0e0e10;
+    border-radius: 29px !important;
+    height: 100%; /* Adjust height according to your layout */
+    border: none !important; /* Remove default border */
+    overflow: hidden; /* Prevent scrollbars outside the card */
+    margin: 0 !important;
+    padding: 2px !important;
+}
+
+.character-card .character-list-container {
+    height: 100%; /* Adjust height according to your layout */
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+/* Custom Scrollbar */
+.character-card .character-list-container::-webkit-scrollbar {
+    width: 8px; /* Adjust the width of the scrollbar */
+    margin: 0 !important;
+}
+
+.character-list-header {
+    padding: 17px 15px 11px 15px !important;
+    text-align: center !important;
+    color: white !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    line-height: 24px !important;
+    border-bottom: 2px solid #545556 !important; /* Divider color */
+    width: 100% !important;
+}
+
+.character-card .character-list-container::-webkit-scrollbar-track {
+    background: #1c1c1f; /* Track color */
+    border-radius: 10px; /* Rounded corners for the track */
+}
+
+.character-card .character-list-container::-webkit-scrollbar-thumb {
+    background-color: #545556; /* Scrollbar color */
+    border-radius: 10px; /* Rounded corners for the scrollbar */
+    border: 2px solid #1c1c1f; /* Padding around the scrollbar thumb */
+}
+
+/* Custom scrollbar for Firefox */
+.character-card .character-list-container {
+    scrollbar-color: #545556 #1c1c1f; /* Scrollbar thumb and track color */
+    scrollbar-width: thin; /* Thin scrollbar */
+}
+
+.character-list-container {
+    padding: 25px 42px !important;
+}
+
+.character-list-item {
+    cursor: pointer;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important; /* Vertically centers items */
+    flex-direction: row !important;
+    padding: 12.5px 0px !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+    border-bottom: 1.6px solid #545556 !important; /* Divider color */
+}
+
+
+.character-list-item-identity {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+    padding: 0px !important;
+    margin: 0px !important;
+}
+
+
+.character-list-item-avatar {
+    border-radius: 16px !important;
+    padding: 0px !important;
+    margin: 0px !important;
+}
+
+.character-list-item-name {
+   font-size: 20px !important;
+   font-weight: bold !important;
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+.character-list-item-price {
+    font-size: 20px !important;
+    font-weight: normal !important;
+    margin-left: auto !important;
+    padding: 0px !important;
+    margin: 0px !important;
+    display: inline-block !important; /* Allows inline behavior with block properties */
+}
+
+.character-list-item:last-child {
+    border-bottom: none; /* Remove bottom border for the last item */
+}
+
+.bg-dark {
+    background-color: #0e0e10 !important; /* Consistent dark background */
+}
+
+.text-white {
+    color: white !important;
+}
+
+.text-warning {
+    color: #545556 !important;
+}

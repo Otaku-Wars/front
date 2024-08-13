@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import './ModalBuySell.css';
 import { BigNumber } from 'ethers';
 import { useBuyShares, useBuyPrice, useCharacterSharesBalance, convertEthToWei, useSellShares, useSellPrice } from '../hooks/contract'; // Import your hooks
-import { useWallets } from '@privy-io/react-auth';
 import { useAddress } from '../hooks/user';
 import { DefaultModal } from './Modal';
 
@@ -70,110 +68,69 @@ export const ModalBuySell = ({ show, handleClose, actionType, characterName, cha
         } else {
             sellShares(); // Call the sell shares function when the button is clicked
         }
-        // Else handle Sell case as needed with another hook for selling
+    };
+
+    const incrementAmount = () => {
+        if (actionType === 'Buy') setAmount(amount + 1);
+        else setSellAmount(sellAmount + 1);
+    };
+
+    const decrementAmount = () => {
+        if (actionType === 'Buy' && amount > 0) setAmount(amount - 1);
+        else if (actionType === 'Sell' && sellAmount > 0) setSellAmount(sellAmount - 1);
     };
 
     const {data: yourShares} = useCharacterSharesBalance(characterId ?? 0, address)
 
-
     return (
-        // <Modal show={show} onHide={
-        //     handleClose
-        //     } centered>
-        //     <Modal.Body className="">
-        //         <h4 className="text-center">You Own: {yourShares?.toString() ?? 0} Shares of {characterName}</h4>
-        //         <div className="text-center mb-3">
-        //             <Button 
-        //               variant={actionType === 'Buy' ? 'secondary' : 'outline-secondary'} 
-        //               className="buy-sell-button"
-        //               onClick={() => setAmount(0)} // Reset amount on Buy/Sell switch
-        //             >
-        //                 Buy
-        //             </Button>
-        //             <Button 
-        //               variant={actionType === 'Sell' ? 'secondary' : 'outline-secondary'} 
-        //               className="buy-sell-button"
-        //               onClick={() => setSellAmount(0)} // Reset amount on Buy/Sell switch
-        //             >
-        //                 Sell
-        //             </Button>
-        //         </div>
-        //         <Form.Group controlId="formAmount" className="mb-3">
-        //             <Form.Label>Amount</Form.Label>
-        //             <Form.Control 
-        //                 type="number" 
-        //                 value={actionType === 'Buy' ? amount : sellAmount} 
-        //                 onChange={handleAmountChange} />
-        //             <Button variant="outline-dark" className="max-button">Max</Button>
-        //         </Form.Group>
-        //         <div className="text-center">
-        //             <Button 
-        //               variant="dark" 
-        //               className="place-trade-button" 
-        //               onClick={handlePlaceTrade}
-        //               disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}
-        //             >
-        //                 {isBuying ? 'Buying...' : isSelling ? 'Selling...' : 'Place Trade'}
-        //             </Button>
-        //         </div>
-        //         <p className="text-center mt-3 text-muted">
-        //             {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : actionType === 'Buy' ? `Buy Price: ${buyPrice} ETH` : `Sell Price: ${sellPrice} ETH`}
-        //         </p>
-
-        //         {actionType == 'Buy' && <>
-        //         {buyError && <p className="text-danger text-center mt-3">Error: {buyError.message}</p>}
-        //         {priceError && <p className="text-danger text-center mt-3">Error: {priceError.message}</p>}
-        //         {buySuccess && <p className="text-success text-center mt-3">Buy order Successful!</p>}
-        //         </>}
-
-        //         {actionType == 'Sell' && <>
-        //             {sellPriceError && <p className="text-danger text-center mt-3">Error: {sellPriceError.message}</p>}
-        //             {sellError && <p className="text-danger text-center mt-3">Error: {sellError.message}</p>}
-        //             {sellSuccess && <p className="text-success text-center mt-3">Sell order Successful!</p>}
-        //         </>}
-                
-        //     </Modal.Body>
-        // </Modal>
-
         <DefaultModal
-            title={`${actionType} Shares of ${characterName}`}
+            title=""
             show={show}
             handleClose={handleClose}
         >   
-            <h4 className="text-center">You Own: {yourShares?.toString() ?? 0} Shares of {characterName}</h4>
-            <Form.Group controlId="formAmount" className="mb-3">
-                <Form.Label>Amount</Form.Label>
+            <div className="buy-sell-button-group">
+                <Button 
+                  className={`buy-sell-button ${actionType === 'Buy' ? 'active' : ''}`} 
+                  onClick={() => setAmount(0)}
+                >
+                    Buy
+                </Button>
+                <Button 
+                  className={`buy-sell-button ${actionType === 'Sell' ? 'active' : ''}`} 
+                  onClick={() => setSellAmount(0)}
+                >
+                    Sell
+                </Button>
+            </div>
+
+            <Form.Group className="form-group">
+                <div className="decrement-button" onClick={decrementAmount}>-</div>
                 <Form.Control 
                     type="number" 
                     value={actionType === 'Buy' ? amount : sellAmount} 
-                    onChange={handleAmountChange} />
-                <Button variant="light" className="max-button">Max</Button>
+                    onChange={handleAmountChange} 
+                />
+                <div className="increment-button" onClick={incrementAmount}>+</div>
             </Form.Group>
-            <div className="text-center">
-                <Button 
-                    variant= {actionType === 'Buy' ? 'success' : 'danger'}
-                    className="place-trade-button" 
-                    onClick={handlePlaceTrade}
-                    disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}
-                >
-                    {isBuying ? 'Buying...' : isSelling ? 'Selling...' : 'Place Trade'}
-                </Button>
-            </div>
-            <p className="text-center mt-3 text-stats">
-                {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : actionType === 'Buy' ? `Buy Price: ${buyPrice} ETH` : `Sell Price: ${sellPrice} ETH`}
+
+            <Button 
+                className="max-button"
+                onClick={() => setAmount(100)} // Example logic for Max button, adjust accordingly
+            >
+                Max
+            </Button>
+
+            <Button 
+                className="place-trade-button" 
+                onClick={handlePlaceTrade}
+                disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}
+            >
+                {isBuying ? 'Buying...' : isSelling ? 'Selling...' : actionType}
+            </Button>
+
+            <p className="text-stats">
+                {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : actionType === 'Buy' ? `Est. amount of shares ${buyPrice}` : `Est. amount of shares ${sellPrice}`}
             </p>
-
-            {actionType == 'Buy' && <>
-            {buyError && <p className="text-danger text-center mt-3">Error: {buyError.message}</p>}
-            {priceError && <p className="text-danger text-center mt-3">Error: {priceError.message}</p>}
-            {buySuccess && <p className="text-success text-center mt-3">Buy order Successful!</p>}
-            </>}
-
-            {actionType == 'Sell' && <>
-                {sellPriceError && <p className="text-danger text-center mt-3">Error: {sellPriceError.message}</p>}
-                {sellError && <p className="text-danger text-center mt-3">Error: {sellError.message}</p>}
-                {sellSuccess && <p className="text-success text-center mt-3">Sell order Successful!</p>}
-            </>}
         </DefaultModal>
     );
 };

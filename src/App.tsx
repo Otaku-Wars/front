@@ -9,6 +9,7 @@ import { UserPage } from './components/UserPage';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 function Home() {
@@ -20,26 +21,26 @@ function Home() {
         width: 'calc(100vw - 60px)',
       }}
     >
-      <Row className="h-100 mx-60 mt-10">
+      <Row className="h-100 mx-60 pt-75 justify-content-between gap-25">
         <Col 
-          md="auto" 
+          xs={12} sm={4} md={3} lg={2} 
           className="d-flex flex-column h-100 align-items-center" 
-          style={{ flexBasis: '21%' }} // 25% width
+          style={{ flexBasis: '22%' }} 
         >
           <CharacterList />
         </Col>
         <Col 
-          md="auto" 
+          xs={12} sm={8} md={6} lg={7} 
           className="d-flex flex-column h-100 px-0 justify-content-between" 
-          style={{ flexBasis: '58%' }} 
+          style={{ flexBasis: '54%' }} 
         >
           <StreamView />
           <WorldStateView />
         </Col>
         <Col 
-          md="auto" 
+          xs={12} sm={4} md={3} lg={2} 
           className="d-flex flex-column h-100" 
-          style={{ flexBasis: '21%' }} // 25% width
+          style={{ flexBasis: '22%' }} 
         >
           <ActivityBar />
         </Col>

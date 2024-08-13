@@ -10,7 +10,10 @@ import { useQuery } from '@tanstack/react-query';
 import { apiUrl } from '../main';
 import { convertWeiToEth, useGetSellPrices } from '../hooks/contract';
 import Jazzicon from 'react-jazzicon'
+import { usePrivy } from '@privy-io/react-auth';
+import { Image } from 'react-bootstrap';
 
+import Identicon from 'identicon.js';
 
 
 export const UserPage = () => {
@@ -19,6 +22,7 @@ export const UserPage = () => {
     const [showModal, setShowModal] = useState(false);
     const address = useAddress();
     const { balance: userBalance } = useBalance(address as `0x${string}`);
+    const  { logout } = usePrivy();
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ['worldState'],
@@ -46,6 +50,11 @@ export const UserPage = () => {
         })) ?? []
     );
 
+    const identiconImg = useMemo(() => {
+        return new Identicon(id, address).toString();
+    }, [id, address]);
+
+
     const netWorth = useMemo(() => {
         return sellPrices?.reduce((acc: number, curr: any) => acc + convertWeiToEth(curr.result), 0) ?? 0;
     }, [sellPrices]);
@@ -57,14 +66,16 @@ export const UserPage = () => {
         <div className="user-page-container">
             <div className='user-card'>
                 <div className="user-info">
-                    <Jazzicon diameter={50} seed={parseInt(id, 16)} />
+                    <Image
+                        className="user-avatar"
+                        src={`https://static.vecteezy.com/system/resources/thumbnails/004/511/281/small/default-avatar-photo-placeholder-profile-picture-vector.jpg`}
+                    />
                     <h4 className="user-name">{truncateWallet(id)}</h4>
                 </div>
-                <div className="wallet-info mt-3">
+                <div className="wallet-info">
                     <div>
-                    <p className="wallet-label">Wallet Address:</p>
-                    <p className="wallet-address">{truncateWallet(address)}</p>
-
+                        
+                        <p className="wallet-address">Wallet Address: <br /> {address}</p>
                     </div>
                     <Button 
                         variant="outline-light" 
@@ -74,20 +85,20 @@ export const UserPage = () => {
                         Copy
                     </Button>
                 </div>
-                <div className="deposit-info mt-4">
+                <div className="deposit-info">
                     <p>How to Deposit: Copy your wallet address. Send funds to it. Wait for balance to appear within UI. You are ready to buy your favorite character.</p>
                 </div>
-                <div className="balance-info mt-4">
-                    <p >Balance: {userBalance} ETH </p>
+                <div className="balance-info">
+                    <p >Cash: {userBalance} ETH </p>
                     <Button 
-                        variant="warning" 
+                    variant='outline-light'
                         className="withdraw-button" 
                         onClick={handleShowModal}
                     >
                         Withdraw
                     </Button>
                 </div>
-                <div className="portfolio-info mt-4">
+                <div className="portfolio-info">
                     <p>Portfolio: {netWorth} ETH</p>
                     <ListGroup variant="flush">
                         {userData?.balances?.map((balance: any, index: number) => {
@@ -95,12 +106,12 @@ export const UserPage = () => {
                             return (
                                 <ListGroup.Item 
                                     key={index} 
-                                    className="portfolio-item bg-warning"
+                                    className="portfolio-item"
                                     onClick={() => navigate(`/character/${characters?.find((c: any) => c.id === balance.character)?.name}`)}
                                 >
-                                    <span className="item-name"> {balance.balance}  "{characters?.find((c: any) => c.id === balance.character)?.name ?? "Loading"}"  </span>
-                                    <span className="item-details">SHARES </span>
-                                    <span className='item-value'> worth  {value} ETH  </span>
+                                    <div className=''>{characters?.find((c: any) => c.id === balance.character)?.name ?? "Loading"}</div>
+                                    <div className="item-name">{balance.balance} Shares</div>
+                                    <div className='item-value'>{value} ETH</div>
                                 </ListGroup.Item>
                             );
                         })}
@@ -111,10 +122,11 @@ export const UserPage = () => {
                         )}
                     </ListGroup>
                 </div>
-                <div className="logout mt-4">
+                <div className="logout">
                     <Button 
                         variant="outline-light" 
                         className="logout-button"
+                        onClick={() => logout()}
                     >
                         Logout
                     </Button>
