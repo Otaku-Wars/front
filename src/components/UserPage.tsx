@@ -87,7 +87,7 @@ export const UserPage = () => {
                     </Button>
                 </div>
                 <div className="deposit-info">
-                    <p>How to Deposit: Copy your wallet address. Send funds to it. Wait for balance to appear within UI. You are ready to buy your favorite character.</p>
+                    <p>How to Deposit: Copy your wallet address. Send funds to it (BASE SEPOLIA ONLY). Wait for balance to appear within UI. You are ready to buy your favorite character.</p>
                 </div>
                 <div className="balance-info">
                     <p >Cash: ${convertEthToUsd(userBalance)} ({userBalance} ETH)</p>
