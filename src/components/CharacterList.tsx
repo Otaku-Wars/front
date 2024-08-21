@@ -69,6 +69,8 @@ import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import useWebSocket from 'react-use-websocket';
 import './CharacterList.css'; // Import your custom styles
+import { Character } from "@memeclashtv/types"
+import { useCharacterPerformance, useCharacters } from "../hooks/api";
 
 const cutText = (text, maxLength) => {
     if (text.length > maxLength) {
@@ -87,15 +89,35 @@ export const convertEthToUsd = (eth) => {
 }
 
 
+export const CharacterListItem = ({ character }: { character: Character }) => {
+    const yesterday = (new Date().getTime()/ 1000) - 86400;
+    const { data: performance, isLoading, isError } = useCharacterPerformance(character.id, yesterday);
+
+    return (
+        <ListGroup.Item className="character-list-item bg-dark text-white">
+            <div className="character-list-item-identity">
+                <Image
+                    src={character?.pfp}
+                    alt={"Hi"}
+                    height={41}
+                    width={41}
+                    className="character-list-item-avatar"
+                />
+                <p className="character-list-item-name">{cutText(character?.name, 8)}</p>
+            </div>
+            <p className="character-list-item-price">${convertEthToUsd(character?.value) ?? "0"}</p>
+            <p className="character-list-item-price">${convertEthToUsd(character?.price) ?? "0"}</p>
+            <p className={"character-list-item-price " + (performance > 0 ? "text-success" : "text-danger")}>{
+                isLoading ? "Loading..." : isError ? "Error" : formatFloat(performance, 2)
+            }</p>
+        </ListGroup.Item>
+    );
+}
+
+
+
 export const CharacterList = () => {
-    const { data, isLoading, isError } = useQuery({
-        queryKey: ['worldState'],
-        queryFn: async () => {
-            const response = await fetch(`${apiUrl}/world`);
-            return response.json();
-        },
-        refetchInterval: 1000,
-    });
+    const { data: characters, isLoading, isError } = useCharacters();
 
     const navigate = useNavigate();
 
@@ -118,25 +140,11 @@ export const CharacterList = () => {
             </Card.Header>
             <div className="character-list-container flex-grow-1 d-flex flex-column overflow-auto">
                 <ListGroup variant="flush" className="flex-grow-1 flex-column">
-                    {data?.characters.map((character, index) => (
-                        <ListGroup.Item 
-                            key={index} 
-                            className="character-list-item bg-dark text-white"
-                            onClick={() => handleCharacterClick(character.name)}
-                            >
-                            <div className="character-list-item-identity">
-                                <Image
-                                    src={character?.pfp}
-                                    alt={"Hi"}
-                                    height={41}
-                                    width={41}
-                                    className="character-list-item-avatar"
-                                />
-                                <p className="character-list-item-name">{cutText(character?.name, 8)}</p>
-                            </div>
-                            <p className="character-list-item-price">${convertEthToUsd(character?.price) ?? "0"}</p>
-                        </ListGroup.Item>
-                    ))}
+                    {characters
+                        .sort((a, b) => b.value - a.value)
+                        .map((character: any, index: number) => (
+                            <CharacterListItem key={index} character={character} />
+                        ))}
                 </ListGroup>
             </div>
         </Card>
