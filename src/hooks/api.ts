@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiUrl } from "../main";
-import { Character } from "@memeclashtv/types";
+import { Character, CurrentBattleState } from "@memeclashtv/types";
 import { TradeActivity } from "@memeclashtv/types/activity";
 
 
@@ -35,6 +35,20 @@ export const useCharacterPerformance = (characterId: number, start:number): { da
         queryKey: ['character', characterId, 'performance', start],
         queryFn: async () => {
             const response = await fetch(`${apiUrl}/character/${characterId}/performance/after/${start}`);
+            return response.json();
+        },
+        refetchInterval: 1000,
+    });
+
+    return { data, isLoading, isError };
+}
+
+
+export const useBattleState = (): { data: CurrentBattleState | undefined, isLoading: boolean, isError: boolean } => {
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['battleState'],
+        queryFn: async () => {
+            const response = await fetch(`${apiUrl}/battle`);
             return response.json();
         },
         refetchInterval: 1000,
