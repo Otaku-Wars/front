@@ -1,0 +1,54 @@
+.match-list {
+    background-color: #121212;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.match-list-header {
+    display: flex;
+    background-color: #1e1e1e;
+    padding: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #333;
+}
+
+.header-player {
+    flex: 1;
+}
+
+.header-result,
+.header-price-change,
+.header-mktcap-change,
+.header-timestamp {
+    width: 120px;
+    text-align: right;
+}
+
+/* Adjust MatchListItem styles to align with the header */
+.match-list-item {
+    display: flex;
+}
+
+.match-list-item .player {
+    flex: 1;
+}
+
+.match-list-item .match-result,
+.match-list-item .timestamp {
+    width: 120px;
+    text-align: right;
+}
+
+.match-list-loading,
+.match-list-error,
+.match-list-empty {
+  padding: 20px;
+  text-align: center;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  color: #888;
+}
+
+.match-list-error {
+  color: #f44336;
+}

@@ -1,0 +1,41 @@
+.holder-list {
+  background-color: #121212 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+.holder-list-header {
+  display: flex !important;
+  background-color: #1e1e1e !important;
+  padding: 12px 16px !important;
+  font-weight: bold !important;
+  border-bottom: 1px solid #333 !important;
+}
+
+.header-rank {
+  width: 60px !important;
+}
+
+.header-user {
+  flex: 1 !important;
+}
+
+.header-holdings,
+.header-value {
+  width: 120px !important;
+  text-align: right !important;
+}
+
+.holder-list-loading,
+.holder-list-error,
+.holder-list-empty {
+  padding: 20px !important;
+  text-align: center !important;
+  background-color: #1e1e1e !important;
+  border-radius: 8px !important;
+  color: #888 !important;
+}
+
+.holder-list-error {
+  color: #f44336 !important;
+}

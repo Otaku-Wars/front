@@ -37,3 +37,9 @@ export const getBuyPrice = (supply: number, value: number): number => {
     const price = getPrice(supply, 1, scalingFactor);
     return price;
 }
+
+export const getSellPrice = (supply: number, value: number, amount: number): number => {
+    const scalingFactor = getScalingFactor(supply, value);
+    const price = getPrice(supply-amount, amount, scalingFactor);
+    return price;
+}

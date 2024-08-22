@@ -1,172 +1,160 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button';
-import ProgressBar from 'react-bootstrap/ProgressBar';
-import Table from 'react-bootstrap/Table';
+import { Button, Image, ProgressBar } from 'react-bootstrap';
 import { ModalBuySell } from './ModalBuySell';
 import './CharacterPage.css';
-import { useQuery } from '@tanstack/react-query';
-import { apiUrl } from '../main';
+import { useCharacter, useCharacterTrades, useCharacterPerformance } from '../hooks/api';
 import { useCharacterSharesBalance } from '../hooks/contract';
-import { useWallets } from '@privy-io/react-auth';
-import { Image } from 'react-bootstrap';
 import { useAddress } from '../hooks/user';
 import { convertEthToUsd } from './CharacterList';
+import { Chart } from './Chart';
+
+type TimeFrame = 'Live' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'ALL';
 
 export const CharacterPage = () => {
     const { id } = useParams();
     const [showModal, setShowModal] = useState(false);
     const [modalAction, setModalAction] = useState('Buy');
-    const address = useAddress()
-    console.log("charPage address", address) 
+    const address = useAddress();
+    const characterId = parseInt(id);
+    const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>('1D');
+    const [startTime, setStartTime] = useState<number>(Math.floor(Date.now() / 1000) - 24 * 60 * 60); // Default to 1 day ago in seconds
+    
 
-    const handleShowModal = (action: any) => {
+    const { data: character, isLoading } = useCharacter(characterId);
+    const { data: yourShares } = useCharacterSharesBalance(characterId, address);
+    const { data: trades } = useCharacterTrades(characterId);
+    const { data: performance } = useCharacterPerformance(characterId, startTime);
+    //get total stakes by adding up all the stakes for each stat
+    const totalStakes = useMemo(() => {
+        return character?.healthStakes + character?.powerStakes + character?.attackStakes + character?.defenseStakes + character?.speedStakes;
+    }, [character]);
+
+    useEffect(() => {
+        const now = Math.floor(Date.now() / 1000); // Current time in seconds
+        switch (selectedTimeFrame) {
+            case 'Live':
+                setStartTime(now - 60 * 60); // 1 hour ago
+                break;
+            case '1D':
+                setStartTime(now - 24 * 60 * 60);
+                break;
+            case '1W':
+                setStartTime(now - 7 * 24 * 60 * 60);
+                break;
+            case '1M':
+                setStartTime(now - 30 * 24 * 60 * 60);
+                break;
+            case '3M':
+                setStartTime(now - 90 * 24 * 60 * 60);
+                break;
+            case 'YTD':
+                setStartTime(Math.floor(new Date(new Date().getFullYear(), 0, 1).getTime() / 1000));
+                break;
+            case '1Y':
+                setStartTime(now - 365 * 24 * 60 * 60);
+                break;
+            case 'ALL':
+                setStartTime(0); // From the beginning
+                break;
+        }
+    }, [selectedTimeFrame]);
+
+    const handleShowModal = (action: 'Buy' | 'Sell') => {
         setModalAction(action);
         setShowModal(true);
     };
 
     const handleCloseModal = () => setShowModal(false);
 
-    const { data, isLoading, isError } = useQuery({
-        queryKey: ['worldState'],
-        queryFn: async () => {
-            const response = await fetch(`${apiUrl}/world`)
-            return response.json()
-        },
-        refetchInterval: 1000,
-    })
+    const handleTimeFrameChange = (timeFrame: TimeFrame) => {
+        setSelectedTimeFrame(timeFrame);
+    };
 
-    const character = useMemo(() => {
-        if(isLoading) return null
-        if(isError) return null;
-        return data?.characters?.find((c: any) => c?.name.toLowerCase() == id?.toLowerCase())
-    }, [id, data, isLoading, isError])
-
-    const { data: yourShares } = useCharacterSharesBalance(character?.id ?? 0, address)
-    
-    console.log("your shares", yourShares)
+    if (isLoading) return <div>Loading...</div>;
 
     return (
-        <div className="character-page-container">
-            <Card className="character-card">
-                <Card.Body className='flex flex-col gap-30 align-items-center'>
-                <div className="d-flex align-items-center justify-content-between">
-                
-                                <Image 
-                                    src={character?.pfp} 
-                                    alt="Character Avatar" 
-                                    className="character-page-avatar" 
-                                />
-                                <h1 className="character-name"> {character?.name ?? id} </h1>
-                            <h5 className="character-rank">Rank #{character?.rank ?? "Loading"}</h5>
+        <div className="character-page-container dark-theme">
+            <div className="character-header">
+                <div className="character-avatar-container">
+                    <Image src={character?.pfp} alt="Character Avatar" className="character-avatar" roundedCircle />
+                    <div className="character-tier">Tier S</div>
+                </div>
+                <div className="character-info">
+                    <h1>{character?.name}</h1>
+                    <div className="character-stats-summary">
+                        <span>Health: {character?.health}</span>
+                        <span>Power: {character?.power}</span>
+                        <span>Attack: {character?.attack}</span>
+                        <span>Defense: {character?.defense}</span>
+                        <span>Speed: {character?.speed}</span>
                     </div>
-                    <div className='flex flex-col w-100 gap-10 justify-content-between'
-                        style={{ justifyContent: 'space-between !important' }}
-                    >
-                        <div className="character-ownership"
-                        >
-                            {/* <h5>You Own: {yourShares as number ?? "Loading..."} shares of {id}</h5> */}
-                                <div className='d-flex justify-content-between gap-20 mt-20 mb-20'>
-                                    <div className='flex flex-col'>
-                                        <div className="attribute-header">Price</div>
-                                        <div className="attribute-value">${convertEthToUsd(character?.price) ?? "Loading..."}</div>
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        <div className="attribute-header">Market Cap</div>
-                                        <div className="attribute-value">${convertEthToUsd(character?.value) ?? "Loading..."}</div>
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        <div className="attribute-header">Supply</div>
-                                        <div className="attribute-value">{character?.supply ?? "Loading..."}</div>
-                                    </div>
-                                </div>
-                                
-                            <div className="d-flex justify-content-between">
-                                <Button variant="outline-dark" className="buy-button" onClick={() => handleShowModal('Buy')}
-                                    disabled={isLoading}
-                                >
-                                    Buy
-                                </Button>
-                                <Button 
-                                    disabled={isLoading}
-                                variant="outline-dark" className="sell-button" onClick={() => handleShowModal('Sell')}>
-                                    Sell
-                                </Button>
-                            </div>
-                        </div>
-                        <div style={{ width: '400px' }}>
-                            
-                            <div className="character-stats">
-                                <h5>Key Stats</h5>
-                                <div className="d-flex justify-content-between">
-                                    <div className="flex flex-col align-items-center">
-                                        <p className='stats-header'>Wins</p>
-                                        <p className='stats-value'>{character?.winCount ?? "Loading..."}</p>
-                                    </div>
-                                    <div className="flex flex-col align-items-center">
-                                        <p className="stats-header">Losses</p>
-                                        <p className='stats-value'>{character?.lossCount ?? "Loading..."}</p>
-                                    </div>
-                                    <div className="flex flex-col align-items-center">
-                                        <p className='stats-header'>Matches</p>
-                                        <p className='stats-value'>{character?.matchCount ?? "Loading..."}</p>
-                                    </div>
-                                </div>
-                                {/* <Table borderless className="mb-4 character-stats">
-                                    <thead>
-                                        <tr>
-                                            <th>Matches</th>
-                                            <th>Wins</th>
-                                            <th>Losses</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>{character?.matchCount ?? "Loading..." }</td>
-                                            <td>{character?.winCount ?? "Loading..." }</td>
-                                            <td>{character?.lossCount ?? "Loading..." }</td>
-                                        </tr>
-                                    </tbody>
-                                </Table> */}
-                                <div className="stat-bars">
-                                    <div className="flex flex-row">
-                                        <p>Health</p>
-                                        <ProgressBar now={100} label={`${character?.health ?? 0}`} className="progress-bar" />
-                                    </div>
-                                    <div className="mb-2">
-                                        <p>Power</p>
-                                        <ProgressBar now={character?.power ?? 0} label={`${character?.power ?? 0}`} className="progress-bar" />
-                                    </div>
-                                    <div className="mb-2">
-                                        <p>Attack</p>
-                                        <ProgressBar now={character?.attack ?? 0} label={`${character?.attack ?? 0}`} className="progress-bar" />
-                                    </div>
-                                    <div className="mb-2">
-                                        <p>Defence</p>
-                                        <ProgressBar now={character?.defence ?? 0} label={`${character?.defence ?? 0}`} className="progress-bar" />
-                                    </div>
-                                    <div className="mb-2">
-                                        <p>Speed</p>
-                                        <ProgressBar now={character?.speed ?? 0} label={`${character?.speed ?? 0}`} className="progress-bar" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                
-                        
+                    <div className="character-performance">
+                        <span>Wins: {character?.winCount}</span>
+                        <span>Losses: {character?.lossCount}</span>
+                        <span>Matches: {character?.matchCount}</span>
+                        <span>Win odds: {((character?.winCount / character?.matchCount) * 100).toFixed(0)}%</span>
                     </div>
-                    
-                </Card.Body>
-            </Card>
+                </div>
+                <div className="character-market-info">
+                    <h2>${convertEthToUsd(character?.price)}</h2>
+                    <span className="price-change">{performance?.toFixed(2)}% 24hr</span>
+                    <div>Holders: Unavailable</div>
+                    <div>Market Cap: ${convertEthToUsd(character?.value)}</div>
+                </div>
+            </div>
 
-            {/* Render the BuySellModal */}
+            <div className="chart-container">
+                <Chart tradeActivities={trades || []} />
+                <div className="chart-timeframes">
+                    {(['Live', '1D', '1W', '1M', '3M', 'YTD', '1Y', 'ALL'] as TimeFrame[]).map((timeFrame) => (
+                        <button
+                            key={timeFrame}
+                            onClick={() => handleTimeFrameChange(timeFrame)}
+                            className={selectedTimeFrame === timeFrame ? 'active' : ''}
+                        >
+                            {timeFrame}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="action-buttons">
+                <Button variant="success" onClick={() => handleShowModal('Buy')}>Buy</Button>
+                <Button variant="danger" onClick={() => handleShowModal('Sell')}>Sell</Button>
+            </div>
+
+            <div className="next-match">
+                <h3>Next Match:</h3>
+                <p>in {10}s vs {'TBD'}</p>
+            </div>
+
+            <div className="character-stats-detailed">
+                <h3>Character Stats</h3>
+                {['Health', 'Power', 'Attack', 'Defense', 'Speed'].map((stat) => (
+                    <div key={stat} className="stat-row">
+                        <span className={`stat-name ${stat.toLowerCase()}`}>{stat}</span>
+                        <ProgressBar 
+                            now={character[stat.toLowerCase()]} 
+                            max={1090} 
+                            label={`${character[stat.toLowerCase()]}`} 
+                        />
+                        <span className="stat-max">1090</span>
+                        <Button variant="outline-primary" size="sm">Power Up</Button>
+                        <div className="stat-details">
+                            <span>Total stakes: {totalStakes}</span>
+                            <span>Yours: {yourShares}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
             <ModalBuySell 
-                characterId={parseInt(character?.id)}
+                characterId={character?.id}
                 show={showModal} 
                 handleClose={handleCloseModal} 
                 actionType={modalAction} 
-                characterName={id ?? "Character"}
+                characterName={character?.name}
             />
         </div>
     );

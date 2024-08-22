@@ -1,0 +1,75 @@
+.match-list-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #1a1a1a;
+    border-bottom: 1px solid #333;
+  }
+  
+  .player {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+  
+  .player-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .player-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .player-name {
+    font-weight: bold;
+  }
+  
+  .player-stats {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .stat {
+    font-size: 12px;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+  
+  .health { background-color: #4CAF50; }
+  .power { background-color: #2196F3; }
+  .attack { background-color: #F44336; }
+  .defense { background-color: #9E9E9E; }
+  .speed { background-color: #FFEB3B; color: #333; }
+  
+  .vs {
+    margin: 0 10px;
+    font-weight: bold;
+  }
+  
+  .match-result {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-left: 10px;
+  }
+  
+  .result {
+    font-weight: bold;
+  }
+  
+  .result.won { color: #4CAF50; }
+  .result.lost { color: #F44336; }
+  
+  .price-change, .market-cap-change {
+    font-size: 12px;
+  }
+  
+  .timestamp {
+    font-size: 12px;
+    color: #888;
+    margin-left: 10px;
+  }
