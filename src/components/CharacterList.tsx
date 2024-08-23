@@ -29,9 +29,15 @@ export const convertEthToUsd = (eth) => {
 export const CharacterListItem = ({ character }: { character: Character }) => {
     const yesterday = (new Date().getTime()/ 1000) - 86400;
     const { data: performance, isLoading, isError } = useCharacterPerformance(character.id, yesterday);
+    const navigate = useNavigate();
+    console.log("performance found", performance)
+
+    const handleClick = () => {
+        navigate(`/character/${character.id}`);
+    };
 
     return (
-        <ListGroup.Item className="character-list-item bg-dark text-white">
+        <ListGroup.Item className="character-list-item bg-dark text-white" onClick={handleClick}>
             <div className="character-list-item-identity">
                 <Image
                     src={character?.pfp}
@@ -44,8 +50,8 @@ export const CharacterListItem = ({ character }: { character: Character }) => {
             </div>
             <p className="character-list-item-price">${convertEthToUsd(character?.value) ?? "0"}</p>
             <p className="character-list-item-price">${convertEthToUsd(character?.price) ?? "0"}</p>
-            <p className={"character-list-item-price " + (performance > 0 ? "text-success" : "text-danger")}>{
-                isLoading ? "Loading..." : isError ? "Error" : formatFloat(performance, 2)
+            <p className={"character-list-item-price " + (performance >= 0 ? "text-success" : "text-danger")}>{
+                (isLoading && performance == undefined) ? "Loading..." : isError ? "Error" : `%${performance.toFixed(2)}`
             }</p>
         </ListGroup.Item>
     );

@@ -1,9 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Image, ProgressBar } from 'react-bootstrap';
+import { Tab, Tabs, Button, Image, ProgressBar } from 'react-bootstrap';
 import { ModalBuySell } from './ModalBuySell';
+import { MatchList } from './MatchList';
+import { HolderList } from './HolderList';
+import { TradeList } from './TradeList';
+import { StakeList } from './StakeList';
 import './CharacterPage.css';
-import { useCharacter, useCharacterTrades, useCharacterPerformance } from '../hooks/api';
+import { useCharacter, useCharacterTrades, useCharacterPerformance, useCharacters } from '../hooks/api';
 import { useCharacterSharesBalance } from '../hooks/contract';
 import { useAddress } from '../hooks/user';
 import { convertEthToUsd } from './CharacterList';
@@ -18,13 +22,15 @@ export const CharacterPage = () => {
     const address = useAddress();
     const characterId = parseInt(id);
     const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>('1D');
-    const [startTime, setStartTime] = useState<number>(Math.floor(Date.now() / 1000) - 24 * 60 * 60); // Default to 1 day ago in seconds
-    
+    const [startTime, setStartTime] = useState<number>(Math.floor(Date.now() / 1000) - 24 * 60 * 60);
+    const [activeTab, setActiveTab] = useState('matches');
 
     const { data: character, isLoading } = useCharacter(characterId);
+    const { data: characters } = useCharacters();
     const { data: yourShares } = useCharacterSharesBalance(characterId, address);
     const { data: trades } = useCharacterTrades(characterId);
     const { data: performance } = useCharacterPerformance(characterId, startTime);
+
     //get total stakes by adding up all the stakes for each stat
     const totalStakes = useMemo(() => {
         return character?.healthStakes + character?.powerStakes + character?.attackStakes + character?.defenseStakes + character?.speedStakes;
@@ -148,6 +154,25 @@ export const CharacterPage = () => {
                     </div>
                 ))}
             </div>
+
+            <Tabs
+                activeKey={activeTab}
+                onSelect={(k) => setActiveTab(k || 'matches')}
+                className="mb-3 character-tabs"
+            >
+                <Tab eventKey="matches" title="Matches">
+                    <MatchList characterId={characterId} characters={characters} />
+                </Tab>
+                <Tab eventKey="holders" title="Holders">
+                    <HolderList characterId={characterId} characterMarketCap={character?.value} characterSupply={character?.supply}/>
+                </Tab>
+                <Tab eventKey="trades" title="Trades">
+                    <TradeList characterId={characterId} characterImage={character?.pfp || ''} />
+                </Tab>
+                <Tab eventKey="stakes" title="Stakes">
+                    <StakeList characterId={characterId} characterImage={character?.pfp || ''} />
+                </Tab>
+            </Tabs>
 
             <ModalBuySell 
                 characterId={character?.id}

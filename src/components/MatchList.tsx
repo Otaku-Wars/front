@@ -3,12 +3,14 @@ import { MatchEndActivity } from '@memeclashtv/types/activity';
 import { MatchListItem } from './MatchListItem';
 import { useCharacterMatches } from '../hooks/api';
 import './MatchList.css';
+import { Character } from '@memeclashtv/types';
 
 interface MatchListProps {
   characterId: number;
+  characters: Character[];
 }
 
-export const MatchList: React.FC<MatchListProps> = ({ characterId }) => {
+export const MatchList: React.FC<MatchListProps> = ({ characterId, characters }) => {
   const { data: activities, isLoading, isError } = useCharacterMatches(characterId);
 
   if (isLoading) {
@@ -34,7 +36,7 @@ export const MatchList: React.FC<MatchListProps> = ({ characterId }) => {
         <div className="header-timestamp">Timestamp</div>
       </div>
       {activities.map((activity, index) => (
-        <MatchListItem key={`${activity.timestamp}-${index}`} activity={activity} />
+        <MatchListItem key={`${activity.timestamp}-${index}`} activity={activity} characters={characters} characterId={characterId} />
       ))}
     </div>
   );

@@ -1,63 +1,63 @@
 .stake-list-item {
-    display: flex !important;
-    align-items: center !important;
-    padding: 12px 16px !important;
-    background-color: #1a1a1a !important;
-    border-bottom: 1px solid #333 !important;
-  }
-  
-  .stake-user {
-    display: flex !important;
-    align-items: center !important;
-    width: 200px !important;
-  }
-  
-  .user-avatar {
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 50% !important;
-    margin-right: 8px !important;
-  }
-  
-  .user-address {
-    font-family: monospace !important;
-  }
-  
-  .stake-action {
-    width: 100px !important;
-    font-weight: bold !important;
-  }
-  
-  .stake-action.stake {
-    color: #4CAF50 !important;
-  }
-  
-  .stake-action.unstake {
-    color: #F44336 !important;
-  }
-  
-  .stake-amount {
-    display: flex !important;
-    align-items: center !important;
-    width: 200px !important;
-  }
-  
-  .character-icon {
-    width: 24px !important;
-    height: 24px !important;
-    margin-right: 8px !important;
-  }
-  
-  .stake-impact {
-    width: 100px !important;
-    color: #4CAF50 !important;
-  }
-  
-  .stake-final {
-    width: 150px !important;
-  }
-  
-  .stake-timestamp {
-    flex: 1 !important;
-    text-align: right !important;
-  }
+  display: flex !important;
+  align-items: center !important;
+  padding: 12px 16px !important;
+  background-color: #1a1a1a !important;
+  border-bottom: 1px solid #333 !important;
+}
+
+.stake-user {
+  display: flex !important;
+  align-items: center !important;
+  width: 200px !important;
+}
+
+.user-avatar {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  margin-right: 8px !important;
+}
+
+.user-address {
+  font-family: monospace !important;
+}
+
+.stake-action {
+  width: 100px !important;
+  font-weight: bold !important;
+}
+
+.stake-action.stake {
+  color: #4CAF50 !important;
+}
+
+.stake-action.unstake {
+  color: #F44336 !important;
+}
+
+.stake-amount {
+  display: flex !important;
+  align-items: center !important;
+  width: 200px !important;
+}
+
+.character-icon {
+  width: 24px !important;
+  height: 24px !important;
+  margin-right: 8px !important;
+}
+
+.stake-impact {
+  width: 100px !important;
+  color: #4CAF50 !important;
+}
+
+.stake-final {
+  width: 150px !important;
+}
+
+.stake-timestamp {
+  flex: 1 !important;
+  text-align: right !important;
+}

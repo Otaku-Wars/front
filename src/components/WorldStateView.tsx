@@ -88,22 +88,22 @@ export const WorldStateView = () => {
     }, [character1MarketCap, character2MarketCap])
 
     const character1WinPrice = useMemo(() => {
-        const price = getBuyPrice(character1.supply, parseFloat(character1WinMarketCap))
+        const price = getBuyPrice(character1?.supply ?? 0, parseFloat(character1WinMarketCap))
         return convertEthToUsd(price);
     }, [character1WinMarketCap])
 
     const character2WinPrice = useMemo(() => {
-        const price = getBuyPrice(character2.supply, parseFloat(character2WinMarketCap))
+        const price = getBuyPrice(character2?.supply ?? 0, parseFloat(character2WinMarketCap))
         return convertEthToUsd(price);
     }, [character2WinMarketCap])
 
     const character1LossPrice = useMemo(() => {
-        const price = getBuyPrice(character1.supply, parseFloat(character1LossMarketCap))
+        const price = getBuyPrice(character1?.supply ?? 0, parseFloat(character1LossMarketCap))
         return convertEthToUsd(price);
     }, [character1LossMarketCap])
 
     const character2LossPrice = useMemo(() => {
-        const price = getBuyPrice(character2.supply, parseFloat(character2LossMarketCap))
+        const price = getBuyPrice(character2?.supply ?? 0, parseFloat(character2LossMarketCap))
         return convertEthToUsd(price);
     }, [character2LossMarketCap])
 

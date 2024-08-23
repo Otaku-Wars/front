@@ -20,6 +20,8 @@ export const useCharacters = (): { data: Character[] | undefined, isLoading: boo
         refetchInterval: 1000,
     });
 
+    console.log("fetched characters: ", data, isLoading, isError);
+
     return { data, isLoading, isError };
 }
 
@@ -37,16 +39,22 @@ export const useCharacterTrades = (characterId: number): { data: TradeActivity[]
 }
 
 export const useCharacterPerformance = (characterId: number, start:number): { data: number | undefined, isLoading: boolean, isError: boolean } => {
-    const { data, isLoading, isError } = useQuery({
+    const { data: dataReturned, isLoading, isError } = useQuery({
         queryKey: ['character', characterId, 'performance', start],
         queryFn: async () => {
-            const response = await fetch(`${apiUrl}/character/${characterId}/performance/after/${start}`);
+            const response = await fetch(`${apiUrl}/trades/character/${characterId}/performance/after/${parseInt(start.toString())}`);
             return response.json();
         },
-        refetchInterval: 1000,
+        refetchInterval: 50000, // Increased to 5 seconds to reduce frequent refetching
+        staleTime: 10000, // Consider data fresh for 1 second
+
     });
 
-    return { data, isLoading, isError };
+    const performance  = dataReturned?.pricePerformance ?? 0;
+
+    console.log("character performance: ", performance, isLoading, isError)
+
+    return { data: performance, isLoading, isError };
 }
 
 

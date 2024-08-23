@@ -4,7 +4,6 @@ body {
     font-size: 20px !important;
     background: #0e0e10 !important;
     color: white !important;
-    overflow-x: hidden; /* Disable horizontal scrolling */
 }
 
 body * {
