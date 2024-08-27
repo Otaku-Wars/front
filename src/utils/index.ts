@@ -25,7 +25,14 @@ export const getScalingFactor = (supply: number, value: number): number => {
 
     if (originalValue === 0) return 1;
 
-    const scalingFactor = BigInt(value) * BigInt(1e18) / BigInt(originalValue);
+    console.log("originalValue", originalValue);
+    console.log("value", value);
+
+    // Multiply value and originalValue by 1e18 to work with integers only
+    const valueWei = BigInt(Math.floor(value * 1e18));
+    const originalValueWei = BigInt(Math.floor(originalValue * 1e18));
+
+    const scalingFactor = valueWei * BigInt(1e18) / originalValueWei;
 
     return scalingFactor === BigInt(0) ? 1 : convertWeiToEth(scalingFactor);
 }

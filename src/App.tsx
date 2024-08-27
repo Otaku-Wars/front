@@ -6,46 +6,24 @@ import { WorldStateView } from './components/WorldStateView';
 import { NavBar } from './components/NavBar';
 import { CharacterPage } from './components/CharacterPage';
 import { UserPage } from './components/UserPage';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
+import "./globals.css"
 
 function Home() {
   return (
-    <Container 
-      fluid 
-      style={{ 
-        height: 'calc(100vh - 140px)',
-        width: 'calc(100vw - 60px)',
-      }}
-    >
-      <Row className="h-100 mx-60 pt-75 justify-content-between gap-25">
-        <Col 
-          xs={12} sm={4} md={3} lg={2} 
-          className="d-flex flex-column h-100 align-items-center" 
-          style={{ flexBasis: '22%' }} 
-        >
+    <div className="h-[calc(100vh-70px)] w-[calc(100vw)]">
+      <div className="flex h-full justify-between gap-[0px]">
+        <div className="w-[25%] flex flex-col h-full items-center">
           <CharacterList />
-        </Col>
-        <Col 
-          xs={12} sm={8} md={6} lg={7} 
-          className="d-flex flex-column h-100 px-0 justify-content-between" 
-          style={{ flexBasis: '54%' }} 
-        >
+        </div>
+        <div className="w-[54%] flex flex-col h-full px-0 justify-between">
           <StreamView />
           <WorldStateView />
-        </Col>
-        <Col 
-          xs={12} sm={4} md={3} lg={2} 
-          className="d-flex flex-column h-100" 
-          style={{ flexBasis: '22%' }} 
-        >
+        </div>
+        <div className="w-[19%] flex flex-col h-full">
           <ActivityBar />
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
 

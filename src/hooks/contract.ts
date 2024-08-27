@@ -143,7 +143,7 @@ export function useSellShares(characterId: number, amount: BigNumber) {
 
 // Hook to stake shares
 export function useStake(characterId: number, attribute: number, amount: BigNumber) {
-  const { writeContract, data, error, isError, isSuccess } = useWriteContract();
+  const { writeContract, data, error, isError, isSuccess, isPending } = useWriteContract();
 
   const stakeShares = () => {
     writeContract({
@@ -154,12 +154,12 @@ export function useStake(characterId: number, attribute: number, amount: BigNumb
     } as any); 
   };
 
-  return { stakeShares, data, error, isError, isSuccess };
+  return { stakeShares, data, error, isError, isSuccess, isPending };
 }
 
 // Hook to unstake shares
 export function useUnstake(characterId: number, attribute: number, amount: BigNumber) {
-  const { writeContract, data, error, isError, isSuccess } = useWriteContract();
+  const { writeContract, data, error, isError, isSuccess, isPending } = useWriteContract();
 
   const unstakeShares = () => {
     writeContract({
@@ -170,5 +170,5 @@ export function useUnstake(characterId: number, attribute: number, amount: BigNu
     } as any);
   };
 
-  return { unstakeShares, data, error, isError, isSuccess };
+  return { unstakeShares, data, error, isError, isSuccess, isPending }
 }

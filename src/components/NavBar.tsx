@@ -1,84 +1,114 @@
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import Button from 'react-bootstrap/Button'; 
-import Image from 'react-bootstrap/Image'; 
-import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { useNavigate } from 'react-router-dom';
-import { HowToModal } from './ModalHowTo'; // Importing the HowToModal component
-import { useState } from 'react'; // Import useState for modal handling
-import './NavBar.css';
+import { useState } from 'react'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { useNavigate } from 'react-router-dom'
+import { Menu } from "lucide-react"
+
+import { Button } from "../components/ui/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "../components/ui/sheet"
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "../components/ui/dialog"
 
 export const truncateWallet = (wallet: string) => {
-    if (!wallet) {
-        return '';
-    }
-    return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
-};
+  if (!wallet) {
+    return ''
+  }
+  return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`
+}
 
-export const NavBar = () => {
-    const { wallets } = useWallets();
-    const { login, authenticated } = usePrivy();
-    const address = wallets[0]?.address ?? '';
-    const navigate = useNavigate();
+export function NavBar() {
+  const { wallets } = useWallets()
+  const { login, authenticated } = usePrivy()
+  const address = wallets[0]?.address ?? ''
+  const navigate = useNavigate()
 
-    // State to handle HowToModal visibility
-    const [showHowToModal, setShowHowToModal] = useState(false);
-    const handleHowToModalClose = () => setShowHowToModal(false);
-    const handleHowToModalShow = () => setShowHowToModal(true);
+  const [showHowToModal, setShowHowToModal] = useState(false)
 
-    return (
-        <>
-            <Navbar className="nav-custom">
-                <Container fluid>
-                    <Navbar.Brand href="/" className="d-flex align-items-center">
-                        <Image
-                            src="/logo.png"
-                            height={"25px"}
-                            alt="MemeClash.Tv Logo"
-                        />
-                        {/* <span className="ms-2 brand-text-custom">MemeClash<span className="tv-symbol">.Tv</span></span> */}
-                    </Navbar.Brand>
-                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                    <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end gap-5">
-                        <Nav.Link as="button" className="nav-link-custom" onClick={handleHowToModalShow}>
-                            How It Works
-                        </Nav.Link>
-                        <Nav.Link 
-                            href="https://discord.gg/uUdQZXXBPf" 
-                            className="nav-link-custom"
-                            target='_blank'
-                        >
-                            Chat
-                        </Nav.Link>
-                        {authenticated && (
-                            <Button 
-                                variant="warning" 
-                                style={{ paddingLeft: '40px', paddingRight: '40px' }} // Custom padding via inline styles
-                                className="login-btn-custom"
-                                onClick={() => {
-                                    navigate(`/user/${address}`);
-                                }}
-                            >
-                                {truncateWallet(address)}   
-                            </Button>
-                        )}
-                        {!authenticated && (
-                            <Button 
-                                variant="warning" 
-                                style={{ paddingLeft: '40px', paddingRight: '40px' }} // Custom padding via inline styles
-                                className="login-btn-custom"
-                                onClick={login}
-                            >
-                                Log in / Sign up
-                            </Button>
-                        )}
-                    </Navbar.Collapse>
-                </Container>
-            </Navbar>
-            
-            {/* HowToModal Component */}
-            <HowToModal show={showHowToModal} handleClose={handleHowToModalClose} />
-        </>
-    );
-};
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center w-full pl-1 pr-1">
+        <a href="/" className="mr-6 flex items-center space-x-2">
+          {/* <img src="/logo.png" alt="MemeClash.Tv Logo" className="h-6 w-auto" /> */}
+          {/* Uncomment if you want to include the text logo */}
+          <span className="hidden font-bold sm:inline-block">
+            MemeClash<span className="text-primary">.Tv</span>
+          </span>
+        </a>
+        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <Dialog open={showHowToModal} onOpenChange={setShowHowToModal}>
+              <DialogTrigger asChild>
+                <Button variant="ghost">How It Works</Button>
+              </DialogTrigger>
+              <DialogContent>
+                {/* Add your HowToModal content here */}
+                <h2>How It Works</h2>
+                {/* ... */}
+              </DialogContent>
+            </Dialog>
+            <a
+              href="https://discord.gg/uUdQZXXBPf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Chat
+            </a>
+          </nav>
+          <div className="flex items-center space-x-2">
+            {authenticated ? (
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/user/${address}`)}
+              >
+                {truncateWallet(address)}
+              </Button>
+            ) : (
+              <Button onClick={login}>Log in / Sign up</Button>
+            )}
+          </div>
+        </div>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              className="ml-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle Menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right">
+            <nav className="flex flex-col space-y-4">
+              <Button variant="ghost" onClick={() => setShowHowToModal(true)}>How It Works</Button>
+              <a
+                href="https://discord.gg/uUdQZXXBPf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
+              >
+                Chat
+              </a>
+              {authenticated ? (
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(`/user/${address}`)}
+                >
+                  {truncateWallet(address)}
+                </Button>
+              ) : (
+                <Button onClick={login}>Log in / Sign up</Button>
+              )}
+            </nav>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </header>
+  )
+}

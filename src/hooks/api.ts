@@ -17,7 +17,7 @@ export const useCharacters = (): { data: Character[] | undefined, isLoading: boo
             const response = await fetch(`${apiUrl}/characters`);
             return response.json();
         },
-        refetchInterval: 1000,
+        refetchInterval: 10000,
     });
 
     console.log("fetched characters: ", data, isLoading, isError);
@@ -32,7 +32,7 @@ export const useCharacterTrades = (characterId: number): { data: TradeActivity[]
             const response = await fetch(`${apiUrl}/trades/character/${characterId}`);
             return response.json();
         },
-        refetchInterval: 1000,
+        refetchInterval: 10000,
     });
 
     return { data, isLoading, isError };
@@ -65,7 +65,7 @@ export const useBattleState = (): { data: CurrentBattleState | undefined, isLoad
             const response = await fetch(`${apiUrl}/battle`);
             return response.json();
         },
-        refetchInterval: 1000,
+        refetchInterval: 10000,
     });
 
     return { data, isLoading, isError };
@@ -78,7 +78,7 @@ export const useCharacterMatches = (characterId: number): { data: MatchEndActivi
             const response = await fetch(`${apiUrl}/matches/character/${characterId}`);
             return response.json();
         },
-        refetchInterval: 1000,
+        refetchInterval: 10000,
     });
 
     return { data, isLoading, isError };
@@ -91,7 +91,7 @@ export const useCharacterHolders = (characterId: number): { data: User[] | undef
             const response = await fetch(`${apiUrl}/users/character/${characterId}`);
             return response.json();
         },
-        refetchInterval: 1000,
+        refetchInterval: 10000,
     });
 
     return { data, isLoading, isError };
@@ -104,8 +104,21 @@ export const useCharacterStakes = (characterId: number): { data: StakeActivity[]
             const response = await fetch(`${apiUrl}/stakes/character/${characterId}`);
             return response.json();
         },
-        refetchInterval: 1000,
+        refetchInterval: 10000,
     });
 
     return { data, isLoading, isError };
+}
+
+export const useUser = (address: string): { data: User | undefined, isLoading: boolean, isError: boolean, isPending: boolean } => {
+    const { data, isLoading, isError, isPending } = useQuery({
+        queryKey: ['user', address],
+        queryFn: async () => {
+            const response = await fetch(`${apiUrl}/users/${address}`);
+            return response.json();
+        },
+        refetchInterval: 10000,
+    });
+
+    return { data, isLoading, isError, isPending}
 }

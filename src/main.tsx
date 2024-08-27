@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
-import './index.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom';
 import {PrivyProvider} from '@privy-io/react-auth';
@@ -9,6 +8,7 @@ import { WagmiProvider } from '@privy-io/wagmi';
 import { createConfig, http } from 'wagmi';
 import { defineChain } from 'viem';
 import { baseSepolia } from 'viem/chains';
+import "./globals.css"
 
 const isProd = import.meta.env.PROD;
 export const currentChain = isProd ?

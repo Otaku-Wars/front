@@ -1,147 +1,136 @@
-import React, { useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import './ModalBuySell.css';
-import { BigNumber } from 'ethers';
-import { useBuyShares, useBuyPrice, useCharacterSharesBalance, convertEthToWei, useSellShares, useSellPrice } from '../hooks/contract'; // Import your hooks
+import React, { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { useBuyShares, useBuyPrice, useCharacterSharesBalance, useSellShares, useSellPrice } from '../hooks/contract';
 import { useAddress, useBalance } from '../hooks/user';
-import { DefaultModal } from './Modal';
 import { convertEthToUsd } from './CharacterList';
+import { parseEther, formatEther } from 'viem';
 
-export const ModalBuySell = ({ show, handleClose, actionType, characterName, characterId }: 
-  { show: boolean, handleClose: () => void, actionType: string, characterName: string, characterId: number }) => {
-    const [amount, setAmount] = useState(0);
-    const [sellAmount, setSellAmount] = useState(0);
-    const address = useAddress();
-    const [defaultActionType, setDefaultActionType] = useState(actionType);
+interface ModalBuySellProps {
+  show: boolean;
+  handleClose: () => void;
+  actionType: 'Buy' | 'Sell';
+  characterName: string;
+  characterId: number;
+}
 
-    // Get the buy price for the given character and amount
-    const { 
-        data: buyPrice, 
-        isPending: isPriceLoading, 
-        error: priceError 
-    } = useBuyPrice(
-        characterId, 
-        BigNumber.from(amount ?? 0)
-    );
+export const ModalBuySell: React.FC<ModalBuySellProps> = ({ 
+  show, 
+  handleClose, 
+  actionType, 
+  characterName, 
+  characterId 
+}) => {
+  const [amount, setAmount] = useState(0);
+  const address = useAddress();
+  const [currentAction, setCurrentAction] = useState(actionType);
 
-    // Get the sell price for the given character and amount
-    const {
-        data: sellPrice,
-        isPending: isSellPriceLoading,
-        error: sellPriceError
-    } = useSellPrice(
-        characterId,
-        BigNumber.from(sellAmount ?? 0)
-    );
-    
-    // Hook to execute the buy shares function
-    const { 
-        buyShares, 
-        isPending: isBuying, 
-        error: buyError, 
-        isSuccess: buySuccess 
-    } = useBuyShares(
-        characterId, 
-        BigNumber.from(amount ?? 0), 
-        convertEthToWei(buyPrice ?? 0),
-    )
+  const { 
+    data: buyPrice, 
+    isPending: isPriceLoading, 
+    error: priceError 
+  } = useBuyPrice(characterId, BigInt(amount ?? 0));
 
-    const userBalance = useBalance(address as `0x${string}`);
+  const {
+    data: sellPrice,
+    isPending: isSellPriceLoading,
+    error: sellPriceError
+  } = useSellPrice(characterId, BigInt(amount ?? 0));
 
-    // Hook to execute the sell shares function
-    const { 
-        sellShares, 
-        isPending: isSelling, 
-        error: sellError, 
-        isSuccess: sellSuccess 
-    } = useSellShares(
-        characterId, 
-        BigNumber.from(sellAmount ?? 0), 
-    )
+  const { 
+    buyShares, 
+    isPending: isBuying, 
+    error: buyError, 
+    isSuccess: buySuccess 
+  } = useBuyShares(characterId, BigInt(amount ?? 0), parseEther(buyPrice?.toString() ?? '0'));
 
-    const handleAmountChange = (e: any) => {
-        const value = parseInt(e.target.value === '' ? '0' : e.target.value);
-        if (defaultActionType === 'Buy') setAmount(value);
-        else setSellAmount(value);
-    };
+  const userBalance = useBalance(address as `0x${string}`);
 
-    const handlePlaceTrade = () => {
-        if (defaultActionType === 'Buy') {
-            buyShares(); // Call the buy shares function when the button is clicked
-        } else {
-            sellShares(); // Call the sell shares function when the button is clicked
-        }
-    };
+  const { 
+    sellShares, 
+    isPending: isSelling, 
+    error: sellError, 
+    isSuccess: sellSuccess 
+  } = useSellShares(characterId, BigInt(amount ?? 0));
 
-    const incrementAmount = () => {
-        if (defaultActionType === 'Buy') setAmount(amount + 1);
-        else setSellAmount(sellAmount + 1);
-    };
+  const {data: yourShares} = useCharacterSharesBalance(characterId ?? 0, address);
 
-    const decrementAmount = () => {
-        if (defaultActionType === 'Buy' && amount > 0) setAmount(amount - 1);
-        else if (defaultActionType === 'Sell' && sellAmount > 0) setSellAmount(sellAmount - 1);
-    };
+  useEffect(() => {
+    setCurrentAction(actionType);
+  }, [actionType]);
 
-    const {data: yourShares} = useCharacterSharesBalance(characterId ?? 0, address)
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value === '' ? '0' : e.target.value);
+    setAmount(value);
+  };
 
-    return (
-        <DefaultModal
-            title=""
-            show={show}
-            handleClose={handleClose}
-        >   
-            <div className="buy-sell-button-group">
-                <Button 
-                  className={`buy-sell-button ${defaultActionType === 'Buy' ? 'buy-sell-button-active' : ''}`} 
-                  onClick={() => setDefaultActionType('Buy')}
-                >
-                    Buy
-                </Button>
-                <Button 
-                  className={`buy-sell-button ${defaultActionType === 'Sell' ? 'buy-sell-button-active' : ''}`} 
-                  onClick={() => setDefaultActionType('Sell')}
-                >
-                    Sell
-                </Button>
+  const handlePlaceTrade = () => {
+    if (currentAction === 'Buy') {
+      buyShares();
+    } else {
+      sellShares();
+    }
+  };
+
+  const incrementAmount = () => setAmount(amount + 1);
+  const decrementAmount = () => amount > 0 && setAmount(amount - 1);
+
+  return (
+    <Dialog open={show} onOpenChange={handleClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{currentAction} {characterName}</DialogTitle>
+          <DialogDescription>
+            You own: {yourShares} shares of {characterName}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={() => setCurrentAction('Buy')}>Buy</Button>
+            <Button variant="outline" onClick={() => setCurrentAction('Sell')}>Sell</Button>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="amount" className="text-right">
+              Amount
+            </Label>
+            <div className="col-span-3 flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={decrementAmount}>-</Button>
+              <Input
+                id="amount"
+                type="number"
+                value={amount}
+                onChange={handleAmountChange}
+                className="col-span-2"
+              />
+              <Button variant="outline" size="icon" onClick={incrementAmount}>+</Button>
             </div>
-            <div className="d-flex flex-row justify-content-between">
-                <p className="text-stats">You Own: {yourShares} shares of {characterName}</p>
-                <Button 
-                    className="max-button-main"
-                    disabled={defaultActionType == 'Buy'}
-                    onClick={() => setSellAmount(Number(yourShares??0))}
-                >
-                    Max
-                </Button>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Balance</Label>
+            <div className="col-span-3">
+              ${convertEthToUsd(parseFloat(formatEther(userBalance?.balance ?? BigInt(0))))} ({formatEther(userBalance?.balance ?? BigInt(0))} ETH)
             </div>
-            <Form.Group className="form-group">
-                <div className="decrement-button" onClick={decrementAmount}>-</div>
-                <Form.Control 
-                    type="number" 
-                    value={defaultActionType === 'Buy' ? amount : sellAmount} 
-                    onChange={handleAmountChange} 
-                />
-                <div className="increment-button" onClick={incrementAmount}>+</div>
-            </Form.Group>
-            <p className="text-stats">
-                You have ${convertEthToUsd(parseFloat(userBalance?.balance ?? "0"))} ({parseFloat(userBalance?.balance)?.toFixed(5)} ETH) available to trade
-                </p>
-
-            
-
-            <Button 
-                className="place-trade-button" 
-                onClick={handlePlaceTrade}
-                disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}
-            >
-                {isBuying ? 'Buying...' : isSelling ? 'Selling...' : defaultActionType}
-            </Button>
-
-            <p className="text-stats">
-                {isPriceLoading ? 'Loading...' : isSellPriceLoading ? 'Loading...' : defaultActionType === 'Buy' ? `Est. cost $${convertEthToUsd(buyPrice)} (${buyPrice.toExponential(3)} ETH)` : `Est. cost $${convertEthToUsd(sellPrice)} (${sellPrice.toExponential(3)} ETH)`}
-            </p>
-        </DefaultModal>
-    );
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Est. Cost</Label>
+            <div className="col-span-3">
+              {isPriceLoading || isSellPriceLoading ? 
+                'Loading...' : 
+                currentAction === 'Buy' ?
+                  `$${convertEthToUsd(parseFloat(formatEther(buyPrice ?? BigInt(0))))} (${formatEther(buyPrice ?? BigInt(0))} ETH)` :
+                  `$${convertEthToUsd(parseFloat(formatEther(sellPrice ?? BigInt(0))))} (${formatEther(sellPrice ?? BigInt(0))} ETH)`
+              }
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={handlePlaceTrade} disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}>
+            {isBuying ? 'Buying...' : isSelling ? 'Selling...' : currentAction}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 };
