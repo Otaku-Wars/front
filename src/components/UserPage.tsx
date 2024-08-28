@@ -40,11 +40,11 @@ export const UserPage = () => {
     const [withdrawAddress, setWithdrawAddress] = useState(''); // State for withdraw address
     const [withdrawAmount, setWithdrawAmount] = useState(''); // State for withdraw amount
     const netWorth = user?.balances?.reduce((acc, curr) => {
-        const character = characters?.find(c => c.id === curr.character);
-        return acc + (character ? character.price * curr.balance : 0);
+        const character = characters?.find(c => c.id === curr?.character);
+        return acc + (character ? character?.price * curr?.balance : 0);
     }, 0);
 
-  const charactersOwnedCount = user?.balances.length;
+  const charactersOwnedCount = user?.balances?.length;
   const totalStakesCount = user?.stakes?.reduce((acc, curr) => acc + curr.balance, 0);
 
   // Function to calculate time until unlock
