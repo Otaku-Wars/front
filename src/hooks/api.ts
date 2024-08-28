@@ -51,7 +51,7 @@ export const useCharacterPerformance = (characterId: number, start:number): { da
 
     });
 
-    const performance  = dataReturned?.pricePerformance ?? 0;
+    const performance  = dataReturned ?? 0;
 
     console.log("character performance: ", performance, isLoading, isError)
 

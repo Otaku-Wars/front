@@ -16,14 +16,14 @@ interface ModalStakeProps {
 const ModalStake: React.FC<ModalStakeProps> = ({ show, handleClose, characterId, attribute }) => {
     const [stakeAmount, setStakeAmount] = useState(0);
 
-    const { stakeShares, isError, isSuccess, isPending, error } = useStake(characterId, attribute, BigInt(stakeAmount));
+    const { stakeShares, isError, isSuccess, isPending, error } = useStake(characterId, attribute, BigInt(stakeAmount) as any);
 
     const handleStake = () => {
         // Logic to handle staking
         console.log(`Staking ${stakeAmount} for ${attribute} on character ${characterId}`);
         stakeShares();
         // Reset the input after staking
-        setStakeAmount(''); // Reset to empty string
+        setStakeAmount('' as any); // Reset to empty string
         //handleClose(); // Close the modal
     };
 
@@ -63,7 +63,7 @@ const ModalStake: React.FC<ModalStakeProps> = ({ show, handleClose, characterId,
                                     const value = e.target.value;
                                     // Allow empty string or valid number
                                     if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
-                                        setStakeAmount(value); // Set amount directly to the input value
+                                        setStakeAmount(value as any); // Set amount directly to the input value
                                     }
                                 }}
                                 placeholder="Enter amount"

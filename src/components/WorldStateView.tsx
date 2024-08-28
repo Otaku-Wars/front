@@ -126,7 +126,7 @@ export const WorldStateView = () => {
       case Status.Idle:
         return <Badge variant="secondary">Idle</Badge>
       case Status.Pending:
-        return <Badge variant="warning">Pending</Badge>
+        return <Badge>Pending</Badge>
       case Status.Battling:
         return <Badge variant="destructive">Battling</Badge>
     }

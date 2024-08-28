@@ -210,7 +210,7 @@ export const CharacterPage = () => {
                     <CardTitle>Price Chart</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Chart activities={combinedActivities} characterId={characterId} />
+                    <Chart activities={combinedActivities as any} characterId={characterId} />
                     <div className="flex justify-center space-x-2 mt-4">
                         {(['Live', '1D', '1W', '1M', '3M', 'YTD', '1Y', 'ALL'] as TimeFrame[]).map((timeFrame) => (
                             <Button
@@ -251,7 +251,7 @@ export const CharacterPage = () => {
                 characterId={character?.id}
                 show={showModal} 
                 handleClose={handleCloseModal} 
-                actionType={modalAction} 
+                actionType={modalAction as any} 
                 characterName={character?.name}
             />
 
@@ -259,7 +259,7 @@ export const CharacterPage = () => {
                 show={showStakeModal} 
                 handleClose={() => setShowStakeModal(false)} 
                 characterId={characterId} 
-                attribute={selectedAttribute} 
+                attribute={selectedAttribute as any} 
             />
         </div>
     );

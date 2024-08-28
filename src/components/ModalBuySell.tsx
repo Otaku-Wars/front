@@ -23,7 +23,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   characterName, 
   characterId 
 }) => {
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState<any>(0);
   const address = useAddress();
   const [currentAction, setCurrentAction] = useState(actionType);
 
@@ -31,20 +31,20 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     data: buyPrice, 
     isPending: isPriceLoading, 
     error: priceError 
-  } = useBuyPrice(characterId, BigInt(amount ?? 0));
+  } = useBuyPrice(characterId, BigInt(amount ?? 0) as any);
 
   const {
     data: sellPrice,
     isPending: isSellPriceLoading,
     error: sellPriceError
-  } = useSellPrice(characterId, BigInt(amount ?? 0));
+  } = useSellPrice(characterId, BigInt(amount ?? 0) as any);
 
   const { 
     buyShares, 
     isPending: isBuying, 
     error: buyError, 
     isSuccess: buySuccess 
-  } = useBuyShares(characterId, BigInt(amount ?? 0), parseEther(buyPrice?.toString() ?? '0'));
+  } = useBuyShares(characterId, BigInt(amount ?? 0) as any, parseEther(buyPrice?.toString() ?? '0'));
 
   const userBalance = useBalance(address as `0x${string}`);
 
@@ -53,7 +53,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     isPending: isSelling, 
     error: sellError, 
     isSuccess: sellSuccess 
-  } = useSellShares(characterId, BigInt(amount ?? 0));
+  } = useSellShares(characterId, BigInt(amount ?? 0) as any);
 
   const {data: yourShares} = useCharacterSharesBalance(characterId ?? 0, address);
 
@@ -116,7 +116,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">Balance</Label>
             <div className="col-span-3">
-              ${convertEthToUsd(parseFloat(formatEther(userBalance?.balance ?? BigInt(0))))} ({formatEther(userBalance?.balance ?? BigInt(0))} ETH)
+              ${convertEthToUsd(parseFloat(formatEther(userBalance?.balance ?? BigInt(0) as any) as any))} ({formatEther(userBalance?.balance ?? BigInt(0) as any)} ETH)
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -125,8 +125,8 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
               {isPriceLoading || isSellPriceLoading ? 
                 'Loading...' : 
                 currentAction === 'Buy' ?
-                  `$${convertEthToUsd(parseFloat(formatEther(buyPrice ?? BigInt(0))))} (${formatEther(buyPrice ?? BigInt(0))} ETH)` :
-                  `$${convertEthToUsd(parseFloat(formatEther(sellPrice ?? BigInt(0))))} (${formatEther(sellPrice ?? BigInt(0))} ETH)`
+                  `$${convertEthToUsd(parseFloat(formatEther(buyPrice ?? BigInt(0) as any)))} (${formatEther(buyPrice ?? BigInt(0) as any)} ETH)` :
+                  `$${convertEthToUsd(parseFloat(formatEther(sellPrice ?? BigInt(0) as any)))} (${formatEther(sellPrice ?? BigInt(0) as any)} ETH)`
               }
             </div>
           </div>

@@ -72,7 +72,7 @@ export const UserPage = () => {
 
   const handleWithdraw = async () => {
     try {
-      await withdraw(withdrawAddress, withdrawAmount); // Call the withdraw function
+      await withdraw(withdrawAddress as any, withdrawAmount as any); // Call the withdraw function
       console.log("Withdrawal successful");
       setWithdrawAddress('');
       setWithdrawAmount('');
