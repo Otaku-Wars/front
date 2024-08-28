@@ -249,7 +249,7 @@ export const UserPage = () => {
               <CardTitle>Your Holdings</CardTitle>
             </CardHeader>
             <CardContent>
-              {user?.balances.map((balance: Balance, index: number) => {
+              {user?.balances?.map((balance: Balance, index: number) => {
                 const character = characters?.find(c => c.id === balance.character);
                 const value = character ? character.price * balance.balance : 0;
                 return (
@@ -280,7 +280,7 @@ export const UserPage = () => {
               <CardTitle>Your Stakes</CardTitle>
             </CardHeader>
             <CardContent>
-              {user?.stakes.map((stake: Stake, index: number) => {
+              {user?.stakes?.map((stake: Stake, index: number) => {
                 const character = characters?.find(c => c.id === stake.character);
                 return (
                   <div key={index} className="flex items-center justify-between mb-4 p-2 rounded hover:bg-accent cursor-pointer transition-colors">
