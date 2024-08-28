@@ -122,7 +122,14 @@ export const useUser = (address: string): { data: User | undefined, isLoading: b
         staleTime: 10000,
     });
 
-    return { data, isLoading, isError, isPending}
+    // Define dummy data if user is undefined
+    const defaultUser: User = {
+        address,
+        balances: [], // Assuming no balances for dummy data
+        stakes: [], // Assuming no stakes for dummy data
+        stakeUnlockTime: 0
+    };
+    return { data: data || defaultUser, isLoading, isError, isPending };
 }
 
 // export const useEthPrice = (): { data: number | undefined, isLoading: boolean, isError: boolean } => {
