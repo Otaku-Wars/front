@@ -9,6 +9,7 @@ import { createConfig, http } from 'wagmi';
 import { defineChain } from 'viem';
 import { baseSepolia } from 'viem/chains';
 import "./globals.css"
+import { EthPriceProvider } from './EthPriceProvider.tsx';
 
 const isProd = import.meta.env.PROD;
 export const currentChain = isProd ?
@@ -61,7 +62,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             [currentChain.id]: http()
           } as any})}
         >
-          <App />
+          <EthPriceProvider>
+            <App />
+          </EthPriceProvider>
         </WagmiProvider>
       </PrivyProvider>
     </QueryClientProvider>

@@ -3,10 +3,10 @@ import { parseUnits } from 'ethers/lib/utils';
 import { useWallets } from '@privy-io/react-auth';
 import { zeroAddress } from 'viem';
 
-export const useAddress = () => {
+export const useAddress = (): `0x${string}` => {
     const { wallets } = useWallets();
     const address = wallets[0]?.address ?? zeroAddress;
-    return address
+    return address as `0x${string}`
 }
 
 export const useBalance = (address: `0x${string}`) => {

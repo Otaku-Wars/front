@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { apiUrl } from "../main";
 import { Character, CurrentBattleState, User } from "@memeclashtv/types";
 import { MatchEndActivity, StakeActivity, TradeActivity } from "@memeclashtv/types/activity";
+import { useEthPrice } from "../EthPriceProvider";
+import { useCallback } from "react";
 
 
 export const useCharacter = (characterId: number): { data: Character | undefined, isLoading: boolean, isError: boolean } => {
@@ -17,7 +19,7 @@ export const useCharacters = (): { data: Character[] | undefined, isLoading: boo
             const response = await fetch(`${apiUrl}/characters`);
             return response.json();
         },
-        refetchInterval: 10000,
+        staleTime: 10000,
     });
 
     console.log("fetched characters: ", data, isLoading, isError);
@@ -32,7 +34,7 @@ export const useCharacterTrades = (characterId: number): { data: TradeActivity[]
             const response = await fetch(`${apiUrl}/trades/character/${characterId}`);
             return response.json();
         },
-        refetchInterval: 10000,
+        staleTime: 10000,
     });
 
     return { data, isLoading, isError };
@@ -42,10 +44,9 @@ export const useCharacterPerformance = (characterId: number, start:number): { da
     const { data: dataReturned, isLoading, isError } = useQuery({
         queryKey: ['character', characterId, 'performance', start],
         queryFn: async () => {
-            const response = await fetch(`${apiUrl}/trades/character/${characterId}/performance/after/${parseInt(start.toString())}`);
-            return response.json();
+            //const response = await fetch(`${apiUrl}/trades/character/${characterId}/performance/after/${parseInt(start.toString())}`);
+            return 0
         },
-        refetchInterval: 50000, // Increased to 5 seconds to reduce frequent refetching
         staleTime: 10000, // Consider data fresh for 1 second
 
     });
@@ -65,9 +66,10 @@ export const useBattleState = (): { data: CurrentBattleState | undefined, isLoad
             const response = await fetch(`${apiUrl}/battle`);
             return response.json();
         },
-        refetchInterval: 10000,
+        refetchInterval: 5000,
     });
 
+    console.log("battleState: ", data)
     return { data, isLoading, isError };
 }
 
@@ -78,7 +80,7 @@ export const useCharacterMatches = (characterId: number): { data: MatchEndActivi
             const response = await fetch(`${apiUrl}/matches/character/${characterId}`);
             return response.json();
         },
-        refetchInterval: 10000,
+        staleTime: 10000,
     });
 
     return { data, isLoading, isError };
@@ -91,7 +93,7 @@ export const useCharacterHolders = (characterId: number): { data: User[] | undef
             const response = await fetch(`${apiUrl}/users/character/${characterId}`);
             return response.json();
         },
-        refetchInterval: 10000,
+        staleTime: 10000,
     });
 
     return { data, isLoading, isError };
@@ -104,7 +106,7 @@ export const useCharacterStakes = (characterId: number): { data: StakeActivity[]
             const response = await fetch(`${apiUrl}/stakes/character/${characterId}`);
             return response.json();
         },
-        refetchInterval: 10000,
+        staleTime: 10000,
     });
 
     return { data, isLoading, isError };
@@ -117,8 +119,28 @@ export const useUser = (address: string): { data: User | undefined, isLoading: b
             const response = await fetch(`${apiUrl}/users/${address}`);
             return response.json();
         },
-        refetchInterval: 10000,
+        staleTime: 10000,
     });
 
     return { data, isLoading, isError, isPending}
+}
+
+// export const useEthPrice = (): { data: number | undefined, isLoading: boolean, isError: boolean } => {
+//     const { data, isLoading, isError } = useQuery({
+//         queryKey: ['ethPrice'],
+//         queryFn: async () => {
+//             const response = await fetch(`${apiUrl}/ethPrice`);
+//             return response.json();
+//         },
+//         staleTime: 10000,
+//     });
+
+//     return { data, isLoading, isError };
+// }
+
+export const useConvertEthToUsd = (): (eth:number) => number => {
+    const price = useEthPrice();
+    return useCallback((eth: number) => {
+        return eth * price;
+    }, [price]);
 }

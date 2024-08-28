@@ -16,15 +16,15 @@ interface ModalStakeProps {
 const ModalStake: React.FC<ModalStakeProps> = ({ show, handleClose, characterId, attribute }) => {
     const [stakeAmount, setStakeAmount] = useState(0);
 
-    const {stakeShares, isError, isSuccess, isPending, error} = useStake(characterId, attribute, BigInt(stakeAmount));
+    const { stakeShares, isError, isSuccess, isPending, error } = useStake(characterId, attribute, BigInt(stakeAmount));
 
     const handleStake = () => {
         // Logic to handle staking
         console.log(`Staking ${stakeAmount} for ${attribute} on character ${characterId}`);
-        stakeShares()
+        stakeShares();
         // Reset the input after staking
-        //setStakeAmount(0);
-        //handleClose();
+        setStakeAmount(''); // Reset to empty string
+        //handleClose(); // Close the modal
     };
 
     useEffect(() => {
@@ -33,12 +33,12 @@ const ModalStake: React.FC<ModalStakeProps> = ({ show, handleClose, characterId,
         }
     }, [show]);
 
-    useEffect(() =>{
+    useEffect(() => {
         // Reset the input after staking
         if (isSuccess) {
             setStakeAmount(0);
         }
-    }, [isSuccess])
+    }, [isSuccess]);
 
     return (
         <Dialog open={show} onOpenChange={handleClose}>
@@ -57,9 +57,15 @@ const ModalStake: React.FC<ModalStakeProps> = ({ show, handleClose, characterId,
                         <div className="col-span-3">
                             <Input
                                 id="stakeAmount"
-                                type="number"
+                                type="text" // Change type to text to allow empty string
                                 value={stakeAmount}
-                                onChange={(e) => setStakeAmount(Number(e.target.value))}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    // Allow empty string or valid number
+                                    if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+                                        setStakeAmount(value); // Set amount directly to the input value
+                                    }
+                                }}
                                 placeholder="Enter amount"
                             />
                         </div>

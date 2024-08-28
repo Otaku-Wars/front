@@ -62,8 +62,11 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   }, [actionType]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value === '' ? '0' : e.target.value);
-    setAmount(value);
+    const value = e.target.value;
+    // Allow empty string or valid number
+    if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+      setAmount(value); // Set amount directly to the input value
+    }
   };
 
   const handlePlaceTrade = () => {
@@ -74,8 +77,11 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     }
   };
 
-  const incrementAmount = () => setAmount(amount + 1);
-  const decrementAmount = () => amount > 0 && setAmount(amount - 1);
+  const incrementAmount = () => setAmount((prev) => (prev === '' ? '1' : (parseInt(prev) + 1).toString()));
+  const decrementAmount = () => {
+    const newAmount = parseInt(amount) - 1;
+    setAmount(newAmount >= 0 ? newAmount.toString() : '0'); // Prevent negative values
+  };
 
   return (
     <Dialog open={show} onOpenChange={handleClose}>
@@ -99,7 +105,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
               <Button variant="outline" size="icon" onClick={decrementAmount}>-</Button>
               <Input
                 id="amount"
-                type="number"
+                type="text" // Change type to text to allow empty string
                 value={amount}
                 onChange={handleAmountChange}
                 className="col-span-2"

@@ -169,10 +169,20 @@ export const WorldStateView = () => {
             <div className="text-right">${character.price.toFixed(8)}</div>
             <div>Mktcap:</div>
             <div className="text-right">${(character.value).toFixed(8)}</div>
-            <div className="text-green-400">Win price:</div>
-            <div className="text-right text-green-400">${!isRightCard ? character1WinPrice : character2WinPrice } (80%) </div>
-            <div className="text-red-400">Lose price:</div>
-            <div className="text-right text-red-400">${!isRightCard ? character1LossPrice : character2LossPrice} (-10%) </div>
+
+            {winner ? <>
+              <div className="text-right">
+              {winner.winner === character.id 
+                ? `${character.name} won! Price now: ${!isRightCard ? character1WinPrice : character2WinPrice}` 
+                : `${character.name} lost! Price now: ${!isRightCard ? character1LossPrice : character2LossPrice}`}
+            </div>
+            </> : <>
+              <div className="text-green-400">Win price:</div>
+              <div className="text-right text-green-400">${!isRightCard ? character1WinPrice : character2WinPrice } (80%) </div>
+              <div className="text-red-400">Lose price:</div>
+              <div className="text-right text-red-400">${!isRightCard ? character1LossPrice : character2LossPrice} (-10%) </div>
+            </>
+            }
           </div>
         </CardContent>
       </Card>
