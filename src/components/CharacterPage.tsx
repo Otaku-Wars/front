@@ -288,10 +288,13 @@ export const CharacterPage = () => {
                     {/* Stats */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Stats</CardTitle>
+                            <CardTitle>
+                                Stats <span className="text-right text-sm text-gray-600">Total stakes: {totalStakes}</span>
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-6">
+
                             {['Health', 'Power', 'Attack', 'Defense', 'Speed'].map((stat) => (
                                 <div key={stat} className="space-y-2">
                                 <div className="flex justify-between items-center">
