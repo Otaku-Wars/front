@@ -18,8 +18,21 @@ import { Chart } from './Chart';
 import { MatchEndActivity, TradeActivity } from '@memeclashtv/types/activity';
 import ModalStake from './ModalStake'; // Adjust the path as necessary
 import { Attribute } from '@memeclashtv/types';
+import { Users, DollarSign, Coins, TrendingUp, Heart, Zap, Swords, Shield, Wind } from 'lucide-react'
 
 type TimeFrame = 'Live' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'ALL';
+
+const statIcons = {
+    Health: <Heart className="w-4 h-4 text-green-500" />,
+    Power: <Zap className="w-4 h-4 text-blue-500" />,
+    Attack: <Swords className="w-4 h-4 text-orange-500" />,
+    Defense: <Shield className="w-4 h-4 text-gray-500" />,
+    Speed: <Wind className="w-4 h-4 text-yellow-500" />
+}
+
+const formatNumber = (num: number) => {
+    return num.toLocaleString('en-US')
+  }
 
 export const CharacterPage = () => {
     const { id } = useParams();
@@ -147,105 +160,182 @@ export const CharacterPage = () => {
     if (isLoading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <Card className="md:col-span-2">
-                    <CardHeader className="flex flex-row items-center space-x-4">
-                        <Avatar className="w-20 h-20">
-                            <AvatarImage src={character?.pfp} alt={character?.name} />
-                            <AvatarFallback>{character?.name?.charAt(0)}</AvatarFallback>
-                        </Avatar>
+        <div className="flex flex-col lg:flex-row w-full gap-4 lg:gap-8 items-start justify-center p-2 lg:p-4 min-h-screen">
+                <div className="flex flex-col items-center lg:sticky lg:top-8 w-full lg:w-1/4 bg-card p-4 rounded-lg shadow">
+                    <Avatar className="w-32 h-32 lg:w-48 lg:h-48 mb-4">
+                        <AvatarImage src={character.pfp} alt={character.name} />
+                        <AvatarFallback>{character.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="text-center mt-2 mb-6">
+                    <CardTitle className="text-2xl lg:text-3xl">{character.name}</CardTitle>
+                    <CardDescription className="text-lg">Tier S</CardDescription>
+                    </div>
+                    <div className="flex flex-row justify-between gap-10 text-center w-full">
                         <div>
-                            <CardTitle>{character?.name}</CardTitle>
-                            <CardDescription>Tier S</CardDescription>
+                        <p className="text-sm text-muted-foreground">Wins</p>
+                        <p className="font-medium">{character.winCount}</p>
                         </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Price</p>
-                                <p className="text-2xl font-bold">${convertEthToUsd(character?.price)}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">24h Change</p>
-                                <p className={`text-2xl font-bold ${performance > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                    {performance?.toFixed(2)}%
-                                </p>
-                            </div>
+                        <div>
+                        <p className="text-sm text-muted-foreground">Loses</p>
+                        <p className="font-medium">{character.lossCount}</p>
                         </div>
-                        <div className="flex space-x-2">
-                            <Button onClick={() => handleShowModal('Buy')}>Buy</Button>
-                            <Button variant="outline" onClick={() => handleShowModal('Sell')}>Sell</Button>
+                        <div>
+                        <p className="text-sm text-muted-foreground">Matches</p>
+                        <p className="font-medium">{character.matchCount}</p>
                         </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Stats</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {Object.keys(Attribute)
-                            .filter((stat) => stat.length > 1)
-                            .map((stat) => (
-                                <div key={stat} className="space-y-1">
-                                    <div className="flex justify-between items-center">
-                                        <span>{stat}</span>
-                                        <Button onClick={() => handleOpenStakeModal(Attribute[stat])}>Stake</Button>
-                                    </div>
-                                    <Progress value={(character[stat.toLowerCase()] / 1090) * 100} />
-                                    <div className="flex justify-between text-sm">
-                                        <span>Total stakes: {characterStakes[stat]} </span>
-                                        <span>Your stake: {yourStakes[stat]} </span>
-                                    </div>
+                        <div>
+                        <p className="text-sm text-muted-foreground">Win odds</p>
+                        <p className="font-medium">{(character?.winCount *100 / character?.matchCount)?.toFixed(0)}%</p>
+                        </div>
+                    </div>
+                    <div className="w-full space-y-4">
+                        <div className="w-full mt-6 space-y-2">
+                            {Object.entries(statIcons).map(([stat, icon]) => (
+                                <div key={stat} className="flex justify-between items-center">
+                                    <span className="flex items-center gap-2">
+                                    {icon}
+                                    {stat}
+                                    </span>
+                                    <span>{character[stat.toLowerCase()]}</span>
                                 </div>
                             ))}
                         </div>
+                    
+                    <div>
+                        <p className="text-sm font-medium mb-1">Next Match:</p>
+                        <p className="text-sm">In {0} min vs {"Goku"}</p>
+                    </div>
+                    </div>
+                </div>
+                    
+
+                {/* Character info */}
+                <div className='w-full lg:w-3/4 space-y-4 lg:space-y-8'>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Price Chart</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                        <div>
+                            <p className="text-sm text-muted-foreground flex items-center">
+                            <DollarSign className="w-4 h-4 mr-1" />
+                            Price
+                            </p>
+                            <p className="text-xl font-bold">${convertEthToUsd(character.price)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground flex items-center">
+                            <TrendingUp className="w-4 h-4 mr-1" />
+                            24h Change
+                            </p>
+                            <p className={`text-xl font-bold ${performance > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            {performance.toFixed(2)}%
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground flex items-center">
+                            <DollarSign className="w-4 h-4 mr-1" />
+                            Market Cap
+                            </p>
+                            <p className="text-xl font-bold">${convertEthToUsd(character.value)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground flex items-center">
+                            <Users className="w-4 h-4 mr-1" />
+                            Holders
+                            </p>
+                            <p className="text-xl font-bold">{formatNumber(10)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground flex items-center">
+                            <Coins className="w-4 h-4 mr-1" />
+                            Supply
+                            </p>
+                            <p className="text-xl font-bold">{formatNumber(character.supply)}</p>
+                        </div>
+                        </div>
+                        <div className="">
+                            <Chart activities={combinedActivities as any} characterId={characterId} />
+                        </div>
+                        <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 mb-6">
+                        {['Live', '1D', '1W', '1M', '3M', 'YTD', '1Y', 'ALL'].map((timeFrame) => (
+                            <button
+                            key={timeFrame}
+                            className={`w-full text-sm py-2 rounded-md transition-colors ${
+                                selectedTimeFrame === timeFrame
+                                ? 'bg-primary/10 text-primary'
+                                : 'text-muted-foreground hover:bg-muted'
+                            }`}
+                            onClick={() => setSelectedTimeFrame(timeFrame as any)}
+                            >
+                            {timeFrame}
+                            </button>
+                        ))}
+                        </div>
+                        <div className="flex space-x-4">
+                        <Button className="flex-1 text-lg py-6" onClick={() => handleShowModal('Buy')}>Buy</Button>
+                        <Button className="flex-1 text-lg py-6" variant="outline" onClick={() => handleShowModal('Sell')}>Sell</Button>
+                        </div>
                     </CardContent>
                 </Card>
-            </div>
 
-            <Card className="mb-6">
-                <CardHeader>
-                    <CardTitle>Price Chart</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Chart activities={combinedActivities as any} characterId={characterId} />
-                    <div className="flex justify-center space-x-2 mt-4">
-                        {(['Live', '1D', '1W', '1M', '3M', 'YTD', '1Y', 'ALL'] as TimeFrame[]).map((timeFrame) => (
-                            <Button
-                                key={timeFrame}
-                                variant={selectedTimeFrame === timeFrame ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setSelectedTimeFrame(timeFrame)}
-                            >
-                                {timeFrame}
-                            </Button>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
+                    
 
-            <Tabs defaultValue="matches" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="matches">Matches</TabsTrigger>
-                    <TabsTrigger value="holders">Holders</TabsTrigger>
-                    <TabsTrigger value="trades">Trades</TabsTrigger>
-                    <TabsTrigger value="stakes">Stakes</TabsTrigger>
-                </TabsList>
-                <TabsContent value="matches">
-                    <MatchList characterId={characterId} characters={characters} />
-                </TabsContent>
-                <TabsContent value="holders">
-                    <HolderList characterId={characterId} characterMarketCap={character?.value} characterSupply={character?.supply}/>
-                </TabsContent>
-                <TabsContent value="trades">
-                    <TradeList characterId={characterId} characterImage={character?.pfp || ''} />
-                </TabsContent>
-                <TabsContent value="stakes">
-                    <StakeList characterId={characterId} characterImage={character?.pfp || ''} />
-                </TabsContent>
-            </Tabs>
+                    {/* Stats */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Stats</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-6">
+                            {['Health', 'Power', 'Attack', 'Defense', 'Speed'].map((stat) => (
+                                <div key={stat} className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium flex items-center">
+                                    {statIcons[stat]}
+                                    <span className="ml-2">{stat}</span>
+                                    </span>
+                                    <Button size="sm" onClick={() => handleOpenStakeModal(stat)}>Stake</Button>
+                                </div>
+                                <Progress value={(character[stat.toLowerCase()] / 100) * 100} className="h-4" />
+                                <div className="flex justify-between text-sm text-muted-foreground">
+                                    <span>Total stakes: {character[`${stat.toLowerCase()}Stakes`]} </span>
+                                    <span>Your stake: 0 </span>
+                                </div>
+                                </div>
+                            ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                    
+                    {/* Tab lists */}
+                    <Tabs defaultValue="matches" className="w-full">
+                        <TabsList className="grid w-full grid-cols-4">
+                            <TabsTrigger value="matches">Matches</TabsTrigger>
+                            <TabsTrigger value="holders">Holders</TabsTrigger>
+                            <TabsTrigger value="trades">Trades</TabsTrigger>
+                            <TabsTrigger value="stakes">Stakes</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="matches">
+                            <MatchList characterId={characterId} characters={characters} />
+                        </TabsContent>
+                        <TabsContent value="holders">
+                            <HolderList characterId={characterId} characterMarketCap={character?.value} characterSupply={character?.supply}/>
+                        </TabsContent>
+                        <TabsContent value="trades">
+                            <TradeList characterId={characterId} characterImage={character?.pfp || ''} />
+                        </TabsContent>
+                        <TabsContent value="stakes">
+                            <StakeList characterId={characterId} characterImage={character?.pfp || ''} />
+                        </TabsContent>
+                    </Tabs>
+                </div>
+                
+
+            
+
+            
 
             <ModalBuySell 
                 characterId={character?.id}

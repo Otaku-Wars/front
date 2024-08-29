@@ -27,7 +27,7 @@ export const formatFloat = (x, f) => {
 
 export const convertEthToUsd = (eth) => {
     const rate = 2656.84;
-    return (eth)
+    return eth?.toFixed(10)
 }
 
 const AttributeIcon = ({ attribute, value }: { attribute: Attribute, value: number }) => {
