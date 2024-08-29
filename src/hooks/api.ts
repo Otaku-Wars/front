@@ -39,24 +39,25 @@ export const useCharacterTrades = (characterId: number): { data: TradeActivity[]
 
     return { data, isLoading, isError };
 }
-
 export const useCharacterPerformance = (characterId: number, start:number): { data: number | undefined, isLoading: boolean, isError: boolean } => {
     const { data: dataReturned, isLoading, isError } = useQuery({
         queryKey: ['character', characterId, 'performance', start],
         queryFn: async () => {
-            //const response = await fetch(`${apiUrl}/trades/character/${characterId}/performance/after/${parseInt(start.toString())}`);
-            return 0
+            const response = await fetch(`${apiUrl}/trades/character/${characterId}/performance/after/${parseInt(start.toString())}`);
+            return response.json()
         },
-        staleTime: 10000, // Consider data fresh for 1 second
-
+        staleTime: 10000, // Data is fresh for 10 seconds
+        refetchOnWindowFocus: false, // Disable refetch on window focus
+        refetchOnReconnect: false, // Disable refetch on network reconnect
     });
 
-    const performance  = dataReturned ?? 0;
+    const performance  = dataReturned?.pricePerformance ?? 0;
 
     console.log("character performance: ", performance, isLoading, isError)
 
     return { data: performance, isLoading, isError };
 }
+
 
 
 export const useBattleState = (): { data: CurrentBattleState | undefined, isLoading: boolean, isError: boolean } => {

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Image } from 'react-bootstrap';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import useWebSocket from 'react-use-websocket';
@@ -69,8 +69,8 @@ const AttributeIcon = ({ attribute, value }: { attribute: Attribute, value: numb
 
 
 export const CharacterListItem = ({ character }: { character: Character }) => {
-    const yesterday = (new Date().getTime()/ 1000) - 86400;
-    const { data: performance, isLoading, isError } = useCharacterPerformance(character.id, yesterday);
+  const yesterday = useMemo(() => (new Date().getTime() / 1000) - 86400, []);
+  const { data: performance, isLoading, isError } = useCharacterPerformance(character.id, yesterday);
     const navigate = useNavigate();
     console.log("performance found", performance)
 
