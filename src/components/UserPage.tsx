@@ -178,7 +178,7 @@ export const UserPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${convertEthToUsd(userBalance)}</div>
+                  <div className="text-2xl font-bold">${convertEthToUsd(parseFloat(userBalance))}</div>
                   <div className="text-xs text-muted-foreground">{userBalance} ETH</div>
                 </CardContent>
               </Card>

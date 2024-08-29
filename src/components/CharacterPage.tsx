@@ -32,7 +32,7 @@ const statIcons = {
 
 const formatNumber = (num: number) => {
     return num.toLocaleString('en-US')
-  }
+}
 
 export const CharacterPage = () => {
     const { id } = useParams();
@@ -173,20 +173,23 @@ export const CharacterPage = () => {
                     <div className="flex flex-row justify-between gap-10 text-center w-full">
                         <div>
                         <p className="text-sm text-muted-foreground">Wins</p>
-                        <p className="font-medium">{character.winCount}</p>
+                        <p className="text-xl font-bold">{character.winCount}</p>
                         </div>
                         <div>
                         <p className="text-sm text-muted-foreground">Loses</p>
-                        <p className="font-medium">{character.lossCount}</p>
+                        <p className="text-xl font-bold">{character.lossCount}</p>
                         </div>
                         <div>
                         <p className="text-sm text-muted-foreground">Matches</p>
-                        <p className="font-medium">{character.matchCount}</p>
+                        <p className="text-xl font-bold">{character.matchCount}</p>
                         </div>
                         <div>
                         <p className="text-sm text-muted-foreground">Win odds</p>
-                        <p className="font-medium">{(character?.winCount *100 / character?.matchCount)?.toFixed(0)}%</p>
+                        <p className="text-xl font-bold">{(character?.winCount *100 / character?.matchCount)?.toFixed(0)}%</p>
                         </div>
+
+                        
+
                     </div>
                     <div className="w-full space-y-4">
                         <div className="w-full mt-6 space-y-2">

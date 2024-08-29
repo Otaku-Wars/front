@@ -25,9 +25,12 @@ export const formatFloat = (x, f) => {
     return Number.parseFloat(x).toExponential(f);
 };
 
-export const convertEthToUsd = (eth) => {
+export const convertEthToUsd = (eth: number) => {
     const rate = 2656.84;
+    if(eth)
     return eth?.toFixed(10)
+
+    return 0;
 }
 
 const AttributeIcon = ({ attribute, value }: { attribute: Attribute, value: number }) => {
