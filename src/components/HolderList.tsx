@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
 import { User } from '@memeclashtv/types';
 import { HolderListItem } from './HolderListItem';
-import { useCharacterHolders } from '../hooks/api';
+import { useCharacterHolders, useUsers } from '../hooks/api';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
+import { truncateWallet } from './NavBar';
 
 interface HolderListProps {
   characterId: number
@@ -22,6 +23,7 @@ const formatNumber = (num: number) => {
 
 export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSupply, characterMarketCap }) => {
   const { data: holders, isLoading, isError } = useCharacterHolders(characterId);
+  const { data: users } = useUsers(); // Fetch users
 
   const sortedHolders = useMemo(() => {
     return holders
@@ -56,14 +58,18 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
         </TableRow>
       </TableHeader>
       <TableBody>
-        {sortedHolders.map((holder, index) => (
+        {sortedHolders.map((holder, index) => {
+          const user = users?.find(user => user?.address?.toLowerCase() == holder?.address?.toLowerCase())
+          const displayName = (user as any)?.username ?? truncateWallet(user?.address);
+          const pfp = (user as any)?.pfp;
+          return (
           <TableRow key={holder.address}>
             <TableCell className="font-medium">#{index + 1}</TableCell>
             <TableCell>
               <div className="flex items-center space-x-4">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={`/placeholder.svg?height=40&width=40`} alt={`User ${index + 1}`} />
-                  <AvatarFallback>{holder.address.slice(0, 2)}</AvatarFallback>
+                  <AvatarImage src={pfp ?? `/placeholder.svg?height=40&width=40`} alt={`User ${index + 1}`} />
+                  <AvatarFallback>{displayName}</AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="font-semibold">{holder.address}</p>
@@ -75,8 +81,8 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
             <TableCell className="text-right">
               <p className="font-semibold">{formatNumber(holder.value)}</p>
             </TableCell>
-          </TableRow>
-        ))}
+          </TableRow>)
+        })}
       </TableBody>
     </Table>
   )

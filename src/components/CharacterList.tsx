@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { ArrowDownIcon, ArrowUpIcon, ChevronDown, ChevronUp, Diamond, Flame, Heart, Shield, Zap } from 'lucide-react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
+import { useConvertEthToUsd } from '../EthPriceProvider';
 
 const cutText = (text, maxLength) => {
     if (text.length > maxLength) {
@@ -24,14 +25,6 @@ const cutText = (text, maxLength) => {
 export const formatFloat = (x, f) => {
     return Number.parseFloat(x).toExponential(f);
 };
-
-export const convertEthToUsd = (eth: number) => {
-    const rate = 2656.84;
-    if(eth)
-    return eth?.toFixed(10)
-
-    return 0;
-}
 
 const AttributeIcon = ({ attribute, value }: { attribute: Attribute, value: number }) => {
     const icons: Record<Attribute, React.ReactNode> = {
@@ -71,6 +64,7 @@ const AttributeIcon = ({ attribute, value }: { attribute: Attribute, value: numb
 export const CharacterListItem = ({ character }: { character: Character }) => {
   const yesterday = useMemo(() => (new Date().getTime() / 1000) - 86400, []);
   const { data: performance, isLoading, isError } = useCharacterPerformance(character.id, yesterday);
+  const convertEthToUsd = useConvertEthToUsd()
     const navigate = useNavigate();
     console.log("performance found", performance)
 
@@ -105,9 +99,9 @@ export const CharacterListItem = ({ character }: { character: Character }) => {
                 </div>
               </TableCell>
               <TableCell className="p-2 text-sm">
-                ${character.value.toFixed(8)}
+                ${convertEthToUsd(character.value)}
               </TableCell>
-              <TableCell className="p-2 text-sm">${character.price.toFixed(8)}</TableCell>
+              <TableCell className="p-2 text-sm">${convertEthToUsd(character.price)}</TableCell>
               <TableCell className="p-2">
                 <div className={`flex items-center text-sm ${performance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {performance >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}

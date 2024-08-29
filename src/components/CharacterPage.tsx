@@ -13,12 +13,12 @@ import { StakeList } from './StakeList';
 import { useCharacter, useCharacterTrades, useCharacterPerformance, useCharacters, useCharacterMatches, useUser } from '../hooks/api';
 import { useCharacterSharesBalance } from '../hooks/contract';
 import { useAddress } from '../hooks/user';
-import { convertEthToUsd } from './CharacterList';
 import { Chart } from './Chart';
 import { MatchEndActivity, TradeActivity } from '@memeclashtv/types/activity';
 import ModalStake from './ModalStake'; // Adjust the path as necessary
 import { Attribute } from '@memeclashtv/types';
 import { Users, DollarSign, Coins, TrendingUp, Heart, Zap, Swords, Shield, Wind } from 'lucide-react'
+import { useConvertEthToUsd } from '../EthPriceProvider';
 
 type TimeFrame = 'Live' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'ALL';
 
@@ -51,6 +51,8 @@ export const CharacterPage = () => {
     const { data: trades } = useCharacterTrades(characterId);
     const { data: matches } = useCharacterMatches(characterId);
     const { data: performance } = useCharacterPerformance(characterId, startTime);
+
+    const convertEthToUsd = useConvertEthToUsd();
 
     const { data: user } = useUser(address);
 

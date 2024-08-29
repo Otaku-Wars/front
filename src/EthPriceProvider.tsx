@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { apiUrl } from './main';
 
 const EthPriceContext = createContext<number | undefined>(undefined);
@@ -42,4 +42,10 @@ export const useEthPrice = () => {
     }
     console.log("ethPrice context: ", context)
     return context;
+};
+
+export const useConvertEthToUsd = (): (eth: number) => number => {
+    const ethPrice = useEthPrice();
+
+    return useCallback((eth: number) => eth * ethPrice, [ethPrice]);
 };

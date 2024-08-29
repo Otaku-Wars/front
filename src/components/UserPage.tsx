@@ -12,10 +12,10 @@ import { useCharacters, useUser } from '../hooks/api'
 import { useAddress, useBalance, useWithdraw } from '../hooks/user';
 import { useParams } from 'react-router-dom';
 import { truncateWallet } from './NavBar';
-import { convertEthToUsd } from './CharacterList';
 import { useFundWallet, useLogout } from '@privy-io/react-auth';
 import { useChainId } from 'wagmi';
 import { currentChain } from '../main';
+import { useConvertEthToUsd } from '../EthPriceProvider';
 
 const attributeNames = {
   [Attribute.health]: "Health",
@@ -39,13 +39,16 @@ export const UserPage = () => {
     const [showWithdrawModal, setShowWithdrawModal] = useState(false);
     const [withdrawAddress, setWithdrawAddress] = useState(''); // State for withdraw address
     const [withdrawAmount, setWithdrawAmount] = useState(''); // State for withdraw amount
+    const pfp = (user as any)?.pfp;
+    const username = (user as any)?.username;
+    const convertEthToUsd = useConvertEthToUsd();
     const netWorth = user?.balances?.reduce((acc, curr) => {
         const character = characters?.find(c => c.id === curr?.character);
         return acc + (character ? character?.price * curr?.balance : 0);
     }, 0);
 
-  const charactersOwnedCount = user?.balances?.length;
-  const totalStakesCount = user?.stakes?.reduce((acc, curr) => acc + curr.balance, 0);
+  const charactersOwnedCount = user?.balances?.length ?? 0
+  const totalStakesCount = user?.stakes?.reduce((acc, curr) => acc + curr.balance, 0) ?? 0
 
   // Function to calculate time until unlock
   const getTimeUntilUnlock = () => {
@@ -81,17 +84,17 @@ export const UserPage = () => {
       console.error("Withdrawal failed", error);
     }
   };
-
+  const displayName = username ?? truncateWallet(user?.address ?? address) ?? address;
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <Card className="mb-8">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
-            <CardTitle className="text-2xl font-bold">@Profile name</CardTitle>
-            <CardDescription>{truncateWallet(user?.address)}</CardDescription>
+            <CardTitle className="text-2xl font-bold">@{displayName}</CardTitle>
+            <CardDescription>{truncateWallet(user?.address ?? address)}</CardDescription>
           </div>
           <Avatar className="h-20 w-20">
-            <AvatarImage src="/placeholder.svg" alt="Profile" />
+            <AvatarImage src={pfp ??"/placeholder.svg"} alt="Profile" />
             <AvatarFallback>UN</AvatarFallback>
           </Avatar>
         </CardHeader>
@@ -178,8 +181,8 @@ export const UserPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${convertEthToUsd(parseFloat(userBalance))}</div>
-                  <div className="text-xs text-muted-foreground">{userBalance} ETH</div>
+                  <div className="text-2xl font-bold">${convertEthToUsd(parseFloat(userBalance ?? "0")) ?? 0}</div>
+                  <div className="text-xs text-muted-foreground">{userBalance ?? 0} ETH</div>
                 </CardContent>
               </Card>
               <Card>
@@ -190,8 +193,8 @@ export const UserPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${convertEthToUsd(netWorth)}</div>
-                  <div className="text-xs text-muted-foreground">{netWorth?.toFixed(2)} ETH</div>
+                  <div className="text-2xl font-bold">${convertEthToUsd(netWorth ?? 0)}</div>
+                  <div className="text-xs text-muted-foreground">{(netWorth ?? 0)?.toFixed(2)} ETH</div>
                 </CardContent>
               </Card>
               <Card>

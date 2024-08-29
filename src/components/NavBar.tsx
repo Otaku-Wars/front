@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { useLogin, usePrivy, useWallets } from '@privy-io/react-auth'
 import { useNavigate } from 'react-router-dom'
 import { Menu } from "lucide-react"
 
@@ -14,6 +14,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "../components/ui/dialog"
+import { apiUrl } from '../main'
 
 export const truncateWallet = (wallet: string) => {
   if (!wallet) {
@@ -24,7 +25,22 @@ export const truncateWallet = (wallet: string) => {
 
 export function NavBar() {
   const { wallets } = useWallets()
-  const { login, authenticated } = usePrivy()
+  const { authenticated } = usePrivy()
+  const { login } = useLogin({
+    onComplete: async (user, isNewUser, wasAlreadyAuthenticated, loginMethod, linkedAccount) => {
+      //console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, linkedAccount);
+      // Any logic you'd like to execute if the user is/becomes authenticated while this
+      // component is mounted
+      //if new user request server to initiate pfp, username, and social
+      try {
+        const response = await fetch(`${apiUrl}/users/new/${address}`);
+        return response.json();
+      } catch (error) {
+          console.error('Error fetching new user:', error);
+          return undefined;
+      }
+    },
+  })
   const address = wallets[0]?.address ?? ''
   const navigate = useNavigate()
 

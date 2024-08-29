@@ -133,6 +133,18 @@ export const useUser = (address: string): { data: User | undefined, isLoading: b
     return { data: data || defaultUser, isLoading, isError, isPending };
 }
 
+export const useUsers = (): { data: User[] | undefined, isLoading: boolean, isError: boolean, isPending: boolean } => {
+    const { data, isLoading, isError, isPending } = useQuery({
+        queryKey: ['users'],
+        queryFn: async () => {
+            const response = await fetch(`${apiUrl}/users/`);
+            return response.json();
+        },
+        staleTime: 10000,
+    });
+
+    return { data, isLoading, isError, isPending };
+}
 // export const useEthPrice = (): { data: number | undefined, isLoading: boolean, isError: boolean } => {
 //     const { data, isLoading, isError } = useQuery({
 //         queryKey: ['ethPrice'],
@@ -146,7 +158,7 @@ export const useUser = (address: string): { data: User | undefined, isLoading: b
 //     return { data, isLoading, isError };
 // }
 
-export const useConvertEthToUsd = (): (eth:number) => number => {
+export const useConvertEthToUsdApi = (): (eth:number) => number => {
     const price = useEthPrice();
     return useCallback((eth: number) => {
         return eth * price;

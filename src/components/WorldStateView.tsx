@@ -5,7 +5,7 @@ import { Card, CardContent } from "./ui/card"
 import { Heart, Gem, Flame, Shield, Zap } from 'lucide-react'
 import { useCharacters, useBattleState } from '../hooks/api'
 import { getBuyPrice } from '../utils'
-import { convertEthToUsd } from './CharacterList'
+import { useConvertEthToUsd } from '../EthPriceProvider'
 
 interface WorldStateViewProps {
   battleState: CurrentBattleState
@@ -33,6 +33,7 @@ export const useTimeTill = (time: number) => {
 }
 
 export const WorldStateView = () => {
+  const convertEthToUsd = useConvertEthToUsd()
   const { data: characters, isLoading: charactersLoading, isError: charactersError } = useCharacters();
     const { data: battleState, isLoading, isError } = useBattleState();
 

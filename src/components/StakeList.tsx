@@ -1,12 +1,13 @@
 import React from 'react';
 import { StakeListItem } from './StakeListItem';
-import { useCharacterStakes } from '../hooks/api';
+import { useCharacterStakes, useUsers } from '../hooks/api';
 import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { ArrowDownIcon, ArrowUpIcon, HeartIcon, ShieldIcon, SwordIcon, ZapIcon, WindIcon } from "lucide-react"
 import { ActivityType } from './ActivityBar';
 import { StakeActivity } from '@memeclashtv/types/activity';
+import { truncateWallet } from './NavBar';
 interface StakeListProps {
   characterId: number;
   characterImage: string;
@@ -43,6 +44,7 @@ const attributeIcons = {
 
 export const StakeList: React.FC<StakeListProps> = ({ characterId, characterImage }) => {
   const { data: stakes, isLoading, isError } = useCharacterStakes(characterId);
+  const { data: users, isLoading: loadingUsers, isError: errorUsers } = useUsers()
 
   if (isLoading) return <div className="stake-list-loading">Loading stakes...</div>;
   if (isError) return <div className="stake-list-error">Error loading stakes. Please try again.</div>;
@@ -63,13 +65,16 @@ export const StakeList: React.FC<StakeListProps> = ({ characterId, characterImag
           </TableRow>
         </TableHeader>
         <TableBody>
-          {stakes.map((activity, index) => (
-            <TableRow key={index}>
+          {stakes.map((activity, index) => {
+            const user = users?.find(user => user?.address?.toLowerCase() == activity?.staker?.toLowerCase())
+            const displayName = (user as any)?.username ?? truncateWallet(user?.address);
+            const pfp = (user as any)?.pfp;
+            return (<TableRow key={index}>
               <TableCell className="py-4">
                 <div className="flex items-center space-x-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt={activity.staker} />
-                    <AvatarFallback>{activity?.staker}</AvatarFallback>
+                    <AvatarImage src={pfp} alt={activity.staker} />
+                    <AvatarFallback>{displayName}</AvatarFallback>
                   </Avatar>
                   <span className="font-medium">{formatAddress(activity.staker)}</span>
                 </div>
@@ -108,8 +113,8 @@ export const StakeList: React.FC<StakeListProps> = ({ characterId, characterImag
                 </div>
               </TableCell>
               <TableCell className="py-4 text-muted-foreground">{timeSince(activity.timestamp)}</TableCell>
-            </TableRow>
-          ))}
+            </TableRow>)
+          })}
         </TableBody>
       </Table>
     </div>

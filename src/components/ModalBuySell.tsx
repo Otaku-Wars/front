@@ -5,8 +5,8 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useBuyShares, useBuyPrice, useCharacterSharesBalance, useSellShares, useSellPrice } from '../hooks/contract';
 import { useAddress, useBalance } from '../hooks/user';
-import { convertEthToUsd } from './CharacterList';
 import { parseEther, formatEther } from 'viem';
+import { useConvertEthToUsd } from '../EthPriceProvider';
 
 interface ModalBuySellProps {
   show: boolean;
@@ -26,6 +26,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   const [amount, setAmount] = useState<any>(0);
   const address = useAddress();
   const [currentAction, setCurrentAction] = useState(actionType);
+  const convertEthToUsd = useConvertEthToUsd();
 
   const { 
     data: buyPrice, 

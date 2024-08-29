@@ -1,11 +1,12 @@
 import React from 'react';
 import { TradeActivity } from '@memeclashtv/types/activity';
 import { TradeListItem } from './TradeListItem';
-import { useCharacterTrades } from '../hooks/api';
+import { useCharacterTrades, useUsers } from '../hooks/api';
 import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react"
+import { truncateWallet } from './NavBar';
 interface TradeListProps {
   characterId: number;
   characterImage: string;
@@ -33,14 +34,16 @@ const timeSince = (date: number) => {
 
 
 const TraderCard = ({ 
+  pfp,
   trader,
 }: { 
+  pfp: string,
   trader: string
 }) => {
   return (
     <div className="flex items-center space-x-4">
       <Avatar className="h-10 w-10">
-        <AvatarImage src="/placeholder.svg?height=40&width=40" alt={trader} />
+        <AvatarImage src={pfp ?? "/placeholder.svg?height=40&width=40"} alt={trader} />
         <AvatarFallback>{trader[0]}</AvatarFallback>
       </Avatar>
       <div className="flex-grow">
@@ -61,6 +64,7 @@ const CharacterAvatar = ({ characterId, image }: { characterId: number, image:st
 
 export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImage }) => {
   const { data: trades, isLoading, isError } = useCharacterTrades(characterId);
+  const { data: users } = useUsers(); // Fetch users
 
   if (isLoading) {
     return <div className="trade-list-loading">Loading trades...</div>;
@@ -89,10 +93,14 @@ export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImag
         </TableRow>
       </TableHeader>
       <TableBody>
-        {trades.map((trade, index) => (
+        {trades.map((trade, index) => {
+          const user = users?.find(user => user?.address?.toLowerCase() == trade?.trader?.toLowerCase())
+          const displayName = (user as any)?.username ?? truncateWallet(user?.address);
+          const pfp = (user as any)?.pfp;
+          return (
           <TableRow key={index}>
             <TableCell>
-              <TraderCard trader={trade.trader} />
+              <TraderCard trader={displayName} pfp={pfp} />
             </TableCell>
             <TableCell>
               <span className={`font-semibold ${trade.isBuy ? 'text-green-500' : 'text-red-500'}`}>
@@ -137,8 +145,8 @@ export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImag
               </div>
             </TableCell>
             <TableCell className="text-right">{timeSince(trade.timestamp)}</TableCell>
-          </TableRow>
-        ))}
+          </TableRow>)
+        })}
       </TableBody>
     </Table>
   )
