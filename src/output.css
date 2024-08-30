@@ -509,6 +509,8 @@ video {
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  font-family: 'ThaleahFat', sans-serif;
+  /* Apply the custom font */
 }
 
 *, ::before, ::after {
@@ -840,10 +842,6 @@ body {
   height: 3.5rem;
 }
 
-.h-2 {
-  height: 0.5rem;
-}
-
 .h-2\.5 {
   height: 0.625rem;
 }
@@ -1104,6 +1102,10 @@ body {
   gap: 0.25rem;
 }
 
+.gap-10 {
+  gap: 2.5rem;
+}
+
 .gap-2 {
   gap: 0.5rem;
 }
@@ -1114,10 +1116,6 @@ body {
 
 .gap-\[0px\] {
   gap: 0px;
-}
-
-.gap-10 {
-  gap: 2.5rem;
 }
 
 .space-x-1 > :not([hidden]) ~ :not([hidden]) {
@@ -1430,6 +1428,11 @@ body {
   line-height: 2rem;
 }
 
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
 .text-4xl {
   font-size: 2.25rem;
   line-height: 2.5rem;
@@ -1516,6 +1519,11 @@ body {
   color: rgb(107 114 128 / var(--tw-text-opacity));
 }
 
+.text-gray-600 {
+  --tw-text-opacity: 1;
+  color: rgb(75 85 99 / var(--tw-text-opacity));
+}
+
 .text-green-400 {
   --tw-text-opacity: 1;
   color: rgb(74 222 128 / var(--tw-text-opacity));
@@ -1589,11 +1597,6 @@ body {
 .text-yellow-500 {
   --tw-text-opacity: 1;
   color: rgb(234 179 8 / var(--tw-text-opacity));
-}
-
-.text-gray-600 {
-  --tw-text-opacity: 1;
-  color: rgb(75 85 99 / var(--tw-text-opacity));
 }
 
 .underline-offset-4 {
@@ -1724,6 +1727,16 @@ body {
 
 .ease-in-out {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@font-face {
+  font-family: 'ThaleahFat';
+
+  src: url('/DepartureMono-Regular.woff') format('truetype');
+
+  font-weight: 400;
+
+  font-style: normal;
 }
 
 .file\:border-0::file-selector-button {
@@ -2028,10 +2041,6 @@ body {
 }
 
 @media (min-width: 640px) {
-  .sm\:inline-block {
-    display: inline-block;
-  }
-
   .sm\:inline {
     display: inline;
   }
@@ -2143,6 +2152,12 @@ body {
   .lg\:text-3xl {
     font-size: 1.875rem;
     line-height: 2.25rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .xl\:inline-block {
+    display: inline-block;
   }
 }
 
