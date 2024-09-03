@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { User, Balance, Stake, Attribute, Character } from '@memeclashtv/types'
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
@@ -7,10 +7,10 @@ import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Progress } from "./ui/progress";
-import { Copy, LogOut, Wallet, TrendingUp, Lock, ArrowUpRight, ArrowDownLeft, Users, Swords } from "lucide-react";
-import { useCharacters, useUser } from '../hooks/api'
+import { Copy, LogOut, Wallet, TrendingUp, Lock, ArrowUpRight, ArrowDownLeft, Users, Swords, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
+import { useCharacters, useUser, useCharacterPerformance } from '../hooks/api'
 import { useAddress, useBalance, useWithdraw } from '../hooks/user';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { truncateWallet } from './NavBar';
 import { useFundWallet, useLogout } from '@privy-io/react-auth';
 import { useChainId } from 'wagmi';
@@ -255,23 +255,40 @@ export const UserPage = () => {
               {user?.balances?.map((balance: Balance, index: number) => {
                 const character = characters?.find(c => c.id === balance.character);
                 const value = character ? character.price * balance.balance : 0;
+
+                // Fetch performance data for the character
+                const yesterday = useMemo(() => (new Date().getTime() / 1000) - 24 * 60 * 60, []);
+                const { data: performance, isLoading, isError } = useCharacterPerformance(character.id, yesterday);
+
                 return (
-                  <div key={balance.character} className="flex items-center justify-between mb-4 p-2 rounded hover:bg-accent cursor-pointer transition-colors">
-                    <div className="flex items-center">
-                      <Avatar className="h-10 w-10 mr-4">
-                        <AvatarImage src={character?.pfp} alt={character?.name} />
-                        <AvatarFallback>{character?.name.substring(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-semibold">{character?.name}</div>
-                        <div className="text-sm text-muted-foreground">{balance.balance.toLocaleString()} Shares</div>
+                  <Link to={`/character/${character?.id}`} key={balance.character} className="flex flex-col mb-4 p-2 rounded hover:bg-accent cursor-pointer transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Avatar className="h-10 w-10 mr-4">
+                          <AvatarImage src={character?.pfp} alt={character?.name} />
+                          <AvatarFallback>{character?.name.substring(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-semibold">{character?.name}</div>
+                          <div className="text-sm text-muted-foreground">{balance.balance.toLocaleString()} Shares</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold">${convertEthToUsd(value)}</div>
+                        <div className="text-sm text-muted-foreground">{value.toFixed(2)} ETH</div>
+                        {/* Performance Section */}
+                        {isLoading && <div className="text-sm text-gray-500">Loading performance...</div>}
+                        {isError && <div className="text-red-500">Error loading performance data</div>}
+                        {performance !== undefined && (
+                          <div className={`flex items-center text-sm ${performance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            {performance >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
+                            {Math.abs(performance).toFixed(1)}%
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-semibold">${convertEthToUsd(value)}</div>
-                      <div className="text-sm text-muted-foreground">{value.toFixed(2)} ETH</div>
-                    </div>
-                  </div>
+                    
+                  </Link>
                 );
               })}
             </CardContent>
@@ -286,7 +303,7 @@ export const UserPage = () => {
               {user?.stakes?.map((stake: Stake, index: number) => {
                 const character = characters?.find(c => c.id === stake.character);
                 return (
-                  <div key={index} className="flex items-center justify-between mb-4 p-2 rounded hover:bg-accent cursor-pointer transition-colors">
+                  <Link to={`/character/${character?.id}`} key={index} className="flex items-center justify-between mb-4 p-2 rounded hover:bg-accent cursor-pointer transition-colors">
                     <div className="flex items-center">
                       <Avatar className="h-10 w-10 mr-4">
                         <AvatarImage src={character?.pfp} alt={character?.name} />
@@ -301,7 +318,7 @@ export const UserPage = () => {
                       <div className="font-semibold">{stake.balance} shares</div>
                       <div className="text-sm text-muted-foreground">Staked</div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </CardContent>
