@@ -13,7 +13,7 @@ interface HolderListProps {
   characterMarketCap: number
 }
 
-const formatNumber = (num: number) => {
+export const formatNumber = (num: number) => {
   return new Intl.NumberFormat('en-US', { 
     style: 'currency', 
     currency: 'USD',
