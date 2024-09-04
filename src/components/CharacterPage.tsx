@@ -22,6 +22,17 @@ import { useConvertEthToUsd } from '../EthPriceProvider';
 
 type TimeFrame = 'Live' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'ALL';
 
+//Create tier list base on market cap, S, A, B, C, D
+//Priced in ETH 0-1ETH = D, 1-5ETH = C, 5-10ETH = B, 10-50ETH = A, 50+ETH = S
+const getTier = (marketCap: number) => {
+    if (marketCap > 50) return 'S';
+    if (marketCap > 10) return 'A';
+    if (marketCap > 5) return 'B';
+    if (marketCap > 1) return 'C';
+    if (marketCap > 0) return 'D';
+    return 'F';
+}
+
 const statIcons = {
     Health: <Heart className="w-4 h-4 text-green-500" />,
     Power: <Zap className="w-4 h-4 text-blue-500" />,
@@ -170,7 +181,7 @@ export const CharacterPage = () => {
                     </Avatar>
                     <div className="text-center mt-2 mb-6">
                     <CardTitle className="text-2xl lg:text-3xl">{character.name}</CardTitle>
-                    <CardDescription className="text-lg">Tier S</CardDescription>
+                    <CardDescription className="text-lg">Tier {getTier(character.value)}</CardDescription>
                     </div>
                     <div className="flex flex-row justify-between gap-10 text-center w-full">
                         <div>
