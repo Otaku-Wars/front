@@ -8,6 +8,8 @@ import { ArrowDownIcon, ArrowUpIcon, HeartIcon, ShieldIcon, SwordIcon, ZapIcon, 
 import { ActivityType } from './ActivityBar';
 import { StakeActivity } from '@memeclashtv/types/activity';
 import { truncateWallet } from './NavBar';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+
 interface StakeListProps {
   characterId: number;
   characterImage: string;
@@ -43,6 +45,7 @@ const attributeIcons = {
 }
 
 export const StakeList: React.FC<StakeListProps> = ({ characterId, characterImage }) => {
+  const navigate = useNavigate(); // Initialize useNavigate
   const { data: stakes, isLoading, isError } = useCharacterStakes(characterId);
   const { data: users, isLoading: loadingUsers, isError: errorUsers } = useUsers()
 
@@ -66,54 +69,57 @@ export const StakeList: React.FC<StakeListProps> = ({ characterId, characterImag
         </TableHeader>
         <TableBody>
           {stakes.map((activity, index) => {
-            const user = users?.find(user => user?.address?.toLowerCase() == activity?.staker?.toLowerCase())
+            const user = users?.find(user => user?.address?.toLowerCase() === activity?.staker?.toLowerCase());
             const displayName = (user as any)?.username ?? truncateWallet(user?.address);
             const pfp = (user as any)?.pfp;
-            return (<TableRow key={index}>
-              <TableCell className="py-4">
-                <div className="flex items-center space-x-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={pfp} alt={activity.staker} />
-                    <AvatarFallback>{displayName}</AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium">{formatAddress(activity.staker)}</span>
-                </div>
-              </TableCell>
-              <TableCell className="py-4">
-                <span className={activity.amount > 0 ? "text-green-500" : "text-red-500"}>
-                  {activity.amount > 0 ? "STAKE" : "UNSTAKE"}
-                </span>
-              </TableCell>
-              <TableCell className="py-4">
-                <div className="flex items-center space-x-1">
-                  <Avatar className="h-5 w-5">
-                    <AvatarImage src={characterImage} alt="Token" />
-                    <AvatarFallback>T</AvatarFallback>
-                  </Avatar>
-                  <span>{formatNumber(Math.abs(activity.amount))} for</span>
-                  {attributeIcons[activity.attribute]}
-                </div>
-              </TableCell>
-              <TableCell className="py-4">
-                <div className="flex items-center">
-                  {activity.amount > 0 ? (
-                    <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
-                  ) : (
-                    <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
-                  )}
+
+            return (
+              <TableRow key={index}>
+                <TableCell className="py-4 cursor-pointer" onClick={() => navigate(`/user/${user?.address}`)}> {/* Added onClick for navigation */}
+                  <div className="flex items-center space-x-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={pfp} alt={activity.staker} />
+                      <AvatarFallback>{displayName}</AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">{formatAddress(activity.staker)}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="py-4">
                   <span className={activity.amount > 0 ? "text-green-500" : "text-red-500"}>
-                    {formatNumber(Math.abs(activity.newAttribute - activity.prevAttribute))}
+                    {activity.amount > 0 ? "STAKE" : "UNSTAKE"}
                   </span>
-                </div>
-              </TableCell>
-              <TableCell className="py-4">
-                <div className="flex items-center space-x-1">
-                  <span>{formatNumber(activity.newAttribute)}</span>
-                  {attributeIcons[activity.attribute]}
-                </div>
-              </TableCell>
-              <TableCell className="py-4 text-muted-foreground">{timeSince(activity.timestamp)}</TableCell>
-            </TableRow>)
+                </TableCell>
+                <TableCell className="py-4">
+                  <div className="flex items-center space-x-1">
+                    <Avatar className="h-5 w-5">
+                      <AvatarImage src={characterImage} alt="Token" />
+                      <AvatarFallback>T</AvatarFallback>
+                    </Avatar>
+                    <span>{formatNumber(Math.abs(activity.amount))} for</span>
+                    {attributeIcons[activity.attribute]}
+                  </div>
+                </TableCell>
+                <TableCell className="py-4">
+                  <div className="flex items-center">
+                    {activity.amount > 0 ? (
+                      <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                    ) : (
+                      <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                    )}
+                    <span className={activity.amount > 0 ? "text-green-500" : "text-red-500"}>
+                      {formatNumber(Math.abs(activity.newAttribute - activity.prevAttribute))}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="py-4">
+                  <div className="flex items-center space-x-1">
+                    <span>{formatNumber(activity.newAttribute)}</span>
+                    {attributeIcons[activity.attribute]}
+                  </div>
+                </TableCell>
+                <TableCell className="py-4 text-muted-foreground">{timeSince(activity.timestamp)}</TableCell>
+              </TableRow>
+            );
           })}
         </TableBody>
       </Table>

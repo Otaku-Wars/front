@@ -4,18 +4,17 @@ import { MatchListItem } from './MatchListItem';
 import { useCharacterMatches } from '../hooks/api';
 import './MatchList.css';
 import { Character } from '@memeclashtv/types';
+import { Link } from 'react-router-dom'; // Added import for Link
 
 interface MatchListProps {
   characterId: number;
   characters: Character[];
 }
 
-
 import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { ArrowDownIcon, ArrowUpIcon, HeartIcon, ShieldIcon, SwordIcon, ZapIcon } from "lucide-react"
-
 
 const formatNumber = (num: number) => {
   return new Intl.NumberFormat('en-US', { 
@@ -113,22 +112,26 @@ export const MatchList: React.FC<MatchListProps> = ({ characterId, characters })
           return (
             <TableRow key={match.id}>
               <TableCell>
-                <CharacterCard 
-                  id={match.p1} 
-                  state={match.state1} 
-                  price={match.tokenState.prevPrice1}
-                  marketCap={match.tokenState.prevMarketCap1}
-                  characters={characters}
-                />
+                <Link to={`/character/${match.p1}`}> {/* Added Link */}
+                  <CharacterCard 
+                    id={match.p1} 
+                    state={match.state1} 
+                    price={match.tokenState.prevPrice1}
+                    marketCap={match.tokenState.prevMarketCap1}
+                    characters={characters}
+                  />
+                </Link>
               </TableCell>
               <TableCell>
-                <CharacterCard 
-                  id={match.p2} 
-                  state={match.state2}
-                  price={match.tokenState.prevPrice2}
-                  marketCap={match.tokenState.prevMarketCap2}
-                  characters={characters}
-                />
+                <Link to={`/character/${match.p2}`}> {/* Added Link */}
+                  <CharacterCard 
+                    id={match.p2} 
+                    state={match.state2}
+                    price={match.tokenState.prevPrice2}
+                    marketCap={match.tokenState.prevMarketCap2}
+                    characters={characters}
+                  />
+                </Link>
               </TableCell>
               <TableCell>
                 <span className={`font-semibold ${match.winner == characterId ? 'text-green-500' : 'text-red-500'}`}>

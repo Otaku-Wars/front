@@ -5,6 +5,7 @@ import { useCharacterHolders, useUsers } from '../hooks/api';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { truncateWallet } from './NavBar';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 interface HolderListProps {
   characterId: number
@@ -24,6 +25,7 @@ const formatNumber = (num: number) => {
 export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSupply, characterMarketCap }) => {
   const { data: holders, isLoading, isError } = useCharacterHolders(characterId);
   const { data: users } = useUsers(); // Fetch users
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const sortedHolders = useMemo(() => {
     return holders
@@ -63,7 +65,7 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
           const displayName = (user as any)?.username ?? truncateWallet(user?.address);
           const pfp = (user as any)?.pfp;
           return (
-          <TableRow key={holder.address}>
+          <TableRow key={holder.address} onClick={() => navigate(`/user/${user?.id}`)}> {/* Added onClick for navigation */}
             <TableCell className="font-medium">#{index + 1}</TableCell>
             <TableCell>
               <div className="flex items-center space-x-4">
@@ -72,7 +74,7 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
                   <AvatarFallback>{displayName}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-semibold">{holder.address}</p>
+                  <p className="font-semibold">{truncateWallet(holder.address)}</p>
                   <p className="text-sm text-muted-foreground">{formatNumber(holder.value / holder.balance)}</p>
                 </div>
               </div>

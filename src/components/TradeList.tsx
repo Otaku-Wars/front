@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react"
 import { truncateWallet } from './NavBar';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+
 interface TradeListProps {
   characterId: number;
   characterImage: string;
@@ -40,8 +42,13 @@ const TraderCard = ({
   pfp: string,
   trader: string
 }) => {
+  const navigate = useNavigate(); // Initialize useNavigate
+  const displayName = (trader as any)?.username ?? truncateWallet(trader);
   return (
-    <div className="flex items-center space-x-4">
+    <div 
+      className="flex items-center space-x-4 cursor-pointer" 
+      onClick={() => navigate(`/user/${trader}`)} // Navigate to user's page on click
+    >
       <Avatar className="h-10 w-10">
         <AvatarImage src={pfp ?? "/placeholder.svg?height=40&width=40"} alt={trader} />
         <AvatarFallback>{trader[0]}</AvatarFallback>
@@ -95,12 +102,11 @@ export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImag
       <TableBody>
         {trades.map((trade, index) => {
           const user = users?.find(user => user?.address?.toLowerCase() == trade?.trader?.toLowerCase())
-          const displayName = (user as any)?.username ?? truncateWallet(user?.address);
           const pfp = (user as any)?.pfp;
           return (
           <TableRow key={index}>
             <TableCell>
-              <TraderCard trader={displayName} pfp={pfp} />
+              <TraderCard trader={user?.address} pfp={pfp}/> {/* Pass userId here */}
             </TableCell>
             <TableCell>
               <span className={`font-semibold ${trade.isBuy ? 'text-green-500' : 'text-red-500'}`}>
