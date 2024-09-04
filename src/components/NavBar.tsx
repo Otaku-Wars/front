@@ -50,10 +50,10 @@ export function NavBar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center w-full pl-1 pr-1">
         <a href="/" className="mr-6 flex items-center space-x-2 xl">
-          <img src="/logo.gif" alt="MemeClash.Tv Logo" className="h-6 w-auto" />
+          <img src="/logo.png" alt="MemeClash.Tv Logo" className="h-6 w-auto" />
           {/* Uncomment if you want to include the text logo */}
           <span className="hidden text-3xl font-bold xl:inline-block">
-            Meme<span className='text-blue'>Clash</span><span className="text-primary">.Tv</span>
+            <img src="/logo-text.png" alt="MemeClash.Tv" className="h-6 w-auto" />
           </span>
         </a>
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
