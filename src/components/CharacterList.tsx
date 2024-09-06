@@ -199,6 +199,9 @@ export const CharacterList = () => {
 
     return (
         <ScrollArea className="h-full w-full rounded-md border">
+          <div className="p-4 border-b">
+            <h2 className="text-lg font-semibold">Character List</h2>
+          </div>
           <Table className="w-full">
             <TableHeader>
               <TableRow>

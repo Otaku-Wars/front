@@ -78,7 +78,17 @@ const ActivityItem = ({ activity }: { activity: BaseActivity }) => {
 // Main ActivityBar component
 export const ActivityBar = () => {
     const [activities, setActivities] = useState<BaseActivity[]>([]);
-    
+    //set 20 dummy activities
+    useEffect(() => {
+        for (let i = 0; i < 20; i++) {
+            setActivities(prevActivities => [...prevActivities, {
+                type: ActivityType.MatchPending,
+                timestamp: Date.now(),
+                p1: i,
+                p2: i + 1
+            }]);
+        }
+    }, []);
     // WebSocket URL
     const socketUrl = import.meta.env.VITE_WS_API_URL as string;
 
@@ -99,17 +109,15 @@ export const ActivityBar = () => {
     }, [lastMessage]);
 
   return (
-    <div className="h-full w-full bg-background border-l">
+    <ScrollArea className="h-full w-full bg-background border-l">
       <div className="p-4 border-b">
         <h2 className="text-lg font-semibold">Activity Feed</h2>
       </div>
-      <ScrollArea className="">
-        <div className="p-4 space-y-2">
+      <div className="p-4 space-y-2">
           {activities.map((activity, index) => (
             <ActivityItem key={index} activity={activity} />
           ))}
         </div>
-      </ScrollArea>
-    </div>
+    </ScrollArea>
   )
 }
