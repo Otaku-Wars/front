@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { format } from 'date-fns'
 import { Card, CardContent } from "./ui/card"
 import { Badge } from "./ui/badge"
@@ -78,6 +78,8 @@ const ActivityItem = ({ activity }: { activity: BaseActivity }) => {
 // Main ActivityBar component
 export const ActivityBar = () => {
     const [activities, setActivities] = useState<BaseActivity[]>([]);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+
     //set 20 dummy activities
     useEffect(() => {
         for (let i = 0; i < 20; i++) {
@@ -108,12 +110,19 @@ export const ActivityBar = () => {
         }
     }, [lastMessage]);
 
+    // Scroll to bottom when activities change
+    useEffect(() => {
+        //if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+        //}
+    }, []);
+
   return (
-    <ScrollArea className="h-full w-full bg-background border-l">
-      <div className="p-4 border-b">
+    <ScrollArea className="max-h-full overflow-y-auto" ref={scrollAreaRef}>
+      <div className="p-4 border-b text-center"> {/* Center the header text */}
         <h2 className="text-lg font-semibold">Activity Feed</h2>
       </div>
-      <div className="p-4 space-y-2">
+        <div className="p-4 space-y-2 flex flex-col-reverse"> {/* Reverse the order of activities */}
           {activities.map((activity, index) => (
             <ActivityItem key={index} activity={activity} />
           ))}
