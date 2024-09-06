@@ -65,7 +65,7 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
           const displayName = (user as any)?.username ?? truncateWallet(user?.address);
           const pfp = (user as any)?.pfp;
           return (
-          <TableRow key={holder.address} onClick={() => navigate(`/user/${user?.id}`)}> {/* Added onClick for navigation */}
+          <TableRow key={holder.address} onClick={() => navigate(`/user/${user?.address}`)}> {/* Added onClick for navigation */}
             <TableCell className="font-medium">#{index + 1}</TableCell>
             <TableCell>
               <div className="flex items-center space-x-4">
