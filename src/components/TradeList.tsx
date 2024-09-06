@@ -51,7 +51,7 @@ const TraderCard = ({
     >
       <Avatar className="h-10 w-10">
         <AvatarImage src={pfp ?? "/placeholder.svg?height=40&width=40"} alt={trader} />
-        <AvatarFallback>{trader[0]}</AvatarFallback>
+        <AvatarFallback>{trader?.[0]}</AvatarFallback>
       </Avatar>
       <div className="flex-grow">
         <p className="font-semibold">{trader}</p>

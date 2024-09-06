@@ -10,7 +10,7 @@ import { MatchList } from './MatchList';
 import { formatNumber, HolderList } from './HolderList';
 import { TradeList } from './TradeList';
 import { StakeList } from './StakeList';
-import { useCharacter, useCharacterTrades, useCharacterPerformance, useCharacters, useCharacterMatches, useUser, useBattleState } from '../hooks/api';
+import { useCharacter, useCharacterTrades, useCharacterPerformance, useCharacters, useCharacterMatches, useUser, useBattleState, useCharacterHolders } from '../hooks/api';
 import { useCharacterSharesBalance } from '../hooks/contract';
 import { useAddress } from '../hooks/user';
 import { Chart } from './Chart';
@@ -120,6 +120,7 @@ export const CharacterPage = () => {
     const { data: matches } = useCharacterMatches(characterId);
     const { data: performance } = useCharacterPerformance(characterId, startTime);
     const { data: battleState, isLoading: isBattleLoading, isError: isBattleError } = useBattleState(); // Use battleState hook
+    const { data: holders } = useCharacterHolders(characterId);
 
     const convertEthToUsd = useConvertEthToUsd();
 
@@ -251,8 +252,12 @@ export const CharacterPage = () => {
     // Predict the next character that will be fought
     const nextMatchIndex = (currentMatchIndex + matchesLeft) % totalMatches;
     const nextMatch = matchups[nextMatchIndex];
-    const nextOpponentId = nextMatch.find(id => id !== characterId);
+    const nextOpponentId = nextMatch?.find(id => id !== characterId);
     const nextOpponent = characters?.find(c => c.id === nextOpponentId);
+
+    const holderCount = useMemo(() => {
+        return holders?.length || 0;
+    }, [holders]);
 
     if (isLoading || isBattleLoading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
 
@@ -319,6 +324,7 @@ export const CharacterPage = () => {
                                     Price
                                 </p>
                                 <p className="text-xl font-bold">${convertEthToUsd(character.price)}</p>
+                                <p className="text-sm text-muted-foreground">{character.price} ETH</p>
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground flex items-center">
@@ -335,20 +341,21 @@ export const CharacterPage = () => {
                                     Market Cap
                                 </p>
                                 <p className="text-xl font-bold">${convertEthToUsd(character.value)}</p>
+                                <p className="text-sm text-muted-foreground">{character.value} ETH</p>
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground flex items-center">
                                     <Users className="w-4 h-4 mr-1" />
                                     Holders
                                 </p>
-                                <p className="text-xl font-bold">{formatNumber(10)}</p>
+                                <p className="text-xl font-bold">{holderCount}</p>
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground flex items-center">
                                     <Coins className="w-4 h-4 mr-1" />
                                     Supply
                                 </p>
-                                <p className="text-xl font-bold">{formatNumber(character.supply)}</p>
+                                <p className="text-xl font-bold">{(character.supply)}</p>
                             </div>
                         </div>
                         <div className="">

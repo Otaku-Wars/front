@@ -98,16 +98,16 @@ export const CharacterListItem = ({ character }: { character: Character }) => {
                   </div>
                 </div>
               </TableCell>
-              <TableCell className="p-2 text-sm">
+              {/* <TableCell className="p-2 text-sm">
                 ${convertEthToUsd(character.value)}
-              </TableCell>
-              <TableCell className="p-2 text-sm">${convertEthToUsd(character.price)}</TableCell>
+              </TableCell> */}
               <TableCell className="p-2">
                 <div className={`flex items-center text-sm ${performance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {performance >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
                   {Math.abs(performance).toFixed(1)}%
                 </div>
               </TableCell>
+              <TableCell className="p-2 text-sm">${convertEthToUsd(character.price)}</TableCell>
             </TableRow>
 
         // <ListGroup.Item className="character-list-item bg-dark text-white" onClick={handleClick}>
@@ -203,17 +203,17 @@ export const CharacterList = () => {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-1/3 min-w-[200px]">Character</TableHead>
-                <TableHead className="w-1/4 p-1 min-w-[100px]">
+                {/* <TableHead className="w-1/4 p-1 min-w-[100px]">
                   <SortButton column="marketCap">
                     <span className="hidden sm:inline">Market Cap</span>
                     <span className="sm:hidden">MC</span>
                   </SortButton>
+                </TableHead> */}
+                <TableHead className="w-1/6 p-1 min-w-[80px]">
+                  <SortButton column="performance">24h</SortButton>
                 </TableHead>
                 <TableHead className="w-1/4 p-1 min-w-[80px]">
                   <SortButton column="price">Price</SortButton>
-                </TableHead>
-                <TableHead className="w-1/6 p-1 min-w-[80px]">
-                  <SortButton column="performance">24h</SortButton>
                 </TableHead>
               </TableRow>
             </TableHeader>
