@@ -1,32 +1,22 @@
+import { readContract } from '@wagmi/core'
+import { config } from '../main'
+import {abi as WorldABI} from '../abis/World.json'; // Adjust the path to your actual ABI file
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS as `0x${string}` ?? '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+
 export const convertWeiToEth = (wei: bigint): number => {
     return Number(wei) / 10**18
 }
 
-//Smart contract simulation functions
-export const getCurve = (supply: number, amount: number): number => {
-    const k = BigInt(1);
-    const supplyCubed = BigInt(supply) * BigInt(supply) * BigInt(supply);
-    const newSupply = BigInt(supply) + BigInt(amount);
-    const newSupplyCubed = newSupply * newSupply * newSupply;
-    const area = (k * (newSupplyCubed - supplyCubed)) / BigInt(3);
-    const scaledArea = (area * (BigInt(1e18))) / BigInt(100000000);
-
-    return convertWeiToEth(scaledArea);
-}
-
-export const getPrice = (supply: number, amount: number, scalingFactor: number): number => {
-    const price = getCurve(supply, amount);
+export const getPrice = async (supply: number, amount: number, scalingFactor: number): Promise<number> => {
+    const price = await getCurveCall(supply, amount);
     return price * scalingFactor;
 }
 
-export const getScalingFactor = (supply: number, value: number): number => {
-    const xf = supply;
-    const originalValue = getCurve(0, xf);
-
+export const getScalingFactor = async (supply: number, value: number, originalValue: number): Promise<number> => {
     if (originalValue === 0) return 1;
 
-    console.log("originalValue", originalValue);
-    console.log("value", value);
+    //console.log("originalValue", originalValue);
+    //console.log("value", value);
 
     // Multiply value and originalValue by 1e18 to work with integers only
     const valueWei = BigInt(Math.floor(value * 1e18));
@@ -37,16 +27,32 @@ export const getScalingFactor = (supply: number, value: number): number => {
     return scalingFactor === BigInt(0) ? 1 : convertWeiToEth(scalingFactor);
 }
 
-export const getBuyPrice = (supply: number, value: number): number => {
-    //console.log("getBuyPrice", supply, value)
-    const scalingFactor = getScalingFactor(supply, value);
+export const getBuyPrice = async (supply: number, value: number): Promise<number> => {
+    const originalValue = await getCurveCall(0, supply);
+    const scalingFactor = await getScalingFactor(supply, value, originalValue);
     //console.log("scalingFactor", scalingFactor)
-    const price = getPrice(supply, 1, scalingFactor);
+    const price = await getPrice(supply, 1, scalingFactor);
     return price;
 }
 
-export const getSellPrice = (supply: number, value: number, amount: number): number => {
-    const scalingFactor = getScalingFactor(supply, value);
-    const price = getPrice(supply-amount, amount, scalingFactor);
-    return price;
+export const getPriceCall = async (characterId: number): Promise<number> => {
+    const amount = await readContract(config,{
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: WorldABI,
+        functionName: 'getBuyPrice',
+        args: [BigInt(characterId), BigInt(1)],
+    }) as bigint;
+
+    return convertWeiToEth(amount);
+}
+
+export const getCurveCall = async (supply: number, amount: number): Promise<number> => {
+    const curve = await readContract(config,{
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: WorldABI,
+        functionName: 'getCurve',
+        args: [BigInt(supply), BigInt(amount)],
+    }) as bigint;
+
+    return convertWeiToEth(curve);
 }

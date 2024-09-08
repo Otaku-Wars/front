@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { truncateWallet } from './NavBar';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { formatNumber } from '../lib/utils';
 
 interface HolderListProps {
   characterId: number
@@ -13,14 +14,7 @@ interface HolderListProps {
   characterMarketCap: number
 }
 
-export const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('en-US', { 
-    style: 'currency', 
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 10,
-  }).format(num)
-}
+
 
 export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSupply, characterMarketCap }) => {
   const { data: holders, isLoading, isError } = useCharacterHolders(characterId);

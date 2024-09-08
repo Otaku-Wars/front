@@ -16,6 +16,7 @@ import { useFundWallet, useLogout } from '@privy-io/react-auth';
 import { useChainId } from 'wagmi';
 import { currentChain } from '../main';
 import { useConvertEthToUsd } from '../EthPriceProvider';
+import { useTimeTill } from './WorldStateView';
 
 const attributeNames = {
   [Attribute.health]: "Health",
@@ -50,11 +51,9 @@ export const UserPage = () => {
   const charactersOwnedCount = user?.balances?.length ?? 0
   const totalStakesCount = user?.stakes?.reduce((acc, curr) => acc + curr.balance, 0) ?? 0
 
+  const timeTill = useTimeTill(user?.stakeUnlockTime ?? 0)
   // Function to calculate time until unlock
-  const getTimeUntilUnlock = () => {
-    const currentTime = Date.now() / 1000; // Current time in seconds
-    const timeRemaining = user?.stakeUnlockTime - currentTime; // Time remaining in seconds
-
+  const getTimeUntilUnlock = (timeRemaining: number) => {
     if (timeRemaining <= 0) return "Stake is unlocked";
 
     const hours = Math.floor(timeRemaining / 3600);
@@ -238,7 +237,7 @@ export const UserPage = () => {
                   {new Date(user?.stakeUnlockTime * 1000).toLocaleString()}
                 </div>
                 <div className="text-md font-medium">
-                  Time until unlock: {getTimeUntilUnlock()}
+                  Time until unlock: {getTimeUntilUnlock(timeTill)}
                 </div>
                 {/* <Progress value={50} className="mt-2" /> */}
               </CardContent>

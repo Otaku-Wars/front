@@ -39,6 +39,12 @@ console.log('wsApiUrl', wsApiUrl)
 console.log('currentChain', currentChain.name)
 console.log('isProd', isProd)
 
+export const config = createConfig({
+  chains: [currentChain],
+  transports: {
+    [currentChain.id]: http()
+  } as any
+})
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -56,12 +62,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           },
         }}
       >
-        <WagmiProvider config={createConfig({
-          chains: [currentChain],
-          transports: {
-            [currentChain.id]: http()
-          } as any})}
-        >
+        <WagmiProvider config={config}>
           <EthPriceProvider>
             <App />
           </EthPriceProvider>
