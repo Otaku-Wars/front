@@ -19,6 +19,7 @@ import ModalStake from './ModalStake'; // Adjust the path as necessary
 import { Attribute, Status } from '@memeclashtv/types';
 import { Users, DollarSign, Coins, TrendingUp, Heart, Zap, Swords, Shield, Wind } from 'lucide-react'
 import { useConvertEthToUsd } from '../EthPriceProvider';
+import ModalUnstake from './ModalUnstake';
 
 type TimeFrame = 'Live' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'ALL';
 
@@ -111,7 +112,7 @@ export const CharacterPage = () => {
     const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>('1D');
     const [startTime, setStartTime] = useState<number>(Math.floor(Date.now() / 1000) - 24 * 60 * 60);
     const [showStakeModal, setShowStakeModal] = useState(false);
-    const [selectedAttribute, setSelectedAttribute] = useState('');
+    const [selectedAttribute, setSelectedAttribute] = useState<number>(0);
 
     const { data: character, isLoading } = useCharacter(characterId);
     const { data: characters } = useCharacters();
@@ -121,10 +122,11 @@ export const CharacterPage = () => {
     const { data: performance } = useCharacterPerformance(characterId, startTime);
     const { data: battleState, isLoading: isBattleLoading, isError: isBattleError } = useBattleState(); // Use battleState hook
     const { data: holders } = useCharacterHolders(characterId);
-
     const convertEthToUsd = useConvertEthToUsd();
 
     const { data: user } = useUser(address);
+
+    const unlockTime = user?.stakeUnlockTime;
 
     const totalStakes = useMemo(() => {
         return character?.healthStakes + character?.powerStakes + character?.attackStakes + character?.defenseStakes + character?.speedStakes;
@@ -145,6 +147,8 @@ export const CharacterPage = () => {
         });
         return { ...stakes }; // Return a new object to avoid read-only issues
     }, [character, user]);
+
+    const [showUnstakeModal, setShowUnstakeModal] = useState(false);
 
     const characterStakes = useMemo(() => {
         const types = [
@@ -202,9 +206,14 @@ export const CharacterPage = () => {
     };
 
     // Function to handle opening the stake modal
-    const handleOpenStakeModal = (attribute: string) => {
+    const handleOpenStakeModal = (attribute: number) => {
         setSelectedAttribute(attribute);
         setShowStakeModal(true);
+    };
+
+    const handleOpenUnstakeModal = (attribute: number) => {
+        setSelectedAttribute(attribute);
+        setShowUnstakeModal(true);
     };
 
     // Combine and sort activities
@@ -399,12 +408,18 @@ export const CharacterPage = () => {
                                             {statIcons[stat]}
                                             <span className="ml-2">{stat}</span>
                                         </span>
-                                        <Button size="sm" onClick={() => handleOpenStakeModal(stat)}>Stake</Button>
                                     </div>
-                                    <Progress value={(character[stat.toLowerCase()] / 100) * 100} className="h-4" />
-                                    <div className="flex justify-between text-sm text-muted-foreground">
+                                    <div className="flex justify-between items-center gap-5">
+                                        <Progress value={(character[stat.toLowerCase()] / 100) * 100} className="h-4" />
+                                        <Button className='ml-4' size="lg" onClick={() => handleOpenStakeModal(Attribute[stat?.toLowerCase()])}>Stake</Button>
+                                    </div>
+                                    <div className="flex justify-start text-sm text-muted-foreground items-center gap-10">
                                         <span>Total stakes: {character[`${stat.toLowerCase()}Stakes`]} </span>
-                                        <span>Your stake: 0 </span>
+                                        <span>Your stakes: {yourStakes[stat.toLowerCase()]}
+                                            {yourStakes[stat.toLowerCase()] > 0 && 
+                                                <Button className='ml-2' size="sm" variant="outline" onClick={() => handleOpenUnstakeModal(Attribute[stat?.toLowerCase()])}>Unstake</Button>
+                                            }
+                                        </span>
                                     </div>
                                 </div>
                             ))}
@@ -445,6 +460,14 @@ export const CharacterPage = () => {
             <ModalStake 
                 show={showStakeModal}
                 handleClose={() => setShowStakeModal(false)}
+                characterId={characterId}
+                attribute={selectedAttribute as any}
+            />
+
+            <ModalUnstake 
+                stakeUnlockTime={unlockTime}
+                show={showUnstakeModal}
+                handleClose={() => setShowUnstakeModal(false)}
                 characterId={characterId}
                 attribute={selectedAttribute as any}
             />

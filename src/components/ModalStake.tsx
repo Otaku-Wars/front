@@ -3,8 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { useStake } from '../hooks/contract';
+import { useCharacterSharesBalance, useStake } from '../hooks/contract';
 import { Attribute } from '@memeclashtv/types';
+import { useAddress } from '../hooks/user';
+
+const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};
 
 interface ModalStakeProps {
     show: boolean;
@@ -14,9 +19,11 @@ interface ModalStakeProps {
 }
 
 const ModalStake: React.FC<ModalStakeProps> = ({ show, handleClose, characterId, attribute }) => {
-    const [stakeAmount, setStakeAmount] = useState(0);
+    const [stakeAmount, setStakeAmount] = useState<any>(0);
+    const address = useAddress();
 
     const { stakeShares, isError, isSuccess, isPending, error } = useStake(characterId, attribute, BigInt(stakeAmount) as any);
+    const { data: yourShares } = useCharacterSharesBalance(characterId ?? 0, address);
 
     const handleStake = () => {
         // Logic to handle staking
@@ -40,13 +47,30 @@ const ModalStake: React.FC<ModalStakeProps> = ({ show, handleClose, characterId,
         }
     }, [isSuccess]);
 
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+            setStakeAmount(value as any);
+        }
+    };
+
+    const incrementAmount = () => {
+        setStakeAmount((prev) => (prev === '' ? '1' : (parseInt(prev) + 1).toString()));
+    };
+
+    const decrementAmount = () => {
+        const newAmount = parseInt(stakeAmount) - 1;
+        setStakeAmount(newAmount >= 0 ? newAmount.toString() : '0');
+    };
+
     return (
         <Dialog open={show} onOpenChange={handleClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Stake {attribute}</DialogTitle>
+                    <DialogTitle>Stake {capitalizeFirstLetter(Attribute[attribute])}</DialogTitle>
                     <DialogDescription>
-                        Enter the amount you wish to stake for {attribute}.
+                        You own: {yourShares} shares of this character.
+                        Enter the amount you wish to stake for {capitalizeFirstLetter(Attribute[attribute])}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -54,20 +78,17 @@ const ModalStake: React.FC<ModalStakeProps> = ({ show, handleClose, characterId,
                         <Label htmlFor="stakeAmount" className="text-right">
                             Amount
                         </Label>
-                        <div className="col-span-3">
+                        <div className="col-span-3 flex items-center gap-2">
+                            <Button variant="outline" size="icon" onClick={decrementAmount}>-</Button>
                             <Input
                                 id="stakeAmount"
-                                type="text" // Change type to text to allow empty string
+                                type="text"
                                 value={stakeAmount}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    // Allow empty string or valid number
-                                    if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
-                                        setStakeAmount(value as any); // Set amount directly to the input value
-                                    }
-                                }}
+                                onChange={handleAmountChange}
                                 placeholder="Enter amount"
+                                className="col-span-2"
                             />
+                            <Button variant="outline" size="icon" onClick={incrementAmount}>+</Button>
                         </div>
                     </div>
                 </div>
