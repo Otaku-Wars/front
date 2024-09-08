@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLogin, usePrivy, useWallets } from '@privy-io/react-auth'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Menu } from "lucide-react"
 
 import { Button } from "../components/ui/button"
@@ -15,6 +15,8 @@ import {
   DialogTrigger,
 } from "../components/ui/dialog"
 import { apiUrl } from '../main'
+import { useAccount } from 'wagmi'
+import { useSetActiveWallet } from '@privy-io/wagmi'
 
 export const truncateWallet = (wallet: string) => {
   if (!wallet) {
@@ -24,8 +26,9 @@ export const truncateWallet = (wallet: string) => {
 }
 
 export function NavBar() {
-  const { wallets } = useWallets()
-  const { authenticated } = usePrivy()
+  const { authenticated, user } = usePrivy()
+  const address = user?.wallet?.address;
+  const {setActiveWallet} = useSetActiveWallet()
   const { login } = useLogin({
     onComplete: async (user, isNewUser, wasAlreadyAuthenticated, loginMethod, linkedAccount) => {
       //console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, linkedAccount);
@@ -41,7 +44,14 @@ export function NavBar() {
       }
     },
   })
-  const address = wallets[0]?.address ?? ''
+  const {address: mainAddress} = useAccount()
+  console.log("mainAddress", mainAddress)
+  console.log("mainAddress2", address)
+
+  if(authenticated){
+    //setActiveWallet(wallets[0])
+  }
+
   const navigate = useNavigate()
 
   const [showHowToModal, setShowHowToModal] = useState(false)
@@ -49,13 +59,13 @@ export function NavBar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center w-full pl-1 pr-1">
-        <a href="/" className="mr-6 flex items-center space-x-2 xl">
+        <Link to="/" className="mr-6 flex items-center space-x-2 xl">
           <img src="/logo.png" alt="MemeClash.Tv Logo" className="h-6 w-auto" />
           {/* Uncomment if you want to include the text logo */}
           <span className="hidden text-3xl font-bold xl:inline-block">
             <img src="/logo-text.png" alt="MemeClash.Tv" className="h-6 w-auto" />
           </span>
-        </a>
+        </Link>
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             <Dialog open={showHowToModal} onOpenChange={setShowHowToModal}>

@@ -1,115 +1,134 @@
-import React, { useMemo } from 'react';
-import { Line } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    Filler,
-    TimeScale
-} from 'chart.js';
-import 'chartjs-adapter-date-fns';  // Ensure this is imported
+"use client"
 
-import { TradeActivity, MatchEndActivity } from '@memeclashtv/types/activity';
+import React, { useMemo, useState } from 'react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    Filler,
-    TimeScale
-);
+enum ActivityType {
+    MatchEnd = 'MatchEnd',
+    Trade = 'Trade',
+}
+
+interface BaseActivity {
+    type: ActivityType;
+    timestamp: number;
+}
+
+interface MatchEndActivity extends BaseActivity {
+    type: ActivityType.MatchEnd;
+    tokenState: { newPrice1: number };
+}
+
+interface TradeActivity extends BaseActivity {
+    type: ActivityType.Trade;
+    newPrice: number;
+}
+
+type Activity = MatchEndActivity | TradeActivity;
+
+interface ChartDataPoint {
+    timestamp: number;
+    price: number;
+    activity: 'MatchEnd' | 'Trade';
+}
 
 interface ChartProps {
-    activities: (TradeActivity | MatchEndActivity)[];
+    activities: Activity[];
     characterId: number;
 }
 
-export const Chart: React.FC<ChartProps> = ({ activities, characterId }) => {
+export const Chart: React.FC<ChartProps> = ({ activities }) => {
+    const [timeRange, setTimeRange] = useState<string>("all");
+
     const chartData = useMemo(() => {
-        const labels = activities.map(activity =>
-            new Date(activity.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        );
+        const sortedActivities = activities.sort((a, b) => a.timestamp - b.timestamp);
+        const data: ChartDataPoint[] = sortedActivities.map(activity => ({
+            timestamp: activity.timestamp,
+            price: activity.type === ActivityType.MatchEnd ? activity.tokenState.newPrice1 : activity.newPrice,
+            activity: activity.type,
+        }));
 
-        const prices = activities.map(activity => {
-            if ('newPrice' in activity) { 
-               return activity.newPrice; // For TradeActivity
-            } else {
-                // Determine if characterId is p1 or p2
-                const isPlayer1 = activity.p1 === characterId;
-                const playerIndex = isPlayer1 ? '1' : '2';
-                return activity.tokenState[`newPrice${playerIndex}`]; // For MatchEndActivity
-            }
-            return 0; // Fallback in case of unexpected activity type
-        });
+        if (timeRange === "all") {
+            return data;
+        }
 
-        return {
-            labels,
-            datasets: [
-                {
-                    label: 'Price',
-                    data: prices,
-                    borderColor: 'rgba(0, 123, 255, 1)',
-                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                    fill: true,
-                    tension: 0.3,
-                },
-            ],
+        // Filter data based on selected time range
+        const lastTimestamp = data[data.length - 1]?.timestamp || Date.now()/1000;
+        const timeRanges = {
+            "1h": 60 * 60 * 1000,
+            "1d": 24 * 60 * 60 * 1000,
+            "1w": 7 * 24 * 60 * 60 * 1000,
+            "1m": 30 * 24 * 60 * 60 * 1000,
         };
-    }, [activities, characterId]);
+        const filteredData = data.filter(point => point.timestamp >= lastTimestamp - timeRanges[timeRange]);
 
-    const options = useMemo(() => ({
-        responsive: true,
-        maintainAspectRatio: false,
-        options: {
-            //spanGaps: 10,
-        },
-        scales: {
-            x: {
-                //type:'time',
-                time: {
-                    unit: 'minute', // Adjust the unit as needed
-                    tooltipFormat: 'll HH:mm', // Format for tooltips
-                },
-                ticks: {
-                    autoSkip: true, // Prevent Chart.js from skipping ticks
-                    maxTicksLimit: 1000, // Limit to a reasonable number of ticks
-                },
-                grid: {
-                    display: false,
-                },
-            },
-            y: {
-                ticks: {
-                    callback: function (value) {
-                        return `$${value.toFixed(10)}`;
-                    },
-                },
-            },
-        },
-        plugins: {
-            legend: {
-                display: false,
-            },
-            tooltip: {
-                callbacks: {
-                    label: (context) => `$${context.parsed.y.toFixed(10)}`,
-                },
-            },
-        },
-    }), [])
+        return filteredData.length > 0 ? filteredData : data;
+    }, [activities, timeRange]);
+
+    const yAxisDomain = useMemo(() => {
+        const prices = chartData.map(d => d.price);
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        return [Math.max(0, minPrice - (minPrice*0.1)), maxPrice + (maxPrice*0.5)];
+    }, [chartData]);
+
+    const chartColor = useMemo(() => {
+        if (chartData.length < 2) return "#6366f1"; // Default color (indigo)
+        const startPrice = chartData[0].price;
+        const endPrice = chartData[chartData.length - 1].price;
+        return startPrice < endPrice ? "#22c55e" : "#ef4444"; // Green for up, red for down
+    }, [chartData]);
+
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <div className="bg-background p-2 rounded shadow-md border border-gray-200">
+                    <p className="font-bold">{new Date(data.timestamp*1000).toLocaleString()}</p>
+                    <p>Price: {data.price}</p>
+                    <p>Activity: {data.activity}</p>
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
-        <div style={{ height: '300px' }} aria-label="Price chart over time">
-            <Line data={chartData} options={options} />
+        <div className="w-full space-y-4">
+            <div className="h-[400px] bg-background">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                        <defs>
+                            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor={chartColor} stopOpacity={0.8}/>
+                                <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <XAxis dataKey="timestamp" type="number" domain={['dataMin', 'dataMax']} hide />
+                        <YAxis domain={yAxisDomain} hide />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Area
+                            type="monotone"
+                            dataKey="price"
+                            stroke={chartColor}
+                            fillOpacity={1}
+                            fill="url(#colorPrice)"
+                            strokeWidth={2}
+                        />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
+            <div className="w-full grid grid-cols-5 gap-2">
+                {["1h", "1d", "1w", "1m", "all"].map(range => (
+                    <button
+                        key={range}
+                        onClick={() => setTimeRange(range)}
+                        className={`w-full py-2 ${timeRange === range ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                        aria-label={`Toggle ${range} view`}
+                    >
+                        {range}
+                    </button>
+                ))}
+            </div>
         </div>
     );
 };

@@ -7,6 +7,7 @@ import { useBuyShares, useBuyPrice, useCharacterSharesBalance, useSellShares, us
 import { useAddress, useBalance } from '../hooks/user';
 import { parseEther, formatEther } from 'viem';
 import { useConvertEthToUsd } from '../EthPriceProvider';
+import { Link } from 'react-router-dom';
 
 interface ModalBuySellProps {
   show: boolean;
@@ -24,12 +25,18 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   characterId 
 }) => {
   const [amount, setAmount] = useState<any>(0);
+  const [buyError, setBuyError] = useState<any>(null);
+  const [sellError, setSellError] = useState<any>(null);
+  const [buySuccess, setBuySuccess] = useState<boolean>(false);
+  const [sellSuccess, setSellSuccess] = useState<boolean>(false);
+
   const address = useAddress();
   const [currentAction, setCurrentAction] = useState(actionType);
   const convertEthToUsd = useConvertEthToUsd();
 
   const { 
     data: buyPrice, 
+    rawData: buyPriceRaw,
     isPending: isPriceLoading, 
     error: priceError 
   } = useBuyPrice(characterId, BigInt(amount ?? 0) as any);
@@ -40,20 +47,22 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     error: sellPriceError
   } = useSellPrice(characterId, BigInt(amount ?? 0) as any);
 
+  const ethAmount = buyPrice ? parseEther(buyPrice.toString()) : BigInt(0);
+
   const { 
     buyShares, 
     isPending: isBuying, 
-    error: buyError, 
-    isSuccess: buySuccess 
-  } = useBuyShares(characterId, BigInt(amount ?? 0) as any, parseEther(buyPrice?.toString() ?? '0'));
+    error: buySharesError, 
+    isSuccess: buySharesSuccess 
+  } = useBuyShares(characterId, BigInt(amount ?? 0) as any, buyPriceRaw);
 
   const userBalance = useBalance(address as `0x${string}`);
 
   const { 
     sellShares, 
     isPending: isSelling, 
-    error: sellError, 
-    isSuccess: sellSuccess 
+    error: sellSharesError, 
+    isSuccess: sellSharesSuccess 
   } = useSellShares(characterId, BigInt(amount ?? 0) as any);
 
   const {data: yourShares} = useCharacterSharesBalance(characterId ?? 0, address);
@@ -62,30 +71,69 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     setCurrentAction(actionType);
   }, [actionType]);
 
+  useEffect(() => {
+    if (buySharesError) setBuyError(buySharesError);
+    if (sellSharesError) setSellError(sellSharesError);
+    if (buySharesSuccess) setBuySuccess(true);
+    if (sellSharesSuccess) setSellSuccess(true);
+    if(buySharesSuccess || sellSharesSuccess || buyError || sellError) {
+      const tempAmount = amount;
+      setAmount(0);
+      setTimeout(() => setAmount(tempAmount), 10);
+    }
+  }, [buySharesError, sellSharesError, buySharesSuccess, sellSharesSuccess]);
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Allow empty string or valid number
     if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
       setAmount(value); // Set amount directly to the input value
+      // Reset error and success states
+      setBuyError(null);
+      setSellError(null);
+      setBuySuccess(false);
+      setSellSuccess(false);
     }
   };
 
   const handlePlaceTrade = () => {
     if (currentAction === 'Buy') {
+      console.log(`Attempting to buy ${amount} shares with ${ethAmount} ETH`);
       buyShares();
     } else {
       sellShares();
     }
   };
 
-  const incrementAmount = () => setAmount((prev) => (prev === '' ? '1' : (parseInt(prev) + 1).toString()));
+  const incrementAmount = () => {
+    // Reset error and success states
+    setBuyError(null);
+    setSellError(null);
+    setBuySuccess(false);
+    setSellSuccess(false);
+    setAmount((prev) => (prev === '' ? '1' : (parseInt(prev) + 1).toString()));
+  }
   const decrementAmount = () => {
+    // Reset error and success states
+    setBuyError(null);
+    setSellError(null);
+    setBuySuccess(false);
+    setSellSuccess(false);
     const newAmount = parseInt(amount) - 1;
     setAmount(newAmount >= 0 ? newAmount.toString() : '0'); // Prevent negative values
   };
 
+  const trueClose = () => {
+    // Reset error and success states
+    setBuyError(null);
+    setSellError(null);
+    setBuySuccess(false);
+    setSellSuccess(false);
+    handleClose();
+  }
+
   return (
-    <Dialog open={show} onOpenChange={handleClose}>
+    <Dialog open={show} onOpenChange={trueClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{currentAction} {characterName}</DialogTitle>
@@ -106,7 +154,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
               <Button variant="outline" size="icon" onClick={decrementAmount}>-</Button>
               <Input
                 id="amount"
-                type="text" // Change type to text to allow empty string
+                type="text"
                 value={amount}
                 onChange={handleAmountChange}
                 className="col-span-2"
@@ -126,11 +174,34 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
               {isPriceLoading || isSellPriceLoading ? 
                 'Loading...' : 
                 currentAction === 'Buy' ?
-                  `$${convertEthToUsd(parseFloat(formatEther(buyPrice ?? BigInt(0) as any)))} (${formatEther(buyPrice ?? BigInt(0) as any)} ETH)` :
-                  `$${convertEthToUsd(parseFloat(formatEther(sellPrice ?? BigInt(0) as any)))} (${formatEther(sellPrice ?? BigInt(0) as any)} ETH)`
+                  `$${convertEthToUsd(buyPrice ?? 0)} (${buyPrice} ETH)` :
+                  `$${convertEthToUsd(sellPrice ?? 0)} (${sellPrice} ETH)`
               }
             </div>
           </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+          {buyError && currentAction === 'Buy' && (
+            <div className="text-red-500 col-span-4">
+              Error: {buyError.message}
+            </div>
+          )}
+          {sellError && currentAction === 'Sell' && (
+            <div className="text-red-500 col-span-4">
+              Error: {sellError.message}
+            </div>
+          )}
+          {buySuccess && currentAction === 'Buy' && (
+            <div className="text-green-500 col-span-4">
+              Successfully bought {amount} shares! <span className="text-blue-500 underline"><Link to={`/user/${address}`}>Check balance</Link></span>
+            </div>
+          )}
+          {sellSuccess && currentAction === 'Sell' && (
+            <div className="text-green-500 col-span-4">
+              Successfully sold {amount} shares! <span className="text-blue-500 underline"><Link to={`/user/${address}`}>Check balance</Link></span>
+            </div>
+          )}
+          </div>
+          
         </div>
         <DialogFooter>
           <Button onClick={handlePlaceTrade} disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}>

@@ -367,7 +367,7 @@ export const CharacterPage = () => {
                                     key={timeFrame}
                                     className={`w-full text-sm py-2 rounded-md transition-colors ${
                                         selectedTimeFrame === timeFrame
-                                            ? 'bg-primary/10 text-primary'
+                                            ? 'bg-background/10 text-primary'
                                             : 'text-muted-foreground hover:bg-muted'
                                     }`}
                                     onClick={() => setSelectedTimeFrame(timeFrame as any)}

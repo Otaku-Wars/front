@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Progress } from "./ui/progress";
 import { Copy, LogOut, Wallet, TrendingUp, Lock, ArrowUpRight, ArrowDownLeft, Users, Swords, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
-import { useCharacters, useUser, useCharacterPerformance } from '../hooks/api'
+import { useCharacters, useUser, useAllCharacterPerformance } from '../hooks/api'
 import { useAddress, useBalance, useWithdraw } from '../hooks/user';
 import { useParams, Link } from 'react-router-dom';
 import { truncateWallet } from './NavBar';
@@ -65,7 +65,8 @@ export const UserPage = () => {
   };
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(user?.address);
+    navigator.clipboard.writeText(user?.address ?? address);
+    alert(`Copied ${user?.address ?? address} to clipboard`);
   };
 
   const handleLogout = () => {
@@ -85,6 +86,11 @@ export const UserPage = () => {
     }
   };
   const displayName = username ?? truncateWallet(user?.address ?? address) ?? address;
+
+  const yesterday = useMemo(() => new Date().getTime() / 1000 - 24 * 60 * 60, []);
+  const characterIds = user?.balances?.map(balance => balance.character) || [];
+  const performanceData = useAllCharacterPerformance(characterIds, yesterday);
+
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <Card className="mb-8">
@@ -252,13 +258,10 @@ export const UserPage = () => {
               <CardTitle>Your Holdings</CardTitle>
             </CardHeader>
             <CardContent>
-              {user?.balances?.map((balance: Balance, index: number) => {
+              {user?.balances?.map((balance: Balance) => {
                 const character = characters?.find(c => c.id === balance.character);
                 const value = character ? character.price * balance.balance : 0;
-
-                // Fetch performance data for the character
-                const yesterday = useMemo(() => (new Date().getTime() / 1000) - 24 * 60 * 60, []);
-                const { data: performance, isLoading, isError } = useCharacterPerformance(character.id, yesterday);
+                const performance = performanceData?.find(p => p.characterId === character?.id);
 
                 return (
                   <Link to={`/character/${character?.id}`} key={balance.character} className="flex flex-col mb-4 p-2 rounded hover:bg-accent cursor-pointer transition-colors">
@@ -277,17 +280,16 @@ export const UserPage = () => {
                         <div className="font-semibold">${convertEthToUsd(value)}</div>
                         <div className="text-sm text-muted-foreground">{value.toFixed(2)} ETH</div>
                         {/* Performance Section */}
-                        {isLoading && <div className="text-sm text-gray-500">Loading performance...</div>}
-                        {isError && <div className="text-red-500">Error loading performance data</div>}
-                        {performance !== undefined && (
-                          <div className={`flex items-center text-sm ${performance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {performance >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
-                            {Math.abs(performance).toFixed(1)}%
+                        {performance?.isLoading && <div className="text-sm text-gray-500">Loading performance...</div>}
+                        {performance?.isError && <div className="text-red-500">Error loading performance data</div>}
+                        {performance?.data !== undefined && (
+                          <div className={`flex items-center text-sm ${performance.data >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            {performance.data >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
+                            {Math.abs(performance.data).toFixed(1)}%
                           </div>
                         )}
                       </div>
                     </div>
-                    
                   </Link>
                 );
               })}

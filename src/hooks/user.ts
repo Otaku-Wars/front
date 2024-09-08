@@ -1,11 +1,11 @@
 import { useBalance as wagmiUseBalance, useSendTransaction } from 'wagmi';
 import { parseUnits } from 'ethers/lib/utils';
-import { useWallets } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { zeroAddress } from 'viem';
 
 export const useAddress = (): `0x${string}` => {
-    const { wallets } = useWallets();
-    const address = wallets[0]?.address ?? zeroAddress;
+    const { user } = usePrivy()
+    const address = user?.wallet?.address ?? zeroAddress;
     return address as `0x${string}`
 }
 

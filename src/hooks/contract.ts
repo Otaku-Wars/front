@@ -1,4 +1,4 @@
-import { useWriteContract, useReadContract, Connector, ConnectorEventMap, CreateConnectorFn, State, useReadContracts } from 'wagmi';
+import { useWriteContract, useReadContract, Connector, ConnectorEventMap, CreateConnectorFn, State, useReadContracts, useAccount } from 'wagmi';
 import { BigNumber } from 'ethers';
 import {abi as WorldABI} from '../abis/World.json'; // Adjust the path to your actual ABI file
 import { readContract } from 'wagmi/actions';
@@ -6,6 +6,7 @@ import { Transport } from '@wagmi/core';
 import { EventData } from '@wagmi/core/internal';
 import { EIP6963ProviderDetail } from 'mipd';
 import { Chain, Client, EIP1193RequestFn } from 'viem';
+import { useCallback } from 'react';
 
 const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS as `0x${string}` ?? '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
@@ -40,6 +41,7 @@ export function useCharacterSharesBalance(characterId: number, address: string) 
 
 // Hook to get the buy price for a specific character's shares
 export function useBuyPrice(characterId: number, amount: BigNumber) {
+  console.log(`getting buy price for ${characterId} with amount ${amount}`)
     const {
         data,
         error,
@@ -54,7 +56,8 @@ export function useBuyPrice(characterId: number, amount: BigNumber) {
     });
     let buyPrice = convertWeiToEth(data as bigint);
     buyPrice = Number.isNaN(buyPrice) ? 0 : buyPrice;
-    return { data: buyPrice, error, isError, isPending, isSuccess };
+    console.log(`getting buy price result ${buyPrice}`)
+    return { data: buyPrice, rawData: data as bigint, error, isError, isPending, isSuccess };
 }
 
 
@@ -111,8 +114,9 @@ export function useStakedAmount(characterId: number, address: string, attribute:
 // Hook to buy shares
 export function useBuyShares(characterId: number, amount: BigNumber, ethAmount: bigint) {
   const { writeContract, data, error, isError, isPending, isSuccess } = useWriteContract();
-
-  const buyShares = () => {
+  console.log(`getting buy shares ${amount} for ${ethAmount}`)
+  const buyShares = useCallback(() => {
+    console.log(`getting buy buying shares ${amount} for ${ethAmount}`)
     writeContract({
       abi: WorldABI as any,
       address: contractAddress as `0x${string}`,
@@ -120,7 +124,7 @@ export function useBuyShares(characterId: number, amount: BigNumber, ethAmount: 
       args: [characterId, amount],
       value: ethAmount,
     } as any);
-  };
+  }, [characterId, amount, ethAmount, writeContract, contractAddress]);
 
   return { buyShares, data, error, isError, isSuccess, isPending };
 }

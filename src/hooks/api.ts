@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { apiUrl } from "../main";
 import { Character, CurrentBattleState, User } from "@memeclashtv/types";
 import { MatchEndActivity, StakeActivity, TradeActivity } from "@memeclashtv/types/activity";
@@ -58,7 +58,30 @@ export const useCharacterPerformance = (characterId: number, start:number): { da
     return { data: performance, isLoading, isError };
 }
 
+export const useAllCharacterPerformance = (characterIds: number[], start: number) => {
+    const queries = characterIds.map(characterId => ({
+        queryKey: ['character', characterId, 'performance', start],
+        queryFn: async () => {
+            const response = await fetch(`${apiUrl}/trades/character/${characterId}/performance/after/${parseInt(start.toString())}`);
+            return response.json();
+        },
+        staleTime: 10000, // Data is fresh for 10 seconds
+        refetchOnWindowFocus: false, // Disable refetch on window focus
+        refetchOnReconnect: false, // Disable refetch on network reconnect
+    }));
 
+    const results = useQueries({ queries });
+
+    return results?.map(result => {
+        console.log("result: ", result)
+        return {
+            data: result.data?.pricePerformance ?? 0,
+            isLoading: result.isLoading,
+            isError: result.isError,
+            characterId: result?.data?.characterId
+        };
+    });
+};
 
 export const useBattleState = (): { data: CurrentBattleState | undefined, isLoading: boolean, isError: boolean } => {
     const { data, isLoading, isError } = useQuery({
