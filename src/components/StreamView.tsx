@@ -28,13 +28,11 @@ export const getPlaybackSource = async (playbackId: string): Promise<Src[] | nul
 export const StreamEmbed = () => {
     return (
       <iframe 
-        src="https://lvpr.tv?v=6950nisrggh4cvk1" 
-        frameBorder="0" 
+        src="https://player.twitch.tv/?channel=ultimateurinater&muted=false&parent=memeclash.tv&autoplay=true"
         height={"100%"}
         allowFullScreen 
         allow="autoplay; encrypted-media; picture-in-picture" 
-        sandbox="allow-same-origin allow-scripts">
-
+      >
       </iframe>
     )
 }

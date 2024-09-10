@@ -8,6 +8,7 @@ import { useAddress, useBalance } from '../hooks/user';
 import { parseEther, formatEther } from 'viem';
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { Link } from 'react-router-dom';
+import { usePrivy } from '@privy-io/react-auth';
 
 interface ModalBuySellProps {
   show: boolean;
@@ -15,6 +16,7 @@ interface ModalBuySellProps {
   actionType: 'Buy' | 'Sell';
   characterName: string;
   characterId: number;
+  isInBattle: boolean;
 }
 
 export const ModalBuySell: React.FC<ModalBuySellProps> = ({ 
@@ -22,8 +24,11 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   handleClose, 
   actionType, 
   characterName, 
-  characterId 
+  characterId,
+  isInBattle,
 }) => {
+  const { ready } = usePrivy();
+  const [internalShow, setInternalShow] = useState(show);
   const [amount, setAmount] = useState<any>(0);
   const [buyError, setBuyError] = useState<any>(null);
   const [sellError, setSellError] = useState<any>(null);
@@ -83,6 +88,12 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     }
   }, [buySharesError, sellSharesError, buySharesSuccess, sellSharesSuccess]);
 
+  useEffect(() => {
+    if (ready) {
+      setInternalShow(show);
+    }
+  }, [show, ready]);
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Allow empty string or valid number
@@ -124,16 +135,12 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   };
 
   const trueClose = () => {
-    // Reset error and success states
-    setBuyError(null);
-    setSellError(null);
-    setBuySuccess(false);
-    setSellSuccess(false);
+    setInternalShow(false);
     handleClose();
   }
 
   return (
-    <Dialog open={show} onOpenChange={trueClose}>
+    <Dialog open={internalShow} onOpenChange={trueClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{currentAction} {characterName}</DialogTitle>
@@ -204,8 +211,8 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
           
         </div>
         <DialogFooter>
-          <Button onClick={handlePlaceTrade} disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading}>
-            {isBuying ? 'Buying...' : isSelling ? 'Selling...' : currentAction}
+          <Button className={`w-full ${isInBattle ? 'bg-gray-500' : ''}`} onClick={handlePlaceTrade} disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading || isInBattle}>
+            {isInBattle ? 'In Battle' : isBuying ? 'Buying...' : isSelling ? 'Selling...' : currentAction} {isInBattle && <span className="text-sm text-red-500"> (Cannot buy or sell while in battle)</span>}
           </Button>
         </DialogFooter>
       </DialogContent>

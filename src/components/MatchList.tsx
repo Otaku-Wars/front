@@ -15,19 +15,9 @@ import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { ArrowDownIcon, ArrowUpIcon, HeartIcon, ShieldIcon, SwordIcon, ZapIcon } from "lucide-react"
+import { formatNumber, formatPercentage } from '../lib/utils';
+import { useConvertEthToUsd } from '../EthPriceProvider';
 
-const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('en-US', { 
-    style: 'currency', 
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 10, 
-  }).format(num)
-}
-
-const formatPercent = (num: number) => {
-  return (num * 100).toFixed(2) + '%'
-}
 
 const timeSince = (date: number) => {
   const now = Math.floor(Date.now() / 1000); // Current time in seconds
@@ -41,13 +31,15 @@ const CharacterCard = ({
   state, 
   price, 
   marketCap ,
-  characters
+  characters,
+  convertEthToUsd
 }: { 
   id: number, 
   state: CharacterAttributeState, 
   price: number, 
   marketCap: number,
-  characters: Character[]
+  characters: Character[],
+  convertEthToUsd: (price: number) => number
 }) => {
   const character = characters.find(c => c.id == id)
 
@@ -61,8 +53,8 @@ const CharacterCard = ({
         <div className="flex justify-between items-center">
           <p className="font-semibold">{character.name}</p>
           <div className="text-right">
-            <p className="text-sm font-semibold">{formatNumber(price)}</p>
-            <p className="text-xs text-muted-foreground">{formatNumber(marketCap)}</p>
+            <p className="text-sm font-semibold">{formatNumber(convertEthToUsd(price))}</p>
+            <p className="text-xs text-muted-foreground">{formatNumber(convertEthToUsd(marketCap))}</p>
           </div>
         </div>
         <div className="flex space-x-2 text-sm">
@@ -78,6 +70,7 @@ const CharacterCard = ({
 
 export const MatchList: React.FC<MatchListProps> = ({ characterId, characters }) => {
   const { data: activities, isLoading, isError } = useCharacterMatches(characterId);
+  const convertEthToUsd = useConvertEthToUsd();
 
   if (isLoading) {
     return <div className="match-list-loading">Loading match history...</div>;
@@ -114,6 +107,7 @@ export const MatchList: React.FC<MatchListProps> = ({ characterId, characters })
               <TableCell>
                 <Link to={`/character/${match.p1}`}> {/* Added Link */}
                   <CharacterCard 
+                    convertEthToUsd={convertEthToUsd}
                     id={match.p1} 
                     state={match.state1} 
                     price={match.tokenState.prevPrice1}
@@ -125,6 +119,7 @@ export const MatchList: React.FC<MatchListProps> = ({ characterId, characters })
               <TableCell>
                 <Link to={`/character/${match.p2}`}> {/* Added Link */}
                   <CharacterCard 
+                    convertEthToUsd={convertEthToUsd}
                     id={match.p2} 
                     state={match.state2}
                     price={match.tokenState.prevPrice2}
@@ -149,7 +144,7 @@ export const MatchList: React.FC<MatchListProps> = ({ characterId, characters })
                     {formatNumber(Math.abs(match.tokenState[`newPrice${playerIndex}`]))}
                   </span>
                   <span className="ml-1 text-muted-foreground">
-                    ({formatPercent(Math.abs((match.tokenState[`newPrice${playerIndex}`] - match.tokenState[`prevPrice${playerIndex}`]) / match.tokenState[`prevPrice${playerIndex}`]))})
+                    ({formatPercentage(Math.abs((match.tokenState[`newPrice${playerIndex}`] - match.tokenState[`prevPrice${playerIndex}`]) / match.tokenState[`prevPrice${playerIndex}`]))})
                   </span>
                 </div>
               </TableCell>
@@ -164,7 +159,7 @@ export const MatchList: React.FC<MatchListProps> = ({ characterId, characters })
                     {formatNumber(Math.abs(match.tokenState[`newMarketCap${playerIndex}`]))}
                   </span>
                   <span className="ml-1 text-muted-foreground">
-                    ({formatPercent(Math.abs((match.tokenState[`newMarketCap${playerIndex}`] - match.tokenState[`prevMarketCap${playerIndex}`]) / match.tokenState[`prevMarketCap${playerIndex}`]))})
+                    ({formatPercentage(Math.abs((match.tokenState[`newMarketCap${playerIndex}`] - match.tokenState[`prevMarketCap${playerIndex}`]) / match.tokenState[`prevMarketCap${playerIndex}`]))})
                   </span>
                 </div>
               </TableCell>

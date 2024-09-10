@@ -1,54 +1,76 @@
-import { useState, useEffect, useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { format } from 'date-fns'
-import { Card, CardContent } from "./ui/card"
-import { Badge } from "./ui/badge"
-import { ScrollArea } from "./ui/scroll-area"
-import useWebSocket from 'react-use-websocket';
-import { BaseActivity, MatchPendingActivity, MatchStartActivity, MatchEndActivity, TradeActivity, StakeActivity } from '@memeclashtv/types/activity'
-// Type definitions for websocket messages
+import { ScrollArea, ScrollBar } from "./ui/scroll-area"
+import { BaseActivity, MatchEndActivity, MatchStartActivity, MatchPendingActivity, TradeActivity, StakeActivity } from '@memeclashtv/types/activity'
+import { Character } from '@memeclashtv/types';
+import { useCharacters } from '../hooks/api';
+import { formatNumber } from '../lib/utils';
+import { useConvertEthToUsd } from '../EthPriceProvider';
+import { statIcons } from './CharacterPage';
+import { useActivities } from './ActivityListenerProvider'
+
 export enum ActivityType {
-    MatchPending = 'MatchPending',
-    MatchStart = 'MatchStart',
-    MatchEnd = 'MatchEnd',
-    Trade = 'Trade',
-    Stake = 'Stake',
+  MatchPending = 'MatchPending',
+  MatchStart = 'MatchStart',
+  MatchEnd = 'MatchEnd',
+  Trade = 'Trade',
+  Stake = 'Stake',
 }
 
-// Helper function to format timestamps
-const formatTime = (timestamp: number) => format(new Date(timestamp), 'HH:mm:ss')
+// Helper function to format timestamps do month day year. last 2 digits of year
+const formatTime = (timestamp: number) => format(new Date(timestamp), 'MMM d, yy HH:mm:ss')
 
 // Activity renderer component
-const ActivityItem = ({ activity }: { activity: BaseActivity }) => {
+const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: BaseActivity, characters: Character[], convertEthToUsd: any}) => {
   const renderContent = () => {
     switch (activity.type) {
       case ActivityType.MatchPending:
         const matchPending = activity as MatchPendingActivity
+        const character1 = characters?.find(c => c.id === matchPending.p1);
+        const character2 = characters?.find(c => c.id === matchPending.p2);
         return (
-          <p>Match pending between Player {matchPending.p1} and Player {matchPending.p2}</p>
+          <span>Match pending between <img src={character1?.pfp} alt={character1?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{character1?.name}</span> and <img src={character2?.pfp} alt={character2?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{character2?.name}</span></span>
         )
 
       case ActivityType.MatchStart:
         const matchStart = activity as MatchStartActivity
+        const character1Match = characters?.find(c => c.id === matchStart.p1);
+        const character2Match = characters?.find(c => c.id === matchStart.p2);
         return (
-          <p>Match {matchStart.id} started: Player {matchStart.p1} vs Player {matchStart.p2}</p>
+          <span>Match {matchStart.id} started: <img src={character1Match?.pfp} alt={character1Match?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{character1Match?.name}</span> vs <img src={character2Match?.pfp} alt={character2Match?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{character2Match?.name}</span></span>
         )
 
       case ActivityType.MatchEnd:
         const matchEnd = activity as MatchEndActivity
+        const winnerIsP1 = matchEnd?.p1 == matchEnd?.winner;
+        const winnerPrice = winnerIsP1 ? 
+        formatNumber(convertEthToUsd(matchEnd?.tokenState?.newPrice1)):
+        formatNumber(convertEthToUsd(matchEnd?.tokenState?.newPrice2))
+        const winnerCharacter = characters?.find(c => c.id === matchEnd?.winner);
+        const loserCharacter = characters?.find(c => c.id === (winnerIsP1 ? matchEnd?.p2 : matchEnd?.p1));
         return (
-          <p>Match {matchEnd.id} ended. Winner: Player {matchEnd.winner}</p>
+          <span>
+            Match results: <img src={winnerCharacter?.pfp} alt={winnerCharacter?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{winnerCharacter?.name}</span> won against <img src={loserCharacter?.pfp} alt={loserCharacter?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{loserCharacter?.name}</span> {" "} share price went to <span className="text-green-500">${winnerPrice}</span>
+          </span>
         )
 
       case ActivityType.Trade:
         const trade = activity as TradeActivity
+        const character = characters?.find(c => c.id === trade.character);
+        const cost = formatNumber(convertEthToUsd(trade?.ethAmount));
+        const amount = trade?.shareAmount;
         return (
-          <p>{trade.trader} {trade.isBuy ? 'bought' : 'sold'} {trade.shareAmount} shares of Character {trade.character}</p>
+          <p>
+            <span className='underline'>{trade.trader}</span> <span className={trade.isBuy ? "text-green-500" : "text-red-500"}>{trade.isBuy ? 'bought' : 'sold'}</span> {amount} shares of <img src={character?.pfp} alt={character?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{character?.name}</span> for <span className='text-green-500'>${cost}</span>
+          </p>
         )
 
       case ActivityType.Stake:
         const stake = activity as StakeActivity
+        const characterStake = characters?.find(c => c.id === stake.character);
+
         return (
-          <p>{stake.staker} staked {stake.amount} on Character {stake.character}'s {stake.attribute} attribute</p>
+          <p><span className='underline'>{stake.staker}</span> staked {stake.amount} on <img src={characterStake?.pfp} alt={characterStake?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{characterStake?.name}</span>'s towards {statIcons[stake.attribute]} attribute</p>
         )
 
       default:
@@ -57,76 +79,44 @@ const ActivityItem = ({ activity }: { activity: BaseActivity }) => {
   }
 
   return (
-    <Card className="mb-2">
-      <CardContent className="p-3">
-        <div className="flex justify-between items-center mb-1">
-          <Badge variant="outline" className="text-xs">
-            {activity.type}
-          </Badge>
-          <time dateTime={new Date(activity?.timestamp ?? 0).toISOString()} className="text-xs text-muted-foreground">
-            {formatTime(activity.timestamp)}
-          </time>
-        </div>
-        <div className="text-sm">
-          {renderContent()}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="inline-block mr-2 mb-2">
+      <span className="text-xs text-muted-foreground mr-1">
+        {formatTime(activity.timestamp*1000)}
+      </span>
+      <span className="text-sm">
+        {renderContent()}
+      </span>
+    </div>
   )
 }
 
 // Main ActivityBar component
 export const ActivityBar = () => {
-    const [activities, setActivities] = useState<BaseActivity[]>([]);
+    const activities = useActivities();
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-    //set 20 dummy activities
-    useEffect(() => {
-        for (let i = 0; i < 20; i++) {
-            setActivities(prevActivities => [...prevActivities, {
-                type: ActivityType.MatchPending,
-                timestamp: Date.now(),
-                p1: i,
-                p2: i + 1
-            }]);
-        }
-    }, []);
-    // WebSocket URL
-    const socketUrl = import.meta.env.VITE_WS_API_URL as string;
-
-    // Use the useWebSocket hook to connect to the WebSocket
-    const { lastMessage } = useWebSocket(socketUrl, {
-        onMessage: (message) => console.log('WebSocket message received:', message),
-        onOpen: () => console.log('WebSocket connection opened'),
-        onClose: () => console.log('WebSocket connection closed'),
-        onError: (error) => console.error('WebSocket error:', error),
-        shouldReconnect: () => true, // Will attempt to reconnect on all close events
-    });
-
-    // Handle incoming messages
-    useEffect(() => {
-        if (lastMessage !== null) {
-            setActivities(prevActivities => [JSON.parse(lastMessage.data), ...prevActivities]);
-        }
-    }, [lastMessage]);
+    const converEthToUsd = useConvertEthToUsd();
+    const { data:characters } = useCharacters();
 
     // Scroll to bottom when activities change
     useEffect(() => {
-        //if (scrollAreaRef.current) {
-            scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-        //}
-    }, []);
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTop = -100;
+        }
+    }, [activities]);
 
-  return (
-    <ScrollArea className="max-h-full overflow-y-auto" ref={scrollAreaRef}>
-      <div className="p-4 border-b text-center"> {/* Center the header text */}
-        <h2 className="text-lg font-semibold">Activity Feed</h2>
-      </div>
-        <div className="p-4 space-y-2 flex flex-col-reverse"> {/* Reverse the order of activities */}
-          {activities.map((activity, index) => (
-            <ActivityItem key={index} activity={activity} />
-          ))}
+    return (
+        <div className="flex flex-col h-full">
+            <div className="p-4 border-b text-center">
+                <h2 className="text-lg font-semibold">Activity Feed</h2>
+            </div>
+            <ScrollArea className="flex-grow" scrollToBottom={true}>
+                <div className="p-4 flex flex-col-reverse">
+                    {activities.map((activity, index) => (
+                        <ActivityItem key={index} activity={activity} characters={characters} convertEthToUsd={converEthToUsd} />
+                    ))}
+                </div>
+                <ScrollBar />
+            </ScrollArea>
         </div>
-    </ScrollArea>
-  )
+    )
 }

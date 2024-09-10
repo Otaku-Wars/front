@@ -5,10 +5,17 @@ import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { ArrowDownIcon, ArrowUpIcon, HeartIcon, ShieldIcon, SwordIcon, ZapIcon, WindIcon } from "lucide-react"
-import { ActivityType } from './ActivityBar';
 import { StakeActivity } from '@memeclashtv/types/activity';
 import { truncateWallet } from './NavBar';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+
+export enum ActivityType {
+  MatchPending = 'MatchPending',
+  MatchStart = 'MatchStart',
+  MatchEnd = 'MatchEnd',
+  Trade = 'Trade',
+  Stake = 'Stake',
+}
 
 interface StakeListProps {
   characterId: number;

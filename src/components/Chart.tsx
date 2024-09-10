@@ -2,6 +2,9 @@
 
 import React, { useMemo, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { formatEther, formatNumber } from '../lib/utils';
+import { useConvertEthToUsd } from '../EthPriceProvider';
+import { MatchEndActivity } from '@memeclashtv/types/activity';
 
 enum ActivityType {
     MatchEnd = 'MatchEnd',
@@ -11,11 +14,6 @@ enum ActivityType {
 interface BaseActivity {
     type: ActivityType;
     timestamp: number;
-}
-
-interface MatchEndActivity extends BaseActivity {
-    type: ActivityType.MatchEnd;
-    tokenState: { newPrice1: number };
 }
 
 interface TradeActivity extends BaseActivity {
@@ -36,16 +34,24 @@ interface ChartProps {
     characterId: number;
 }
 
-export const Chart: React.FC<ChartProps> = ({ activities }) => {
+export const Chart: React.FC<ChartProps> = ({ activities, characterId }) => {
     const [timeRange, setTimeRange] = useState<string>("all");
-
+    const convertEthToUsd = useConvertEthToUsd();
     const chartData = useMemo(() => {
         const sortedActivities = activities.sort((a, b) => a.timestamp - b.timestamp);
-        const data: ChartDataPoint[] = sortedActivities.map(activity => ({
-            timestamp: activity.timestamp,
-            price: activity.type === ActivityType.MatchEnd ? activity.tokenState.newPrice1 : activity.newPrice,
-            activity: activity.type,
-        }));
+        const data: ChartDataPoint[] = sortedActivities.map(activity => {
+            const isMatchEnd = activity.type === ActivityType.MatchEnd;
+            const price = isMatchEnd ? 
+                characterId == (activity as MatchEndActivity).p1 ? 
+                    (activity as MatchEndActivity).tokenState.newPrice1 : 
+                    (activity as MatchEndActivity).tokenState.newPrice2 : 
+                activity.newPrice;
+            return {
+                timestamp: activity.timestamp,
+                price: price,
+                activity: activity.type,
+            }
+        });
 
         if (timeRange === "all") {
             return data;
@@ -54,10 +60,10 @@ export const Chart: React.FC<ChartProps> = ({ activities }) => {
         // Filter data based on selected time range
         const lastTimestamp = data[data.length - 1]?.timestamp || Date.now()/1000;
         const timeRanges = {
-            "1h": 60 * 60 * 1000,
-            "1d": 24 * 60 * 60 * 1000,
-            "1w": 7 * 24 * 60 * 60 * 1000,
-            "1m": 30 * 24 * 60 * 60 * 1000,
+            "1h": 60 * 60,
+            "1d": 24 * 60 * 60,
+            "1w": 7 * 24 * 60 * 60,
+            "1m": 30 * 24 * 60 * 60,
         };
         const filteredData = data.filter(point => point.timestamp >= lastTimestamp - timeRanges[timeRange]);
 
@@ -84,7 +90,7 @@ export const Chart: React.FC<ChartProps> = ({ activities }) => {
             return (
                 <div className="bg-background p-2 rounded shadow-md border border-gray-200">
                     <p className="font-bold">{new Date(data.timestamp*1000).toLocaleString()}</p>
-                    <p>Price: {data.price}</p>
+                    <p>Price: {formatEther(data.price)} ({formatNumber(convertEthToUsd(data.price))})</p>
                     <p>Activity: {data.activity}</p>
                 </div>
             );

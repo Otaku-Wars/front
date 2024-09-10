@@ -12,11 +12,13 @@ import { useCharacters, useUser, useAllCharacterPerformance } from '../hooks/api
 import { useAddress, useBalance, useWithdraw } from '../hooks/user';
 import { useParams, Link } from 'react-router-dom';
 import { truncateWallet } from './NavBar';
-import { useFundWallet, useLogout } from '@privy-io/react-auth';
+import { useFundWallet, useLogout, useWallets } from '@privy-io/react-auth';
 import { useChainId } from 'wagmi';
 import { currentChain } from '../main';
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { useTimeTill } from './WorldStateView';
+import { useSetActiveWallet } from '@privy-io/wagmi';
+import { formatEther, formatNumber, formatPercentage } from '../lib/utils';
 
 const attributeNames = {
   [Attribute.health]: "Health",
@@ -47,6 +49,10 @@ export const UserPage = () => {
         const character = characters?.find(c => c.id === curr?.character);
         return acc + (character ? character?.price * curr?.balance : 0);
     }, 0);
+    const { setActiveWallet } = useSetActiveWallet();
+    //set active account
+  const { wallets } = useWallets();
+  
 
   const charactersOwnedCount = user?.balances?.length ?? 0
   const totalStakesCount = user?.stakes?.reduce((acc, curr) => acc + curr.balance, 0) ?? 0
@@ -118,7 +124,9 @@ export const UserPage = () => {
             <div className="grid grid-cols-2 gap-4">
             
                   <Button 
-                    onClick={()=> {fundWallet(address, {chain: currentChain})}}
+                    onClick={async ()=> {
+                      await fundWallet(address, {chain: currentChain})
+                    }}
                     className="w-full"
                     >
                     <ArrowUpRight className="mr-2 h-4 w-4" />
@@ -186,8 +194,8 @@ export const UserPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${convertEthToUsd(parseFloat(userBalance ?? "0")) ?? 0}</div>
-                  <div className="text-xs text-muted-foreground">{userBalance ?? 0} ETH</div>
+                  <div className="text-2xl font-bold">${formatNumber(convertEthToUsd(parseFloat(userBalance ?? "0")) ?? 0)}</div>
+                  <div className="text-xs text-muted-foreground">{formatEther(parseFloat(userBalance ?? "0"))} ETH</div>
                 </CardContent>
               </Card>
               <Card>
@@ -198,8 +206,8 @@ export const UserPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${convertEthToUsd(netWorth ?? 0)}</div>
-                  <div className="text-xs text-muted-foreground">{(netWorth ?? 0)?.toFixed(2)} ETH</div>
+                  <div className="text-2xl font-bold">${formatNumber(convertEthToUsd(netWorth ?? 0))}</div>
+                  <div className="text-xs text-muted-foreground">{formatEther(netWorth ?? 0)} ETH</div>
                 </CardContent>
               </Card>
               <Card>
@@ -276,15 +284,15 @@ export const UserPage = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold">${convertEthToUsd(value)}</div>
-                        <div className="text-sm text-muted-foreground">{value.toFixed(2)} ETH</div>
+                        <div className="font-semibold">${formatNumber(convertEthToUsd(value))}</div>
+                        <div className="text-sm text-muted-foreground">{formatEther(value)} ETH</div>
                         {/* Performance Section */}
                         {performance?.isLoading && <div className="text-sm text-gray-500">Loading performance...</div>}
                         {performance?.isError && <div className="text-red-500">Error loading performance data</div>}
                         {performance?.data !== undefined && (
                           <div className={`flex items-center text-sm ${performance.data >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                             {performance.data >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
-                            {Math.abs(performance.data).toFixed(1)}%
+                            {formatPercentage(performance.data)}
                           </div>
                         )}
                       </div>

@@ -10,6 +10,7 @@ import { defineChain } from 'viem';
 import { baseSepolia } from 'viem/chains';
 import "./globals.css"
 import { EthPriceProvider } from './EthPriceProvider.tsx';
+import { ActivityProvider } from './components/ActivityListenerProvider.tsx';
 
 const isProd = import.meta.env.PROD;
 export const currentChain = isProd ?
@@ -63,8 +64,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         }}
       >
         <WagmiProvider config={config}>
-          <EthPriceProvider>
-            <App />
+          <EthPriceProvider> 
+            <ActivityProvider>
+              <App />
+            </ActivityProvider>
           </EthPriceProvider>
         </WagmiProvider>
       </PrivyProvider>

@@ -8,23 +8,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react"
 import { truncateWallet } from './NavBar';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useConvertEthToUsd } from '../EthPriceProvider';
+import { formatNumber, formatPercentage } from '../lib/utils';
 
 interface TradeListProps {
   characterId: number;
   characterImage: string;
-}
-
-const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('en-US', { 
-    style: 'currency', 
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 10 
-  }).format(num)
-}
-
-const formatPercent = (num: number) => {
-  return (num * 100).toFixed(2) + '%'
 }
 
 const timeSince = (date: number) => {
@@ -72,6 +61,7 @@ const CharacterAvatar = ({ characterId, image }: { characterId: number, image:st
 export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImage }) => {
   const { data: trades, isLoading, isError } = useCharacterTrades(characterId);
   const { data: users } = useUsers(); // Fetch users
+  const convertEthToUsd = useConvertEthToUsd();
 
   if (isLoading) {
     return <div className="trade-list-loading">Loading trades...</div>;
@@ -84,6 +74,7 @@ export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImag
   if (!trades || trades.length === 0) {
     return <div className="trade-list-empty">No trades found.</div>;
   }
+
 
 
   return (
@@ -119,7 +110,7 @@ export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImag
                 <span>{trade.shareAmount.toLocaleString()}</span>
               </div>
             </TableCell>
-            <TableCell>{formatNumber(trade.ethAmount)}</TableCell>
+            <TableCell>{formatNumber(convertEthToUsd(trade.ethAmount))}</TableCell>
             <TableCell>
               <div className="flex items-center">
                 {trade.newPrice > trade.prevPrice ? (
@@ -128,10 +119,10 @@ export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImag
                   <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
                 )}
                 <span className={trade.newPrice > trade.prevPrice ? 'text-green-500' : 'text-red-500'}>
-                  {formatNumber(Math.abs(trade.newPrice - trade.prevPrice))}
+                  {formatNumber(convertEthToUsd(Math.abs(trade.newPrice - trade.prevPrice)))}
                 </span>
                 <span className="ml-1 text-muted-foreground">
-                  ({formatPercent(Math.abs((trade.newPrice - trade.prevPrice) / trade.prevPrice))})
+                  ({formatPercentage(Math.abs((trade.newPrice - trade.prevPrice) / trade.prevPrice))})
                 </span>
               </div>
             </TableCell>
@@ -143,10 +134,10 @@ export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImag
                   <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
                 )}
                 <span className={trade.newMarketCap > trade.prevMarketCap ? 'text-green-500' : 'text-red-500'}>
-                  {formatNumber(Math.abs(trade.newMarketCap - trade.prevMarketCap))}
+                  {formatNumber(convertEthToUsd(Math.abs(trade.newMarketCap - trade.prevMarketCap)))}
                 </span>
                 <span className="ml-1 text-muted-foreground">
-                  ({formatPercent(Math.abs((trade.newMarketCap - trade.prevMarketCap) / trade.prevMarketCap))})
+                  ({formatPercentage(Math.abs((trade.newMarketCap - trade.prevMarketCap) / trade.prevMarketCap))})
                 </span>
               </div>
             </TableCell>

@@ -7,7 +7,7 @@ import { Progress } from "./ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ModalBuySell } from './ModalBuySell';
 import { MatchList } from './MatchList';
-import { formatNumber, HolderList } from './HolderList';
+import { HolderList } from './HolderList';
 import { TradeList } from './TradeList';
 import { StakeList } from './StakeList';
 import { useCharacter, useCharacterTrades, useCharacterPerformance, useCharacters, useCharacterMatches, useUser, useBattleState, useCharacterHolders } from '../hooks/api';
@@ -20,6 +20,7 @@ import { Attribute, Status } from '@memeclashtv/types';
 import { Users, DollarSign, Coins, TrendingUp, Heart, Zap, Swords, Shield, Wind } from 'lucide-react'
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import ModalUnstake from './ModalUnstake';
+import { formatEther, formatNumber, formatPercentage } from '../lib/utils';
 
 type TimeFrame = 'Live' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'ALL';
 
@@ -34,7 +35,7 @@ const getTier = (marketCap: number) => {
     return 'F';
 }
 
-const statIcons = {
+export const statIcons = {
     Health: <Heart className="w-4 h-4 text-green-500" />,
     Power: <Zap className="w-4 h-4 text-blue-500" />,
     Attack: <Swords className="w-4 h-4 text-orange-500" />,
@@ -43,28 +44,39 @@ const statIcons = {
 }
 
 // Function to generate round-robin matchups
-function generateRoundRobinMatchups(characters: string[]) {
-    let matchups = [];
-    let n = characters.length;
-
-    let _characters = characters.slice(); // Clone the array to avoid modifying the original
-    if (n % 2 === 1) {
-        _characters.push(null); // Add a dummy character for odd number of characters
-        n++;
+export function generateRoundRobinMatchups(characters: string[]) {
+    if (characters.length % 2 === 1) {
+        characters.push(null as any); // Add a dummy character for odd number of characters
     }
 
-    for (let round = 0; round < n - 1; round++) {
-        for (let i = 0; i < n / 2; i++) {
-            const char1 = _characters[i];
-            const char2 = _characters[n - 1 - i];
+    const playerCount = characters.length;
+    const rounds = playerCount - 1;
+    const half = playerCount / 2;
 
-            if (char1 !== null && char2 !== null) {
-                matchups.push([parseInt(char1), parseInt(char2)]);
+    const matchups = [];
+
+    const playerIndexes = characters.map((_, i) => i).slice(1);
+
+    for (let round = 0; round < rounds; round++) {
+        const roundPairings = [];
+
+        const newPlayerIndexes = [0].concat(playerIndexes);
+
+        const firstHalf = newPlayerIndexes.slice(0, half);
+        const secondHalf = newPlayerIndexes.slice(half, playerCount).reverse();
+
+        for (let i = 0; i < firstHalf.length; i++) {
+            const p1 = firstHalf[i];
+            const p2 = secondHalf[i];
+
+            if (characters[p1] !== null && characters[p2] !== null) {
+                roundPairings.push([p1, p2]);
             }
         }
 
-        // Rotate characters, keeping the first character in place
-        _characters.splice(1, 0, _characters.pop()!);
+        // Rotate the array
+        playerIndexes.push(playerIndexes.shift() as any);
+        matchups.push(...roundPairings);
     }
 
     return matchups;
@@ -241,26 +253,35 @@ export const CharacterPage = () => {
     const characterStatus = battleState?.p1 === characterId || battleState?.p2 === characterId 
     ? battleState?.status == Status.Battling
     ? 'inBattle'
-    : 'waiting'
+    : (battleState?.status == Status.Pending? 'waiting': 'idle')
     : 'idle';
 
     // Generate round-robin matchups
     const characterIds = characters?.map(c => c.id.toString()) || [];
     const matchups = generateRoundRobinMatchups(characterIds);
     const totalMatches = matchups.length;
+    console.log("Matchups", matchups)
 
     // Determine the current match index from battleState
-    const currentMatchIndex = battleState?.currentMatch ?? 0;
+    const currentMatchIndex = battleState?.currentMatch  ? (battleState?.currentMatch - 1) % (matchups.length -1) : undefined;
 
-    // Determine the last match index for the character
-    const lastMatchIndex = matchups.findIndex(match => match.includes(characterId));
+    console.log("Matchups current match: ", currentMatchIndex)
+
+
+    // Find the next match for the character, wrapping around from the current index
+    const wrappedMatchups = [...matchups.slice(currentMatchIndex), ...matchups.slice(0, currentMatchIndex)];
+    const nextMatchIndex = wrappedMatchups.findIndex(match => match.includes(characterId));
+
+    // Calculate the true index of the next match
+    const trueNextMatchIndex = (nextMatchIndex + currentMatchIndex) % totalMatches;
+
+    
 
     // Calculate the number of matches left until the next match
-    const matchesLeft = matchesUntilNextMatch(currentMatchIndex, lastMatchIndex, totalMatches);
+    const matchesLeft = trueNextMatchIndex - currentMatchIndex ;
 
     // Predict the next character that will be fought
-    const nextMatchIndex = (currentMatchIndex + matchesLeft) % totalMatches;
-    const nextMatch = matchups[nextMatchIndex];
+    const nextMatch = matchups[trueNextMatchIndex];
     const nextOpponentId = nextMatch?.find(id => id !== characterId);
     const nextOpponent = characters?.find(c => c.id === nextOpponentId);
 
@@ -314,7 +335,8 @@ export const CharacterPage = () => {
                     </div>
                     <div>
                         <p className="text-sm font-medium mb-1">Next Match:</p>
-                        <p className="text-sm">In {matchesLeft * 2} min vs {nextOpponent?.name || "Unknown"}</p> {/* Render next match details */}
+                        {characterStatus != "inBattle" && <p className="text-sm">In {matchesLeft * 2} min vs {nextOpponent?.name || "Unknown"}</p>}
+                        {/* <p className="text-sm">Current matchId: {currentMatchIndex} True next match: {trueNextMatchIndex}  nextMatchId: {nextMatchIndex}</p> */}
                     </div>
                 </div>
             </div>
@@ -332,8 +354,8 @@ export const CharacterPage = () => {
                                     <DollarSign className="w-4 h-4 mr-1" />
                                     Price
                                 </p>
-                                <p className="text-xl font-bold">${convertEthToUsd(character.price)}</p>
-                                <p className="text-sm text-muted-foreground">{character.price} ETH</p>
+                                <p className="text-xl font-bold">${formatNumber(convertEthToUsd(character.price))}</p>
+                                <p className="text-sm text-muted-foreground">{formatEther(character.price)} ETH</p>
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground flex items-center">
@@ -341,7 +363,7 @@ export const CharacterPage = () => {
                                     24h Change
                                 </p>
                                 <p className={`text-xl font-bold ${performance > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                    {performance.toFixed(2)}%
+                                    {formatPercentage(performance)}
                                 </p>
                             </div>
                             <div>
@@ -349,8 +371,8 @@ export const CharacterPage = () => {
                                     <DollarSign className="w-4 h-4 mr-1" />
                                     Market Cap
                                 </p>
-                                <p className="text-xl font-bold">${convertEthToUsd(character.value)}</p>
-                                <p className="text-sm text-muted-foreground">{character.value} ETH</p>
+                                <p className="text-xl font-bold">${formatNumber(convertEthToUsd(character.value))}</p>
+                                <p className="text-sm text-muted-foreground">{formatEther(character.value)} ETH</p>
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground flex items-center">
@@ -451,6 +473,7 @@ export const CharacterPage = () => {
             </div>
 
             <ModalBuySell 
+                isInBattle={characterStatus == "inBattle"}
                 characterId={character?.id}
                 show={showModal}                handleClose={handleCloseModal}
                 actionType={modalAction as any}

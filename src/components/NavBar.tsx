@@ -12,11 +12,15 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from "../components/ui/dialog"
 import { apiUrl } from '../main'
 import { useAccount } from 'wagmi'
 import { useSetActiveWallet } from '@privy-io/wagmi'
+import { useBattleState } from '../hooks/api'
 
 export const truncateWallet = (wallet: string) => {
   if (!wallet) {
@@ -27,6 +31,7 @@ export const truncateWallet = (wallet: string) => {
 
 export function NavBar() {
   const { authenticated, user } = usePrivy()
+  const { data: battleState } = useBattleState()
   const address = user?.wallet?.address;
   const {setActiveWallet} = useSetActiveWallet()
   const { login } = useLogin({
@@ -52,6 +57,8 @@ export function NavBar() {
     //setActiveWallet(wallets[0])
   }
 
+  const currentSong = (battleState as any)?.currentSong;
+
   const navigate = useNavigate()
 
   const [showHowToModal, setShowHowToModal] = useState(false)
@@ -65,6 +72,11 @@ export function NavBar() {
           <span className="hidden text-3xl font-bold xl:inline-block">
             <img src="/logo-text.png" alt="MemeClash.Tv" className="h-6 w-auto" />
           </span>
+          {currentSong && (
+            <span className="text-sm text-foreground/60 w-50" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', animation: 'scroll 10s linear infinite' }}>
+              Now Playing: {currentSong}
+            </span>
+          )}
         </Link>
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
@@ -72,10 +84,28 @@ export function NavBar() {
               <DialogTrigger asChild>
                 <Button variant="ghost">How It Works</Button>
               </DialogTrigger>
-              <DialogContent>
-                {/* Add your HowToModal content here */}
-                <h2>How It Works</h2>
-                {/* ... */}
+              <DialogContent className="bg-gray-900 text-white p-6">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold mb-4">How it works</DialogTitle>
+                  <DialogDescription>
+                    <p className="mb-4">
+                      <span className="text-yellow-300">MemeClash.TV is a non-stop livestream of AI characters fight. Each character has unique skills and fight each others 24/7.</span>
+                    </p>
+                    <p className="mb-4">
+                      <span className="text-orange-400">Fight and Earn:</span> Characters take 10% of the opponent's money (market cap) when they win.
+                    </p>
+                    <p className="mb-4">
+                      <span className="text-green-400">Buy Shares:</span> Every character has its own shares. The more people buy, the higher the price.
+                    </p>
+                    <p className="mb-4">
+                      <span className="text-yellow-300">Power Ups:</span> Lock your shares to power up your character.
+                    </p>
+                    <p className="mb-4">
+                      <span className="text-blue-400">Make Profit:</span> Sell your shares anytime and secure your profit/loss.
+                    </p>
+                  </DialogDescription>
+                </DialogHeader>
+                
               </DialogContent>
             </Dialog>
             <a

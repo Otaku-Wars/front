@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { truncateWallet } from './NavBar';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { formatNumber } from '../lib/utils';
+import { useConvertEthToUsd } from '../EthPriceProvider';
 
 interface HolderListProps {
   characterId: number
@@ -20,6 +21,7 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
   const { data: holders, isLoading, isError } = useCharacterHolders(characterId);
   const { data: users } = useUsers(); // Fetch users
   const navigate = useNavigate(); // Initialize useNavigate
+  const convertEthToUsd = useConvertEthToUsd();
 
   const sortedHolders = useMemo(() => {
     return holders
@@ -69,13 +71,13 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
                 </Avatar>
                 <div>
                   <p className="font-semibold">{truncateWallet(holder.address)}</p>
-                  <p className="text-sm text-muted-foreground">{formatNumber(holder.value / holder.balance)}</p>
+                  <p className="text-sm text-muted-foreground">{holder.balance}</p>
                 </div>
               </div>
             </TableCell>
             <TableCell className="text-right font-semibold">{holder.balance.toLocaleString()}</TableCell>
             <TableCell className="text-right">
-              <p className="font-semibold">{formatNumber(holder.value)}</p>
+              <p className="font-semibold">{formatNumber(convertEthToUsd(holder.value))}</p>
             </TableCell>
           </TableRow>)
         })}

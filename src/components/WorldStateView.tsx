@@ -164,7 +164,7 @@ export const WorldStateView = () => {
       onClick={()=> {navigator(`/character/${character.id}`)}}
 
       >
-        <span className="font-bold text-lg underline" style={{display: 'inline', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{character.name}</span>
+        <span className="font-bold text-lg underline" style={{display: 'inline', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{character.name} ({character.id})</span>
         <img
           src={character.pfp}
           alt={character.name}
@@ -182,7 +182,7 @@ export const WorldStateView = () => {
           alt={character.name}
           className="w-12 h-12 rounded-full object-cover border-2 border-gray-700"
         />
-        <span className="font-bold text-lg underline">{character.name}</span>
+        <span className="font-bold text-lg underline">{character.name} ({character.id})</span>
       </div>
     )
 
