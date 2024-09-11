@@ -1,19 +1,21 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    /* Module and Compilation Settings */
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "strict": false,                // Disable all strict mode checks
-    "noUnusedLocals": false,        // Disable error reporting for unused locals
-    "noUnusedParameters": false,    // Disable error reporting for unused parameters
-    "noImplicitReturns": false,     // Disable error reporting for functions without return values
-    "noFallthroughCasesInSwitch": false,  // Disable error reporting for fallthrough cases in switch statements
+
+    /* Type Checking */
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+
+    /* Performance */
     "disableSizeLimit": false,
     "noEmit": true
-
   },
   "include": ["vite.config.ts"]
 }

@@ -1,14 +1,12 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    /* Language and Compatibility Settings */
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "skipLibCheck": true,
 
-    /* Bundler mode */
+    /* Module Resolution and Bundling */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -17,16 +15,16 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting */
+    /* Type Checking */
+    "skipLibCheck": true,
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
 
-
-    "strict": false,                // Disable all strict mode checks
-    "noUnusedLocals": false,        // Disable error reporting for unused locals
-    "noUnusedParameters": false,    // Disable error reporting for unused parameters
-    "noImplicitReturns": false,     // Disable error reporting for functions without return values
-    "noFallthroughCasesInSwitch": false,  // Disable error reporting for fallthrough cases in switch statements
+    /* Performance */
     "disableSizeLimit": false
-
   },
   "include": ["src"]
 }
