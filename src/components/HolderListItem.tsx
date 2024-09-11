@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { User } from '@memeclashtv/types';
 import './HolderListItem.css';
-import { getSellPrice } from '../utils';
+import { getSellPriceMc } from '../utils';
 
 interface HolderListItemProps {
   user: User;
@@ -28,8 +28,15 @@ export const HolderListItem: React.FC<HolderListItemProps> = ({
   };
 
   const holdings = getHoldings();
-  const value = getSellPrice(characterSupply, characterMarketCap, holdings);
-
+  const [value, setValue] = useState(0);
+  //async call to getSellPrice 
+  useEffect(() => {
+    const _ = async () => {
+      const v = await getSellPriceMc(characterSupply, characterMarketCap, holdings);
+      setValue(v);
+    }
+    _();
+  }, [characterSupply, holdings]);
   return (
     <div className="holder-list-item">
       <div className="holder-rank">#{rank}</div>
@@ -41,3 +48,7 @@ export const HolderListItem: React.FC<HolderListItemProps> = ({
     </div>
   );
 };
+function useEffect(arg0: () => void, arg1: any[]) {
+  throw new Error('Function not implemented.');
+}
+

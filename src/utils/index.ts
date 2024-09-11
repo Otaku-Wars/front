@@ -35,6 +35,22 @@ export const getBuyPrice = async (supply: number, value: number): Promise<number
     return price;
 }
 
+export const getSellPriceMc = async (supply: number, value: number, amount: number): Promise<number> => {
+    const originalValue = await getCurveCall(0, supply);
+    const scalingFactor = await getScalingFactor(supply, value, originalValue);
+    //console.log("scalingFactor", scalingFactor)
+    const price = await getPrice(supply, supply-amount, scalingFactor);
+    return price;
+}
+
+export const getSellPrice = async (supply: number, value: number): Promise<number> => {
+    const originalValue = await getCurveCall(0, supply);
+    const scalingFactor = await getScalingFactor(supply, value, originalValue);
+    //console.log("scalingFactor", scalingFactor)
+    const price = await getPrice(supply+1, supply, scalingFactor);
+    return price;
+}
+
 export const getPriceCall = async (characterId: number): Promise<number> => {
     const amount = await readContract(config,{
         address: CONTRACT_ADDRESS as `0x${string}`,
