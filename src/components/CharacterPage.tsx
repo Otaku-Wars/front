@@ -354,7 +354,7 @@ export const CharacterPage = () => {
                                     <DollarSign className="w-4 h-4 mr-1" />
                                     Price
                                 </p>
-                                <p className="text-xl font-bold">${formatNumber(convertEthToUsd(character.price))}</p>
+                                <p className="text-xl font-bold">{formatNumber(convertEthToUsd(character.price))}</p>
                                 <p className="text-sm text-muted-foreground">{formatEther(character.price)} ETH</p>
                             </div>
                             <div>
@@ -371,7 +371,7 @@ export const CharacterPage = () => {
                                     <DollarSign className="w-4 h-4 mr-1" />
                                     Market Cap
                                 </p>
-                                <p className="text-xl font-bold">${formatNumber(convertEthToUsd(character.value))}</p>
+                                <p className="text-xl font-bold">{formatNumber(convertEthToUsd(character.value))}</p>
                                 <p className="text-sm text-muted-foreground">{formatEther(character.value)} ETH</p>
                             </div>
                             <div>

@@ -50,7 +50,7 @@ const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: Bas
         const loserCharacter = characters?.find(c => c.id === (winnerIsP1 ? matchEnd?.p2 : matchEnd?.p1));
         return (
           <span>
-            Match results: <img src={winnerCharacter?.pfp} alt={winnerCharacter?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{winnerCharacter?.name}</span> won against <img src={loserCharacter?.pfp} alt={loserCharacter?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{loserCharacter?.name}</span> {" "} share price went to <span className="text-green-500">${winnerPrice}</span>
+            Match results: <img src={winnerCharacter?.pfp} alt={winnerCharacter?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{winnerCharacter?.name}</span> won against <img src={loserCharacter?.pfp} alt={loserCharacter?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{loserCharacter?.name}</span> {" "} share price went to <span className="text-green-500">{winnerPrice}</span>
           </span>
         )
 
@@ -61,7 +61,7 @@ const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: Bas
         const amount = trade?.shareAmount;
         return (
           <p>
-            <span className='underline'>{trade.trader}</span> <span className={trade.isBuy ? "text-green-500" : "text-red-500"}>{trade.isBuy ? 'bought' : 'sold'}</span> {amount} shares of <img src={character?.pfp} alt={character?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{character?.name}</span> for <span className='text-green-500'>${cost}</span>
+            <span className='underline'>{trade.trader}</span> <span className={trade.isBuy ? "text-green-500" : "text-red-500"}>{trade.isBuy ? 'bought' : 'sold'}</span> {amount} shares of <img src={character?.pfp} alt={character?.name} className="w-4 h-4 inline-flex rounded-full object-cover border-2 border-gray-700" /> <span className='underline'>{character?.name}</span> for <span className='text-green-500'>{cost}</span>
           </p>
         )
 

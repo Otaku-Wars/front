@@ -194,7 +194,7 @@ export const UserPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${formatNumber(convertEthToUsd(parseFloat(userBalance ?? "0")) ?? 0)}</div>
+                  <div className="text-2xl font-bold">{formatNumber(convertEthToUsd(parseFloat(userBalance ?? "0")) ?? 0)}</div>
                   <div className="text-xs text-muted-foreground">{formatEther(parseFloat(userBalance ?? "0"))} ETH</div>
                 </CardContent>
               </Card>
@@ -206,7 +206,7 @@ export const UserPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${formatNumber(convertEthToUsd(netWorth ?? 0))}</div>
+                  <div className="text-2xl font-bold">{formatNumber(convertEthToUsd(netWorth ?? 0))}</div>
                   <div className="text-xs text-muted-foreground">{formatEther(netWorth ?? 0)} ETH</div>
                 </CardContent>
               </Card>
@@ -284,7 +284,7 @@ export const UserPage = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold">${formatNumber(convertEthToUsd(value))}</div>
+                        <div className="font-semibold">{formatNumber(convertEthToUsd(value))}</div>
                         <div className="text-sm text-muted-foreground">{formatEther(value)} ETH</div>
                         {/* Performance Section */}
                         {performance?.isLoading && <div className="text-sm text-gray-500">Loading performance...</div>}
