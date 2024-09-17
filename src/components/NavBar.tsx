@@ -20,7 +20,7 @@ import {
 import { apiUrl } from '../main'
 import { useAccount } from 'wagmi'
 import { useSetActiveWallet } from '@privy-io/wagmi'
-import { useBattleState } from '../hooks/api'
+import { useBattleState, useUser } from '../hooks/api'
 
 export const truncateWallet = (wallet: string) => {
   if (!wallet) {
@@ -29,6 +29,55 @@ export const truncateWallet = (wallet: string) => {
   return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`
 }
 
+// Custom Button Component
+const CustomButton = ({ children, onClick, shouldBreathDefault = false }) => (
+  <button
+    id='CustomButtonNavBar'
+    onClick={onClick}
+    className={`text-black font-bold px-8 py-3 rounded-md shadow-md focus:outline-none h-73 w-308 transition-all duration-300 ease-in-out transform hover:scale-105 ${shouldBreathDefault ? 'breathing' : ''}`}
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      color: 'black',
+      backgroundColor: '#F6E359',
+      borderRadius: '1px',
+      textShadow: `
+        2px 2px 0 #FFFFFF, 
+        2px 2px 0 #FFFFFF, 
+        2px 2px 0 #FFFFFF, 
+        2px 2px 0 #FFFFFF
+      `,
+    }}
+  >
+    {children}
+    <style jsx>{`
+      #CustomButtonNavBar:hover {
+        background-color: #FFFB3B; /* Brighter color */
+        background: linear-gradient(to right, #FFFB3B, #FFEB3B); /* Gradient effect */
+        text-shadow: 4px 4px 0 #FFFFFF, 4px 4px 0 #FFFFFF, 4px 4px 0 #FFFFFF, 4px 4px 0 #FFFFFF; /* Shadow moves */
+        transform: scale(1.1); /* Button gets slightly bigger */
+      }
+        .breathing {
+        animation: breathing 2s ease-in-out infinite;
+      }
+      @keyframes breathing {
+        0%, 100% {
+          transform: scale(1);
+          background-color: #F8DE7E;
+          
+        }
+        50% {
+          transform: scale(1.05);
+          background-color: #FFF200;
+          box-shadow: 0 0 10px #FFF200;
+
+        }
+      }
+    `}</style>
+  </button>
+)
+
 export function NavBar() {
   const { authenticated, user } = usePrivy()
   const { data: battleState } = useBattleState()
@@ -36,10 +85,6 @@ export function NavBar() {
   const {setActiveWallet} = useSetActiveWallet()
   const { login } = useLogin({
     onComplete: async (user, isNewUser, wasAlreadyAuthenticated, loginMethod, linkedAccount) => {
-      //console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, linkedAccount);
-      // Any logic you'd like to execute if the user is/becomes authenticated while this
-      // component is mounted
-      //if new user request server to initiate pfp, username, and social
       try {
         const response = await fetch(`${apiUrl}/users/new/${address}`);
         return response.json();
@@ -63,26 +108,36 @@ export function NavBar() {
 
   const [showHowToModal, setShowHowToModal] = useState(false)
 
+  const userApi = useUser(address)
+  const pfp = (userApi as any)?.pfp;
+  const username = (userApi as any)?.username;
+  const displayName = username ? 
+    "@" + username:
+    address ?
+      truncateWallet(address):
+      "Loading..."
+    "Loading.."
+
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 items-center w-full pl-1 pr-1">
-        <Link to="/" className="mr-6 flex items-center space-x-2 xl">
-          <img src="/logo.png" alt="MemeClash.Tv Logo" className="h-6 w-auto" />
-          {/* Uncomment if you want to include the text logo */}
-          <span className="hidden text-3xl font-bold xl:inline-block">
-            <img src="/logo-text.png" alt="MemeClash.Tv" className="h-6 w-auto" />
+    <header className="sticky top-0 z-50 w-full border-b bg-[#151519] backdrop-blur supports-[backdrop-filter]:bg-background">
+      <div className="flex h-20 items-center w-full pl-5 pr-5">
+        <Link to="/" className="mr-6 flex items-center space-x-2 xl:flex-row">
+          <img src="/logo.png" alt="MemeClash.Tv Logo" className="h-10 w-auto" />
+          <span className="hidden text-3xl font-bold xl:inline-block mt-1">
+            <img src="/logo-text.png" alt="MemeClash.Tv" className="h-10 w-auto" />
           </span>
           {currentSong && (
-            <span className="text-sm text-foreground/60 w-50" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', animation: 'scroll 10s linear infinite' }}>
+            <span className="text-sm text-foreground/60 w-10" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', animation: 'scroll 10s linear infinite' }}>
               Now Playing: {currentSong}
             </span>
           )}
         </Link>
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+          <nav className="hidden md:flex items-center text-sm font-medium gap-4">
             <Dialog open={showHowToModal} onOpenChange={setShowHowToModal}>
               <DialogTrigger asChild>
-                <Button variant="ghost">How It Works</Button>
+                <Button variant="ghost" className="font-bold" style={{color: '#F6E359'}}>How it works</Button>
               </DialogTrigger>
               <DialogContent className="bg-gray-900 text-white p-6">
                 <DialogHeader>
@@ -109,26 +164,23 @@ export function NavBar() {
               </DialogContent>
             </Dialog>
             <a
-              href="https://discord.gg/uUdQZXXBPf"
+              href="https://x.com/MemeClashTv"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="transition-colors hover:text-foreground/80 px-4 font-bold text-center"
+              style={{color: '#F6E359'}}
             >
-              Chat
+              Twitter
             </a>
-          </nav>
-          <div className="flex items-center space-x-2">
             {authenticated ? (
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/user/${address}`)}
-              >
-                {truncateWallet(address)}
-              </Button>
+              <CustomButton onClick={() => navigate(`/user/${address}`)}>
+                {displayName}
+              </CustomButton>
             ) : (
-              <Button onClick={login}>Log in / Sign up</Button>
+              <CustomButton shouldBreathDefault={true} onClick={login}>Log in / Sign up</CustomButton>
             )}
-          </div>
+          </nav>
+          
         </div>
         <Sheet>
           <SheetTrigger asChild>
@@ -142,24 +194,22 @@ export function NavBar() {
           </SheetTrigger>
           <SheetContent side="right">
             <nav className="flex flex-col space-y-4">
-              <Button variant="ghost" onClick={() => setShowHowToModal(true)}>How It Works</Button>
+              <Button variant="ghost" className="font-bold" style={{color: '#F6E359'}} onClick={() => setShowHowToModal(true)}>How It Works</Button>
               <a
-                href="https://discord.gg/uUdQZXXBPf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
-              >
-                Chat
-              </a>
+              href="https://x.com/MemeClashTv"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-foreground/80 px-4 font-bold text-center"
+              style={{color: '#F6E359'}}
+            >
+              Twitter
+            </a>
               {authenticated ? (
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(`/user/${address}`)}
-                >
-                  {truncateWallet(address)}
-                </Button>
+                <CustomButton onClick={() => navigate(`/user/${address}`)}>
+                  {displayName}
+                </CustomButton>
               ) : (
-                <Button onClick={login}>Log in / Sign up</Button>
+                <CustomButton shouldBreathDefault={true} onClick={login}>Log in / Sign up</CustomButton>
               )}
             </nav>
           </SheetContent>

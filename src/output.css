@@ -447,9 +447,10 @@ video {
 }
 
 :root {
-  --background: 222.2 84% 4.9%;
+  --background: 0 0% 13%;
+  /* Updated background color in HSL */
   --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
+  --card: 0 0% 8%;
   --card-foreground: 210 40% 98%;
   --popover: 222.2 84% 4.9%;
   --popover-foreground: 210 40% 98%;
@@ -462,10 +463,10 @@ video {
   --accent: 217.2 32.6% 17.5%;
   --accent-foreground: 210 40% 98%;
   --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
+  --destructive-foreground: 0 0% 90%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 0 0% 70%;
   --radius: 0.5rem;
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
@@ -475,25 +476,27 @@ video {
 }
 
 .dark {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  --background: 0 0% 13%;
+  /* Updated background color in HSL */
+  --foreground: 0 0% 8%;
+  /* Updated foreground color in HSL */
+  --card: 0 0% 15%;
+  --card-foreground: 0 0% 90%;
+  --popover: 0 0% 15%;
+  --popover-foreground: 0 0% 90%;
+  --primary: 0 0% 90%;
+  --primary-foreground: 0 0% 10%;
+  --secondary: 0 0% 20%;
+  --secondary-foreground: 0 0% 90%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 70%;
+  --accent: 0 0% 20%;
+  --accent-foreground: 0 0% 90%;
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
+  --destructive-foreground: 0 0% 90%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 0 0% 70%;
   --radius: 0.5rem;
   --chart-1: 12 76% 61%;
   --chart-2: 173 58% 39%;
@@ -509,6 +512,7 @@ video {
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  background-color: #111113;
   font-family: 'ThaleahFat', sans-serif;
   /* Apply the custom font */
 }
@@ -729,6 +733,10 @@ body {
   grid-column: span 4 / span 4;
 }
 
+.m-3 {
+  margin: 0.75rem;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -852,10 +860,6 @@ body {
 
 .h-12 {
   height: 3rem;
-}
-
-.h-14 {
-  height: 3.5rem;
 }
 
 .h-2\.5 {
@@ -1094,10 +1098,6 @@ body {
   flex-direction: column-reverse;
 }
 
-.flex-wrap {
-  flex-wrap: wrap;
-}
-
 .items-start {
   align-items: flex-start;
 }
@@ -1176,12 +1176,6 @@ body {
   --tw-space-x-reverse: 0;
   margin-right: calc(1.25rem * var(--tw-space-x-reverse));
   margin-left: calc(1.25rem * calc(1 - var(--tw-space-x-reverse)));
-}
-
-.space-x-6 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-x-reverse: 0;
-  margin-right: calc(1.5rem * var(--tw-space-x-reverse));
-  margin-left: calc(1.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
 .space-y-0 > :not([hidden]) ~ :not([hidden]) {
@@ -1300,16 +1294,22 @@ body {
   border-top-color: transparent;
 }
 
+.bg-\[\#151519\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(21 21 25 / var(--tw-bg-opacity));
+}
+
+.bg-\[\#1F1F23\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(31 31 35 / var(--tw-bg-opacity));
+}
+
 .bg-background {
   background-color: hsl(var(--background));
 }
 
 .bg-background\/10 {
   background-color: hsl(var(--background) / 0.1);
-}
-
-.bg-background\/95 {
-  background-color: hsl(var(--background) / 0.95);
 }
 
 .bg-black\/80 {
@@ -1477,6 +1477,11 @@ body {
   padding-bottom: 5rem;
 }
 
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
 .py-4 {
   padding-top: 1rem;
   padding-bottom: 1rem;
@@ -1491,12 +1496,12 @@ body {
   padding-bottom: 0.5rem;
 }
 
-.pl-1 {
-  padding-left: 0.25rem;
+.pl-5 {
+  padding-left: 1.25rem;
 }
 
-.pr-1 {
-  padding-right: 0.25rem;
+.pr-5 {
+  padding-right: 1.25rem;
 }
 
 .pt-0 {
@@ -1534,6 +1539,10 @@ body {
   line-height: 2.5rem;
 }
 
+.text-\[16px\] {
+  font-size: 16px;
+}
+
 .text-base {
   font-size: 1rem;
   line-height: 1.5rem;
@@ -1563,6 +1572,10 @@ body {
   font-weight: 700;
 }
 
+.font-light {
+  font-weight: 300;
+}
+
 .font-medium {
   font-weight: 500;
 }
@@ -1577,6 +1590,11 @@ body {
 
 .tracking-tight {
   letter-spacing: -0.025em;
+}
+
+.text-black {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
 .text-blue-400 {
@@ -1603,6 +1621,11 @@ body {
 
 .text-foreground\/60 {
   color: hsl(var(--foreground) / 0.6);
+}
+
+.text-gray-300 {
+  --tw-text-opacity: 1;
+  color: rgb(209 213 219 / var(--tw-text-opacity));
 }
 
 .text-gray-400 {
@@ -1794,6 +1817,10 @@ body {
   transition-duration: 200ms;
 }
 
+.duration-300 {
+  transition-duration: 300ms;
+}
+
 .ease-in-out {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1834,6 +1861,10 @@ body {
   animation-duration: 200ms;
 }
 
+.duration-300 {
+  animation-duration: 300ms;
+}
+
 .ease-in-out {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1846,6 +1877,38 @@ body {
   font-weight: 400;
 
   font-style: normal;
+}
+
+.breathing-effect  {
+  animation: breathing-effect 2s ease-in-out infinite;
+}
+
+@keyframes breathing-effect  {
+  0%, 100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+    color: #FFF200;
+  }
+}
+
+.breathing-effect-fast  {
+  animation: breathing-effect 1s ease-in-out infinite;
+}
+
+@keyframes breathing-effect-fast  {
+  0%, 100% {
+    z-index: 10000;
+    transform: scale(1);
+  }
+
+  50% {
+    z-index: 10000;
+    transform: scale(1.1);
+    color: #FFF200;
+  }
 }
 
 .file\:border-0::file-selector-button {
@@ -1871,6 +1934,12 @@ body {
 
 .placeholder\:text-muted-foreground::placeholder {
   color: hsl(var(--muted-foreground));
+}
+
+.hover\:scale-105:hover {
+  --tw-scale-x: 1.05;
+  --tw-scale-y: 1.05;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .hover\:bg-accent:hover {
@@ -2144,8 +2213,8 @@ body {
 }
 
 @supports ((-webkit-backdrop-filter: var(--tw)) or (backdrop-filter: var(--tw))) {
-  .supports-\[backdrop-filter\]\:bg-background\/60 {
-    background-color: hsl(var(--background) / 0.6);
+  .supports-\[backdrop-filter\]\:bg-background {
+    background-color: hsl(var(--background));
   }
 }
 
@@ -2267,6 +2336,10 @@ body {
 @media (min-width: 1280px) {
   .xl\:inline-block {
     display: inline-block;
+  }
+
+  .xl\:flex-row {
+    flex-direction: row;
   }
 }
 

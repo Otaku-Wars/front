@@ -3,11 +3,12 @@ import { CurrentBattleState, Status, Character } from "@memeclashtv/types"
 import { Badge } from "./ui/badge"
 import { Card, CardContent } from "./ui/card"
 import { Heart, Gem, Flame, Shield, Zap } from 'lucide-react'
-import { useCharacters, useBattleState } from '../hooks/api'
+import { useCharacters, useBattleState, useUser } from '../hooks/api'
 import { getBuyPrice } from '../utils'
 import { useConvertEthToUsd } from '../EthPriceProvider'
 import { formatEther, formatNumber } from '../lib/utils'
 import { useNavigate } from 'react-router-dom'
+import { useAddress } from '../hooks/user'
 
 interface WorldStateViewProps {
   battleState: CurrentBattleState
@@ -35,13 +36,15 @@ export const useTimeTill = (time: number) => {
 }
 
 const InfoCard = ({ title, value, valueClass }: { title: string, value: React.ReactNode, valueClass?: string }) => (
-  <div className={`bg-gray-800 p-2 rounded-lg text-center ${valueClass}`}>
+  <div className={`bg-[#1F1F23] p-2 rounded-lg text-center ${valueClass}`}>
     <div className="text-gray-400 text-sm">{title}</div>
-    <div className={`text-sm ${valueClass}`}>{value}</div>
+    <div className={`font-bold text-sm ${valueClass}`}>{value}</div>
   </div>
 );
 
 export const WorldStateView = () => {
+  const address = useAddress()
+      const {data:user} = useUser(address); // Fetch user data using the useUser hook
   const convertEthToUsd = useConvertEthToUsd()
   const { data: characters, isLoading: charactersLoading, isError: charactersError } = useCharacters();
     const { data: battleState, isLoading, isError } = useBattleState();
@@ -60,6 +63,14 @@ export const WorldStateView = () => {
         const p2Id = battleState?.p2;
         return characters?.find((c: any) => c.id === p2Id);
     }, [characters, battleState, isLoading, isError])
+
+    const character1SharesOwnedByYou = useMemo(()=> {
+        return user?.balances?.find((b: any) => b.character == character1?.id)?.balance ?? 0;
+    }, [user, character1])
+
+    const character2SharesOwnedByYou = useMemo(()=> {
+        return user?.balances?.find((b: any) => b.character == character2?.id)?.balance ?? 0;
+    }, [user, character2])
 
     const character1Price = useMemo(()=> {
         return character1 ? character1.price : 0;
@@ -122,7 +133,7 @@ export const WorldStateView = () => {
 
 
     const isPendingMAtch = useMemo(() => {
-        return battleState?.status == 1;
+        return battleState?.status == Status.Pending;
     }, [battleState])
 
     const winner = useMemo(() => {
@@ -144,6 +155,8 @@ export const WorldStateView = () => {
     }
   }
 
+  const isBattling = battleState?.status == Status.Battling;
+
 
   const renderCharacterInfo = (character: Character | undefined, isRightCard: boolean) => {
     if (!character) return null
@@ -159,35 +172,52 @@ export const WorldStateView = () => {
     )
 
     const nameAndPfpJsxLeft = (
-      <div className="flex flex-row justify-end items-center space-x-5 w-full gap-5"
-      style={{"justifyContent": "end"}}
+      <div className="flex flex-row justify-between items-center space-x-5 w-full gap-5 cursor-pointer"
       onClick={()=> {navigator(`/character/${character.id}`)}}
 
       >
-        <span className="font-bold text-lg underline" style={{display: 'inline', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{character.name} ({character.id})</span>
+      
+        <div className="text-sm text-gray-400 flex flex-col">
+          {character1SharesOwnedByYou ?? 0} shares owned
+          {character1SharesOwnedByYou <= 0 && isPendingMAtch && <span className='text-yellow-400 font-bold breathing-effect-fast'> {willStartIn}s to Buy</span>}
+          {isBattling && <span className='text-yellow-400 font-bold'>Trading locked </span>}
+
+        </div>
+        <div className='flex flex-row items-center space-x-4'>
+        <span className="font-bold text-lg" style={{display: 'inline', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{character.name} </span>
         <img
           src={character.pfp}
           alt={character.name}
           className="w-12 h-12 rounded-full object-cover border-2 border-gray-700"
         />
+        </div>
       </div>
     )
 
     const nameAndPfpJsxRight = (
-      <div className="flex justify-start items-center space-x-5 w-full gap-5"
+      <div className="flex justify-between items-center space-x-5 w-full gap-5 cursor-pointer"
       onClick={()=> {navigator(`/character/${character.id}`)}}
-      >
-        <img
+      > 
+      <div className='flex flex-row items-center space-x-4'>
+      <img
           src={character.pfp}
           alt={character.name}
           className="w-12 h-12 rounded-full object-cover border-2 border-gray-700"
         />
-        <span className="font-bold text-lg underline">{character.name} ({character.id})</span>
+        <span className="font-bold text-lg" style={{display: 'inline', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{character.name} </span>
+        </div>
+        
+        <div className="text-sm text-gray-400 flex flex-col items-end text-right">
+          <span>{character2SharesOwnedByYou ?? 0} shares owned</span>
+          {character2SharesOwnedByYou <= 0 && isPendingMAtch && <span className='text-yellow-400 font-bold breathing-effect-fast'> {willStartIn}s to Buy</span>}
+          {isBattling && <span className='text-yellow-400 font-bold'>Trading locked </span>}
+
+        </div>
       </div>
     )
 
     return (
-      <Card className="flex-1 bg-gray-900 text-white border-gray-700 p-4 rounded-lg h-full gap-5">
+      <Card className="flex-1 bg-[#151519] text-white p-4 rounded-lg h-full gap-5">
         <CardContent className="p-4">
           <div className={`flex items-center mb-4 w-full`}>
             {isRightCard ? nameAndPfpJsxRight : nameAndPfpJsxLeft}
@@ -211,7 +241,7 @@ export const WorldStateView = () => {
                       <p className=''>
                         {formatNumber(convertEthToUsd(!isRightCard ? character1WinPrice : character2WinPrice))} 
                         <span className='text-sm'>
-                          ({((character1WinPrice - character.price) / character.price * 100).toFixed(2)}%)
+                          ({(((isRightCard ? character2WinPrice : character1WinPrice) - character.price) / character.price * 100).toFixed(2)}%)
                         </span>
                       </p>
                       {/* <p>
@@ -227,7 +257,7 @@ export const WorldStateView = () => {
                       <p>
                         {formatNumber(convertEthToUsd(!isRightCard ? character1LossPrice : character2LossPrice))} 
                         <span className='text-sm'>
-                          ({((character1LossPrice - character.price) / character.price * 100).toFixed(2)}%)
+                          ({(((isRightCard ? character2LossPrice : character1LossPrice) - character.price) / character.price * 100).toFixed(2)}%)
                         </span>
                       </p>
                       {/* <p>
@@ -251,11 +281,11 @@ export const WorldStateView = () => {
   }
 
   return (
-    <div className="w-full bg-gray-950 py-4 rounded-lg">
+    <div className="w-full py-4 bg-[#1F1F23] border-none">
       <div className="flex items-stretch space-x-1">
         {renderCharacterInfo(character1, false)}
         <div className="flex flex-col items-center justify-center px-4">
-          <div className="text-4xl font-bold text-white mb-2">VS</div>
+          <div className="text-4xl font-bold text-white mb-2 font-shadow-lg">VS</div>
           {battleState?.status === Status.Pending && (
             <div className="text-sm text-gray-400 text-center">
               Start in <br/> <span className='text-xl'>{willStartIn}</span>

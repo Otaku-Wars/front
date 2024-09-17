@@ -64,73 +64,73 @@ const AttributeIcon = ({ attribute, value }: { attribute: Attribute, value: numb
 
 
 export const CharacterListItem = ({ character, performance }: { character: Character, performance: number }) => {
-  const convertEthToUsd = useConvertEthToUsd()
-    const navigate = useNavigate();
-    console.log("performance found", performance)
+  const convertEthToUsd = useConvertEthToUsd();
+  const navigate = useNavigate();
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
 
-    const handleClick = () => {
-        navigate(`/character/${character.id}`);
-    };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setCursorPosition({ x: e.clientX, y: e.clientY });
+  };
 
-    return (
-        <TableRow 
-            onClick={handleClick}
-            className='cursor-pointer py-20'
-        key={character.id}>
-              <TableCell className="p-2">
-                <div className="flex items-start items-center space-x-2">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={character.pfp} alt={character.name} />
-                    <AvatarFallback>{character.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium text-sm">{character.name}</div>
-                    {/* <div className="flex flex-wrap gap-2 mt-1">
-                      {Object.entries({
-                        health: Attribute.health,
-                        power: Attribute.power,
-                        attack: Attribute.attack,
-                        defense: Attribute.defense,
-                        speed: Attribute.speed
-                      }).map(([key, value]) => (
-                        <AttributeIcon key={key} attribute={value as Attribute} value={character[key]} />
-                      ))}
-                    </div> */}
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="p-2 text-sm">{formatNumber(convertEthToUsd(character.price) )}</TableCell>
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
 
-              
-              <TableCell className="p-2">
-                <div className={`flex items-center text-sm ${performance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {performance >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
-                  {Math.abs(performance).toFixed(1)}%
-                </div>
-              </TableCell>
-              <TableCell className="p-2 text-sm">
-                {formatNumber(convertEthToUsd(character.value))}
-              </TableCell>
-            </TableRow>
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
 
-        // <ListGroup.Item className="character-list-item bg-dark text-white" onClick={handleClick}>
-        //     <div className="character-list-item-identity">
-        //         <Image
-        //             src={character?.pfp}
-        //             alt={"Hi"}
-        //             height={41}
-        //             width={41}
-        //             className="character-list-item-avatar"
-        //         />
-        //         <p className="character-list-item-name">{cutText(character?.name, 8)}</p>
-        //     </div>
-        //     <p className="character-list-item-price">${convertEthToUsd(character?.value) ?? "0"}</p>
-        //     <p className="character-list-item-price">${convertEthToUsd(character?.price) ?? "0"}</p>
-        //     <p className={"character-list-item-price " + (performance >= 0 ? "text-success" : "text-danger")}>{
-        //         (isLoading && performance == undefined) ? "Loading..." : isError ? "Error" : `%${performance.toFixed(2)}`
-        //     }</p>
-        // </ListGroup.Item>
-    );
+  const handleClick = () => {
+    navigate(`/character/${character.id}`);
+  };
+
+  return (
+    <TableRow 
+      onClick={handleClick}
+      
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={`cursor-pointer py-20 group ${isHovered ? 'breathing-effect-fast' : ''}`}
+      key={character.id}
+      style={{
+        //transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+        //transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        //boxShadow: isHovered ? '0 0 15px rgba(255, 255, 0, 0.7)' : 'none',
+      }}
+    >
+      <TableCell className="px-3 py-3">
+        <div className="flex items-start items-center space-x-5">
+          <Avatar className="w-12 h-12 border">
+            <AvatarImage src={character.pfp} alt={character.name} />
+            <AvatarFallback>{character.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-bold text-[16px]">{character.name}</div>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell className="p-2 text-md">{formatNumber(convertEthToUsd(character.price))}</TableCell>
+      <TableCell className="p-2">
+        <div className={`flex items-center text-md ${performance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+          {performance >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
+          {Math.abs(performance).toFixed(1)}%
+        </div>
+      </TableCell>
+      <TableCell className="p-2 text-md">
+        {formatNumber(convertEthToUsd(character.value))}
+      </TableCell>
+      {isHovered && (
+        <p 
+          className="fixed text-yellow-500 text-sm font-light breathing-effect-fast"
+          style={{position:'fixed', top: 7, left: '10%' }} // Adjusted position
+        >
+          Buy Me!
+        </p>
+      )}
+    </TableRow>
+  );
 }
 
 type SortColumn = 'marketCap' | 'price' | 'performance'
@@ -212,11 +212,17 @@ export const CharacterList = () => {
     };
 
     return (
-        <ScrollArea className="h-full w-full rounded-md border">
-          <div className="p-4 border-b">
-            <h2 className="text-lg font-semibold">Character List</h2>
+      <div className='flex flex-col h-full rounded-lg border bg-[#151519]'
+      style={{
+        overflowX: 'hidden'
+      }}>
+        <div className="p-4 bg-[#1F1F23] border-rounded m-3 sticky">
+            <h2 className="text-lg font-bold text-center">Characters {" "}
+              <span className='breathing-effect text-sm font-light text-gray-300 inline-block'> Buy a Character<ArrowDownIcon className='w-4 h-4 inline-block'/></span>
+            </h2>
           </div>
-          <Table className="w-full">
+        <ScrollArea className="h-full w-full">
+          <Table className="w-full overflow-hidden">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-1/3 min-w-[200px]">Character</TableHead>
@@ -243,5 +249,6 @@ export const CharacterList = () => {
             </TableBody>
           </Table>
         </ScrollArea>
+        </div>
     );
 };
