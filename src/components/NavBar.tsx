@@ -51,7 +51,7 @@ const CustomButton = ({ children, onClick, shouldBreathDefault = false }) => (
     }}
   >
     {children}
-    <style jsx>{`
+    <style>{`
       #CustomButtonNavBar:hover {
         background-color: #FFFB3B; /* Brighter color */
         background: linear-gradient(to right, #FFFB3B, #FFEB3B); /* Gradient effect */
