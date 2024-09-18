@@ -108,3 +108,35 @@
 
   }
 }
+
+.breathing-red {
+  animation: breathing-red 2s ease-in-out infinite;
+}
+@keyframes breathing-red  {
+  0%, 100% {
+    transform: scale(1);    
+
+  }
+  50% {
+    transform: scale(1.1);
+    color: rgb(255, 159, 159);
+  }
+}
+
+
+.breathing-green {
+  animation: breathing-green 2s ease-in-out infinite;
+}
+@keyframes breathing-green  {
+  0%, 100% {
+    transform: scale(1);    
+  }
+  50% {
+    transform: scale(1.1);
+    color: rgb(159, 255, 159);
+  }
+}
+
+
+
+

@@ -5,7 +5,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useBuyShares, useBuyPrice, useCharacterSharesBalance, useSellShares, useSellPrice } from '../hooks/contract';
 import { useAddress, useBalance } from '../hooks/user';
-import { parseEther, formatEther } from 'viem';
+import {  formatEther } from 'viem';
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { Link } from 'react-router-dom';
 import { usePrivy } from '@privy-io/react-auth';
@@ -13,6 +13,7 @@ import { usePrivy } from '@privy-io/react-auth';
 interface ModalBuySellProps {
   show: boolean;
   handleClose: () => void;
+  handleOpen: (action:string) => void;
   actionType: 'Buy' | 'Sell';
   characterName: string;
   characterId: number;
@@ -22,12 +23,14 @@ interface ModalBuySellProps {
 export const ModalBuySell: React.FC<ModalBuySellProps> = ({ 
   show, 
   handleClose, 
+  handleOpen,
   actionType, 
   characterName, 
   characterId,
   isInBattle,
 }) => {
   const { ready } = usePrivy();
+  console.log('mounted ModalBuySell with show:', show);
   const [internalShow, setInternalShow] = useState(show);
   const [amount, setAmount] = useState<any>(0);
   const [buyError, setBuyError] = useState<any>(null);
@@ -52,7 +55,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     error: sellPriceError
   } = useSellPrice(characterId, BigInt(amount ?? 0) as any);
 
-  const ethAmount = buyPrice ? parseEther(buyPrice.toString()) : BigInt(0);
+  const ethAmount = buyPriceRaw ? formatEther(buyPriceRaw.toString()) : 0;
 
   const { 
     buyShares, 
@@ -76,6 +79,8 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     setCurrentAction(actionType);
   }, [actionType]);
 
+  const [isMouseOver, setIsMouseOver] = useState(false);
+
   useEffect(() => {
     if (buySharesError) setBuyError(buySharesError);
     if (sellSharesError) setSellError(sellSharesError);
@@ -89,7 +94,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   }, [buySharesError, sellSharesError, buySharesSuccess, sellSharesSuccess]);
 
   useEffect(() => {
-    if (ready) {
+    if (ready && show) {
       setInternalShow(show);
     }
   }, [show, ready]);
@@ -135,13 +140,26 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   };
 
   const trueClose = () => {
-    setInternalShow(false);
-    handleClose();
+    console.log("mounted Calling true close")
+    if (isMouseOver) {
+      setInternalShow(false);
+      handleClose();
+    }else{
+      handleOpen(actionType);
+    }
   }
+
+  //    //if sell amount is greater than balance then set amount to balance
+  useEffect(() => {
+    if (currentAction === 'Sell' && yourShares && parseInt(amount) > yourShares) {
+      setAmount(yourShares.toString());
+    }
+  }, [yourShares, amount, currentAction]);
+
 
   return (
     <Dialog open={internalShow} onOpenChange={trueClose}>
-      <DialogContent>
+      <DialogContent onMouseEnter={() => setIsMouseOver(true)} onMouseLeave={() => setIsMouseOver(false)}>
         <DialogHeader>
           <DialogTitle>{currentAction} {characterName}</DialogTitle>
           <DialogDescription>
@@ -172,13 +190,13 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">Balance</Label>
             <div className="col-span-3">
-              ${convertEthToUsd(parseFloat(formatEther(userBalance?.balance ?? BigInt(0) as any) as any))} ({formatEther(userBalance?.balance ?? BigInt(0) as any)} ETH)
+              ${convertEthToUsd(parseFloat(formatEther(userBalance?.balance ?? BigInt(0) as any) as any))} ({userBalance?.balance} ETH)
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">Est. Cost</Label>
             <div className="col-span-3">
-              {isPriceLoading || isSellPriceLoading ? 
+              {isBuying && isPriceLoading || isSelling && isSellPriceLoading ? 
                 'Loading...' : 
                 currentAction === 'Buy' ?
                   `$${convertEthToUsd(buyPrice ?? 0)} (${buyPrice} ETH)` :
@@ -211,7 +229,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
           
         </div>
         <DialogFooter>
-          <Button className={`w-full ${isInBattle ? 'bg-gray-500' : ''}`} onClick={handlePlaceTrade} disabled={isBuying || isPriceLoading || isSelling || isSellPriceLoading || isInBattle}>
+          <Button className={`w-full ${isInBattle ? 'bg-gray-500' : ''}`} onClick={handlePlaceTrade} disabled={isBuying && isPriceLoading || isSelling && isSellPriceLoading || isInBattle}>
             {isInBattle ? 'In Battle' : isBuying ? 'Buying...' : isSelling ? 'Selling...' : currentAction} {isInBattle && <span className="text-sm text-red-500"> (Cannot buy or sell while in battle)</span>}
           </Button>
         </DialogFooter>
@@ -219,3 +237,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     </Dialog>
   );
 };
+
+function parseEther(arg0: string) {
+  throw new Error('Function not implemented.');
+}

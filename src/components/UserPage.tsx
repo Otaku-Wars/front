@@ -19,6 +19,8 @@ import { useConvertEthToUsd } from '../EthPriceProvider';
 import { useTimeTill } from './WorldStateView';
 import { useSetActiveWallet } from '@privy-io/wagmi';
 import { formatEther, formatNumber, formatPercentage } from '../lib/utils';
+import { useGetSellPrices } from '../hooks/contract';
+import { formatEther as viemFormatEther } from 'viem';
 
 const attributeNames = {
   [Attribute.health]: "Health",
@@ -45,10 +47,7 @@ export const UserPage = () => {
     const pfp = (user as any)?.pfp;
     const username = (user as any)?.username;
     const convertEthToUsd = useConvertEthToUsd();
-    const netWorth = user?.balances?.reduce((acc, curr) => {
-        const character = characters?.find(c => c.id === curr?.character);
-        return acc + (character ? character?.price * curr?.balance : 0);
-    }, 0);
+    
     const { setActiveWallet } = useSetActiveWallet();
     //set active account
   const { wallets } = useWallets();
@@ -94,7 +93,15 @@ export const UserPage = () => {
 
   const yesterday = useMemo(() => new Date().getTime() / 1000 - 24 * 60 * 60, []);
   const characterIds = user?.balances?.map(balance => balance.character) || [];
+  const balanceAmounts = user?.balances?.map(balance => balance.balance) || [];
+  const {data: sellPrices} = useGetSellPrices(characterIds.map((characterId, index) => ({characterId, amount: balanceAmounts[index]})));
   const performanceData = useAllCharacterPerformance(characterIds, yesterday);
+
+  const netWorth = useMemo(() => {
+    return sellPrices?.reduce((acc, price) => acc + Number(viemFormatEther(price?.result ?? 0)) , 0) ?? 0;
+  }, [sellPrices]);
+
+  console.log("Net Worth", netWorth)
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
@@ -265,9 +272,9 @@ export const UserPage = () => {
               <CardTitle>Your Holdings</CardTitle>
             </CardHeader>
             <CardContent>
-              {user?.balances?.map((balance: Balance) => {
+              {user?.balances?.map((balance: Balance, index: number) => {
                 const character = characters?.find(c => c.id === balance.character);
-                const value = character ? character.price * balance.balance : 0;
+                const value = sellPrices ? viemFormatEther(sellPrices[index]?.result) : 0;
                 const performance = performanceData?.find(p => p.characterId === character?.id);
 
                 return (
@@ -292,7 +299,7 @@ export const UserPage = () => {
                         {performance?.data !== undefined && (
                           <div className={`flex items-center text-sm ${performance.data >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                             {performance.data >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
-                            {formatPercentage(performance.data)}
+                            {formatPercentage(performance.data/100)}
                           </div>
                         )}
                       </div>

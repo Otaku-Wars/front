@@ -227,7 +227,7 @@ export const WorldStateView = () => {
             <InfoCard title="Mktcap:" value={`${formatNumber(convertEthToUsd(character.value))}`} valueClass="col-span-1" />
             {winner ? (
               <InfoCard title="Result" value={
-              <div className={`text-center ${winner.winner == character.id ? "text-green-400" : "text-red-400"}`}>
+              <div className={`text-center ${winner.winner == character.id ? "text-green-400 breathing-green" : "text-red-400 breathing-red"}`}>
                 {winner.winner == character.id 
                   ? `${character.name} won! Price now: ${!isRightCard ? formatNumber(convertEthToUsd(character1WinPrice)) : formatNumber(convertEthToUsd(character2WinPrice))}` 
                   : `${character.name} lost! Price now: ${!isRightCard ? formatNumber(convertEthToUsd(character1LossPrice)) : formatNumber(convertEthToUsd(character2LossPrice))}`}
@@ -238,9 +238,9 @@ export const WorldStateView = () => {
                 <InfoCard title="If Win:" 
                   value={
                     <div>
-                      <p className=''>
+                      <p className='breathing-green'>
                         {formatNumber(convertEthToUsd(!isRightCard ? character1WinPrice : character2WinPrice))} 
-                        <span className='text-sm'>
+                        <span className='text-sm breathing-green'>
                           ({(((isRightCard ? character2WinPrice : character1WinPrice) - character.price) / character.price * 100).toFixed(2)}%)
                         </span>
                       </p>
@@ -254,9 +254,9 @@ export const WorldStateView = () => {
                 <InfoCard title="If Lose:" 
                   value={
                     <div>
-                      <p>
+                      <p className='breathing-red'>
                         {formatNumber(convertEthToUsd(!isRightCard ? character1LossPrice : character2LossPrice))} 
-                        <span className='text-sm'>
+                        <span className='text-sm breathing-red'>
                           ({(((isRightCard ? character2LossPrice : character1LossPrice) - character.price) / character.price * 100).toFixed(2)}%)
                         </span>
                       </p>

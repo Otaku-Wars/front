@@ -102,12 +102,12 @@ export const CharacterListItem = ({ character, performance }: { character: Chara
     >
       <TableCell className="px-3 py-3">
         <div className="flex items-start items-center space-x-5">
-          <Avatar className="w-12 h-12 border">
+          <Avatar className="w-8 h-8 border">
             <AvatarImage src={character.pfp} alt={character.name} />
             <AvatarFallback>{character.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-bold text-[16px]">{character.name}</div>
+            <div className="font-bold text-[12px]">{character.name}</div>
           </div>
         </div>
       </TableCell>

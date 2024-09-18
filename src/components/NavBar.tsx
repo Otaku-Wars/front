@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useLogin, usePrivy, useWallets } from '@privy-io/react-auth'
+import { useEffect, useState } from 'react'
+import { ConnectedWallet, useLogin, usePrivy, useWallets } from '@privy-io/react-auth'
 import { Link, useNavigate } from 'react-router-dom'
 import { Menu } from "lucide-react"
 
@@ -83,6 +83,7 @@ export function NavBar() {
   const { data: battleState } = useBattleState()
   const address = user?.wallet?.address;
   const {setActiveWallet} = useSetActiveWallet()
+  const { wallets } = useWallets()
   const { login } = useLogin({
     onComplete: async (user, isNewUser, wasAlreadyAuthenticated, loginMethod, linkedAccount) => {
       try {
@@ -98,9 +99,6 @@ export function NavBar() {
   console.log("mainAddress", mainAddress)
   console.log("mainAddress2", address)
 
-  if(authenticated){
-    //setActiveWallet(wallets[0])
-  }
 
   const currentSong = (battleState as any)?.currentSong;
 
@@ -118,7 +116,15 @@ export function NavBar() {
       "Loading..."
     "Loading.."
 
-
+  useEffect(() => {
+    if(authenticated && address){
+      const wallet = wallets.find((wallet: ConnectedWallet) => wallet.address === address)
+      if(wallet){
+        console.log("setting active wallet", wallet)
+        setActiveWallet(wallet)
+      }
+    }
+  }, [authenticated, wallets, address, setActiveWallet])
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-[#151519] backdrop-blur supports-[backdrop-filter]:bg-background">
       <div className="flex h-20 items-center w-full pl-5 pr-5">

@@ -106,8 +106,9 @@ export const useCharacterMatches = (characterId: number): { data: MatchEndActivi
         },
         staleTime: 10000,
     });
-
-    return { data, isLoading, isError };
+    //order by timestamp
+    const sortedData = data?.sort((a, b) => b.timestamp - a.timestamp);
+    return { data: sortedData, isLoading, isError };
 }
 
 export const useCharacterHolders = (characterId: number): { data: User[] | undefined, isLoading: boolean, isError: boolean } => {

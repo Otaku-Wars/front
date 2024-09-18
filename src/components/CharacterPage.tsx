@@ -82,15 +82,6 @@ export function generateRoundRobinMatchups(characters: string[]) {
     return matchups;
 }
 
-// Function to calculate matches until next match
-function matchesUntilNextMatch(currentMatchIndex: number, lastMatchIndex: number, totalMatches: number): number {
-    if (currentMatchIndex < lastMatchIndex) {
-        return lastMatchIndex - currentMatchIndex;
-    } else {
-        return totalMatches - currentMatchIndex + lastMatchIndex;
-    }
-}
-
 interface StatusBadgeProps {
     status: 'inBattle' | 'waiting' | 'idle';
   }
@@ -115,6 +106,17 @@ interface StatusBadgeProps {
     );
   };
 
+export const getMatchesUntilNextMatch = (
+    characterId: number, 
+    currentMatchIndex: number, 
+    characterIds: string[]
+) => {
+    const matchups = generateRoundRobinMatchups(characterIds);
+    const wrappedMatchups = [...matchups.slice(currentMatchIndex), ...matchups.slice(0, currentMatchIndex)];
+    const nextMatchIndex = wrappedMatchups.findIndex(match => match.includes(characterId));
+    return nextMatchIndex;
+}
+
 export const CharacterPage = () => {
     const { id } = useParams();
     const [showModal, setShowModal] = useState(false);
@@ -135,6 +137,7 @@ export const CharacterPage = () => {
     const { data: battleState, isLoading: isBattleLoading, isError: isBattleError } = useBattleState(); // Use battleState hook
     const { data: holders } = useCharacterHolders(characterId);
     const convertEthToUsd = useConvertEthToUsd();
+    const [currentMatchIdLast, setCurrentMatchIdLast] = useState(0);
 
     const { data: user } = useUser(address);
 
@@ -212,7 +215,10 @@ export const CharacterPage = () => {
         setShowModal(true);
     };
 
-    const handleCloseModal = () => setShowModal(false);
+    const handleCloseModal = () => {
+        console.log("mounted Calling handle close")
+        setShowModal(false);
+    }
     const handleTimeFrameChange = (timeFrame: TimeFrame) => {
         setSelectedTimeFrame(timeFrame);
     };
@@ -263,22 +269,26 @@ export const CharacterPage = () => {
     console.log("Matchups", matchups)
 
     // Determine the current match index from battleState
-    const currentMatchIndex = battleState?.currentMatch  ? (battleState?.currentMatch - 1) % (matchups.length -1) : undefined;
+    useEffect(()=> {
+        if (battleState?.currentMatch && battleState?.currentMatch > currentMatchIdLast) {
+            setCurrentMatchIdLast(battleState?.currentMatch)
+        }
+    },[battleState?.currentMatch])
 
-    console.log("Matchups current match: ", currentMatchIndex)
+    console.log("Matchups current match: ", currentMatchIdLast)
 
 
     // Find the next match for the character, wrapping around from the current index
-    const wrappedMatchups = [...matchups.slice(currentMatchIndex), ...matchups.slice(0, currentMatchIndex)];
+    const wrappedMatchups = [...matchups.slice(currentMatchIdLast), ...matchups.slice(0, currentMatchIdLast)];
     const nextMatchIndex = wrappedMatchups.findIndex(match => match.includes(characterId));
 
     // Calculate the true index of the next match
-    const trueNextMatchIndex = (nextMatchIndex + currentMatchIndex) % totalMatches;
+    const trueNextMatchIndex = (nextMatchIndex + currentMatchIdLast) % totalMatches;
 
     
 
     // Calculate the number of matches left until the next match
-    const matchesLeft = trueNextMatchIndex - currentMatchIndex ;
+    const matchesLeft = trueNextMatchIndex - currentMatchIdLast ;
 
     // Predict the next character that will be fought
     const nextMatch = matchups[trueNextMatchIndex];
@@ -336,7 +346,7 @@ export const CharacterPage = () => {
                     <div>
                         <p className="text-sm font-medium mb-1">Next Match:</p>
                         {characterStatus != "inBattle" && <p className="text-sm">In {matchesLeft * 2} min vs {nextOpponent?.name || "Unknown"}</p>}
-                        {/* <p className="text-sm">Current matchId: {currentMatchIndex} True next match: {trueNextMatchIndex}  nextMatchId: {nextMatchIndex}</p> */}
+                        {/* <p className="text-sm">Current matchId: {currentMatchIdLast} True next match: {trueNextMatchIndex}  nextMatchId: {nextMatchIndex}</p> */}
                     </div>
                 </div>
             </div>
@@ -363,7 +373,7 @@ export const CharacterPage = () => {
                                     24h Change
                                 </p>
                                 <p className={`text-xl font-bold ${performance > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                    {formatPercentage(performance)}
+                                    {formatPercentage(performance/100)}
                                 </p>
                             </div>
                             <div>
@@ -475,7 +485,9 @@ export const CharacterPage = () => {
             <ModalBuySell 
                 isInBattle={characterStatus == "inBattle"}
                 characterId={character?.id}
-                show={showModal}                handleClose={handleCloseModal}
+                show={showModal}
+                handleClose={handleCloseModal}
+                handleOpen={handleShowModal}
                 actionType={modalAction as any}
                 characterName={character?.name}
             />
