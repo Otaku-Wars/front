@@ -98,7 +98,7 @@ export const UserPage = () => {
   const performanceData = useAllCharacterPerformance(characterIds, yesterday);
 
   const netWorth = useMemo(() => {
-    return sellPrices?.reduce((acc, price) => acc + Number(viemFormatEther(price?.result ?? 0)) , 0) ?? 0;
+    return sellPrices?.reduce((acc, price: { result: string }) => acc + Number(viemFormatEther(price?.result ?? 0)) , 0) ?? 0;
   }, [sellPrices]);
 
   console.log("Net Worth", netWorth)
