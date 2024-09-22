@@ -55,7 +55,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     error: sellPriceError
   } = useSellPrice(characterId, BigInt(amount ?? 0) as any);
 
-  const ethAmount = buyPriceRaw ? formatEther(buyPriceRaw.toString()) : 0;
+  const ethAmount = buyPriceRaw ? formatEther(buyPriceRaw) : 0;
 
   const { 
     buyShares, 

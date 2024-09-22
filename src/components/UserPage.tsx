@@ -98,7 +98,7 @@ export const UserPage = () => {
   const performanceData = useAllCharacterPerformance(characterIds, yesterday);
 
   const netWorth = useMemo(() => {
-    return sellPrices?.reduce((acc, price: { result: string }) => acc + Number(viemFormatEther(price?.result ?? 0)) , 0) ?? 0;
+    return sellPrices?.reduce((acc, price) => acc + Number(viemFormatEther((price?.result ?? 0) as any)) , 0) ?? 0;
   }, [sellPrices]);
 
   console.log("Net Worth", netWorth)
@@ -274,7 +274,7 @@ export const UserPage = () => {
             <CardContent>
               {user?.balances?.map((balance: Balance, index: number) => {
                 const character = characters?.find(c => c.id === balance.character);
-                const value = sellPrices ? viemFormatEther(sellPrices[index]?.result) : 0;
+                const value = sellPrices ? viemFormatEther((sellPrices[index]?.result ?? 0) as any) : 0;
                 const performance = performanceData?.find(p => p.characterId === character?.id);
 
                 return (
@@ -291,8 +291,8 @@ export const UserPage = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold">{formatNumber(convertEthToUsd(value))}</div>
-                        <div className="text-sm text-muted-foreground">{formatEther(value)} ETH</div>
+                        <div className="font-semibold">{formatNumber(convertEthToUsd(Number(value)))}</div>
+                        <div className="text-sm text-muted-foreground">{formatEther(Number(value))} ETH</div>
                         {/* Performance Section */}
                         {performance?.isLoading && <div className="text-sm text-gray-500">Loading performance...</div>}
                         {performance?.isError && <div className="text-red-500">Error loading performance data</div>}
