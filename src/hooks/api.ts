@@ -12,8 +12,8 @@ export const useCharacter = (characterId: number): { data: Character | undefined
     return { data:character, isLoading, isError };
 }
 
-export const useCharacters = (): { data: Character[] | undefined, isLoading: boolean, isError: boolean } => {
-    const { data, isLoading, isError } = useQuery({
+export const useCharacters = (): { data: Character[] | undefined, isLoading: boolean, isError: boolean, isFetched: boolean } => {
+    const { data, isLoading, isError, isFetched } = useQuery({
         queryKey: ['characters'],
         queryFn: async () => {
             const response = await fetch(`${apiUrl}/characters`);
@@ -24,7 +24,7 @@ export const useCharacters = (): { data: Character[] | undefined, isLoading: boo
 
     console.log("fetched characters: ", data, isLoading, isError);
 
-    return { data, isLoading, isError };
+    return { data, isLoading, isError, isFetched };
 }
 
 export const useCharacterTrades = (characterId: number): { data: TradeActivity[] | undefined, isLoading: boolean, isError: boolean } => {

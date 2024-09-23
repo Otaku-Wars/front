@@ -117,6 +117,26 @@ export const getMatchesUntilNextMatch = (
     return nextMatchIndex;
 }
 
+export const getMatchesUntilNextMatchForCharacters = (
+    characterIds: string[],
+    currentMatchIndex: number, // In raw number, not wrapped,
+): { [id: number] : number} => {
+    const matchups = generateRoundRobinMatchups(characterIds);
+    const trueCurrentMatchIndex = currentMatchIndex % matchups.length;
+    const wrappedMatchups = [...matchups.slice(trueCurrentMatchIndex), ...matchups.slice(0, trueCurrentMatchIndex)];
+    const matchesTill = {}
+    characterIds.forEach(characterId => {
+        const nextMatchIndex = wrappedMatchups.findIndex(match => match.includes(Number(characterId)));
+        console.log("AA, true current matchindex", trueCurrentMatchIndex)
+        console.log("AA, djfnf",nextMatchIndex)
+        console.log("AA, matchups", wrappedMatchups)
+        const trueNextMatchIndex = (nextMatchIndex + trueCurrentMatchIndex) % matchups.length;
+        const matchesTill_ = trueNextMatchIndex - trueCurrentMatchIndex;
+        matchesTill[characterId] = matchesTill_;
+    })
+    return matchesTill;
+}
+
 export const CharacterPage = () => {
     const { id } = useParams();
     const [showModal, setShowModal] = useState(false);
@@ -129,7 +149,7 @@ export const CharacterPage = () => {
     const [selectedAttribute, setSelectedAttribute] = useState<number>(0);
 
     const { data: character, isLoading } = useCharacter(characterId);
-    const { data: characters } = useCharacters();
+    const { data: characters, isLoading: isCharactersLoading, isFetched: isCharactersFetched } = useCharacters();
     const { data: yourShares } = useCharacterSharesBalance(characterId, address);
     const { data: trades } = useCharacterTrades(characterId);
     const { data: matches } = useCharacterMatches(characterId);
@@ -264,18 +284,24 @@ export const CharacterPage = () => {
 
     // Generate round-robin matchups
     const characterIds = characters?.map(c => c.id.toString()) || [];
-    const matchups = generateRoundRobinMatchups(characterIds);
+    const [matchups, setMatchups] = useState<number[][]>([]);
+    useEffect(() => {
+        if (isCharactersFetched && matchups.length == 0) {
+            setMatchups(generateRoundRobinMatchups(characterIds));
+            console.log("calling generateRoundRobinMatchups")
+        }
+    }, [isCharactersFetched]);
     const totalMatches = matchups.length;
     console.log("Matchups", matchups)
 
     // Determine the current match index from battleState
     useEffect(()=> {
-        if (battleState?.currentMatch && battleState?.currentMatch > currentMatchIdLast) {
-            setCurrentMatchIdLast(battleState?.currentMatch)
+        if (battleState?.currentMatch) {
+            setCurrentMatchIdLast(battleState?.currentMatch % matchups.length)
         }
-    },[battleState?.currentMatch])
+    },[battleState?.currentMatch, matchups])
 
-    console.log("Matchups current match: ", currentMatchIdLast)
+    console.log("Matchups current match: ", currentMatchIdLast, "total matches: ", totalMatches)
 
 
     // Find the next match for the character, wrapping around from the current index
@@ -285,10 +311,12 @@ export const CharacterPage = () => {
     // Calculate the true index of the next match
     const trueNextMatchIndex = (nextMatchIndex + currentMatchIdLast) % totalMatches;
 
+    console.log("true match index", trueNextMatchIndex)
+
     
 
     // Calculate the number of matches left until the next match
-    const matchesLeft = trueNextMatchIndex - currentMatchIdLast ;
+    const matchesLeft = trueNextMatchIndex - currentMatchIdLast;
 
     // Predict the next character that will be fought
     const nextMatch = matchups[trueNextMatchIndex];
@@ -346,7 +374,7 @@ export const CharacterPage = () => {
                     <div>
                         <p className="text-sm font-medium mb-1">Next Match:</p>
                         {characterStatus != "inBattle" && <p className="text-sm">In {matchesLeft * 2} min vs {nextOpponent?.name || "Unknown"}</p>}
-                        {/* <p className="text-sm">Current matchId: {currentMatchIdLast} True next match: {trueNextMatchIndex}  nextMatchId: {nextMatchIndex}</p> */}
+                        <p className="text-sm">Current matchId: {currentMatchIdLast} and {battleState?.currentMatch} True next match: {trueNextMatchIndex}  nextMatchId: {nextMatchIndex}</p>
                     </div>
                 </div>
             </div>

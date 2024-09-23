@@ -6,7 +6,7 @@ import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import useWebSocket from 'react-use-websocket';
 import { Attribute, Character } from "@memeclashtv/types"
-import { useCharacterPerformance, useCharacters } from "../hooks/api";
+import { useBattleState, useCharacterPerformance, useCharacters } from "../hooks/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
@@ -16,6 +16,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { formatNumber } from '../lib/utils';
 import { useAllCharacterPerformance } from '../hooks/api';
+import { getMatchesUntilNextMatchForCharacters } from './CharacterPage';
 
 const cutText = (text, maxLength) => {
     if (text.length > maxLength) {
@@ -63,7 +64,7 @@ const AttributeIcon = ({ attribute, value }: { attribute: Attribute, value: numb
   }
 
 
-export const CharacterListItem = ({ character, performance }: { character: Character, performance: number }) => {
+export const CharacterListItem = ({ character, performance, matchesTillNextMatch }: { character: Character, performance: number, matchesTillNextMatch: number }) => {
   const convertEthToUsd = useConvertEthToUsd();
   const navigate = useNavigate();
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
@@ -108,6 +109,7 @@ export const CharacterListItem = ({ character, performance }: { character: Chara
           </Avatar>
           <div>
             <div className="font-bold text-[12px]">{character.name}</div>
+            <div className="text-xs text-gray-500">{matchesTillNextMatch} {matchesTillNextMatch === 1 ? 'match' : 'matches'} till next match</div>
           </div>
         </div>
       </TableCell>
@@ -144,6 +146,7 @@ export const CharacterList = () => {
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
     const convertEthToUsd = useConvertEthToUsd()
     const yesterday = useMemo(() => (new Date().getTime() / 1000) - 86400, []);
+    const { data: battleState } = useBattleState()
     const characterPerformance = useAllCharacterPerformance(characters?.map(c => c.id) ?? [], yesterday);
     const performanceMap = useMemo(() => {
         return characterPerformance?.reduce((acc, curr) => {
@@ -151,6 +154,15 @@ export const CharacterList = () => {
             return acc;
         }, {});
     }, [characterPerformance]);
+    const matchesTillNextMatchArray = useMemo(() => {
+      if (!battleState) {
+        console.log("No battle state")
+        return {}
+      }
+      const characterIds = characters?.map(c => String(c.id)) ?? [];
+      return getMatchesUntilNextMatchForCharacters(characterIds, battleState.currentMatch);
+    }, [characters, battleState]);
+    console.log('matches till next', matchesTillNextMatchArray)
     const navigate = useNavigate();
     const sortedCharacters = useMemo(() => {
         if (!characters) return [];
@@ -241,10 +253,16 @@ export const CharacterList = () => {
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>                    
+            <TableBody> 
+                {battleState?.currentMatch}    {"  "}               
                 {sortedCharacters
                     .map((character: any, index: number) => (
-                        <CharacterListItem key={index} character={character} performance={performanceMap[character.id]} />
+                        <CharacterListItem 
+                        key={index} 
+                        character={character} 
+                        performance={performanceMap[character.id]} 
+                        matchesTillNextMatch={matchesTillNextMatchArray[character.id]}
+                        />
                     ))}
             </TableBody>
           </Table>
