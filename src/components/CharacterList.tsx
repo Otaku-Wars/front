@@ -254,7 +254,6 @@ export const CharacterList = () => {
               </TableRow>
             </TableHeader>
             <TableBody> 
-                {battleState?.currentMatch}    {"  "}               
                 {sortedCharacters
                     .map((character: any, index: number) => (
                         <CharacterListItem 
