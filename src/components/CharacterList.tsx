@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import useWebSocket from 'react-use-websocket';
-import { Attribute, Character } from "@memeclashtv/types"
+import { Attribute, Character, CurrentBattleState, Status } from "@memeclashtv/types"
 import { useBattleState, useCharacterPerformance, useCharacters } from "../hooks/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -64,7 +64,7 @@ const AttributeIcon = ({ attribute, value }: { attribute: Attribute, value: numb
   }
 
 
-export const CharacterListItem = ({ character, performance, matchesTillNextMatch }: { character: Character, performance: number, matchesTillNextMatch: number }) => {
+export const CharacterListItem = ({ character, performance, matchesTillNextMatch, battleState }: { character: Character, performance: number, matchesTillNextMatch: number, battleState: CurrentBattleState }) => {
   const convertEthToUsd = useConvertEthToUsd();
   const navigate = useNavigate();
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
@@ -84,6 +84,30 @@ export const CharacterListItem = ({ character, performance, matchesTillNextMatch
 
   const handleClick = () => {
     navigate(`/character/${character.id}`);
+  };
+
+  const getMatchStatusText = () => {
+    let adjustedMatchesTillNextMatch = matchesTillNextMatch;
+
+    if (battleState.status === Status.Pending) {
+      adjustedMatchesTillNextMatch -= 1;
+    }
+
+    if (battleState.p1 === character.id || battleState.p2 === character.id) {
+      if (battleState.status === Status.Battling) {
+        return "In battle";
+      } else if (battleState.status === Status.Pending) {
+        return "Waiting to battle";
+      } else if (battleState.status === Status.Idle) {
+        return "Finished battling";
+      }
+    } else if (adjustedMatchesTillNextMatch === 0) {
+      return "Next up";
+    } else if (adjustedMatchesTillNextMatch > 0) {
+      return `${adjustedMatchesTillNextMatch} ${adjustedMatchesTillNextMatch === 1 ? 'match' : 'matches'} left until battle`;
+    } else {
+      return "Finished battling";
+    }
   };
 
   return (
@@ -109,7 +133,7 @@ export const CharacterListItem = ({ character, performance, matchesTillNextMatch
           </Avatar>
           <div>
             <div className="font-bold text-[12px]">{character.name}</div>
-            <div className="text-xs text-gray-500">{matchesTillNextMatch} {matchesTillNextMatch === 1 ? 'match' : 'matches'} till next match</div>
+            <div className="text-xs text-gray-500">{getMatchStatusText()}</div>
           </div>
         </div>
       </TableCell>
@@ -261,6 +285,7 @@ export const CharacterList = () => {
                         character={character} 
                         performance={performanceMap[character.id]} 
                         matchesTillNextMatch={matchesTillNextMatchArray[character.id]}
+                        battleState={battleState}
                         />
                     ))}
             </TableBody>

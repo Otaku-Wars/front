@@ -131,7 +131,10 @@ export const getMatchesUntilNextMatchForCharacters = (
         console.log("AA, djfnf",nextMatchIndex)
         console.log("AA, matchups", wrappedMatchups)
         const trueNextMatchIndex = (nextMatchIndex + trueCurrentMatchIndex) % matchups.length;
-        const matchesTill_ = trueNextMatchIndex - trueCurrentMatchIndex;
+        let matchesTill_ = trueNextMatchIndex - trueCurrentMatchIndex;
+        if(matchesTill_ < 0) {
+            matchesTill_ += matchups.length;
+        }
         matchesTill[characterId] = matchesTill_;
     })
     return matchesTill;
@@ -166,6 +169,30 @@ export const CharacterPage = () => {
     const totalStakes = useMemo(() => {
         return character?.healthStakes + character?.powerStakes + character?.attackStakes + character?.defenseStakes + character?.speedStakes;
     }, [character]);
+
+    const getMatchStatusText = () => {
+        let adjustedMatchesTillNextMatch = matchesLeft;
+    
+        if (battleState.status === Status.Pending) {
+          adjustedMatchesTillNextMatch -= 1;
+        }
+    
+        if (battleState.p1 === characterId || battleState.p2 === characterId) {
+          if (battleState.status === Status.Battling) {
+            return "In battle";
+          } else if (battleState.status === Status.Pending) {
+            return "Waiting to battle";
+          } else if (battleState.status === Status.Idle) {
+            return "Finished battling";
+          }
+        } else if (adjustedMatchesTillNextMatch === 0) {
+          return <p>Next up</p>;
+        } else if (adjustedMatchesTillNextMatch > 0) {
+          return <p>{adjustedMatchesTillNextMatch} {adjustedMatchesTillNextMatch === 1 ? 'match' : 'matches'} left until battle vs <img src={nextOpponent?.pfp} className="w-4 h-4 rounded-full inline-block" alt={nextOpponent?.name} />{nextOpponent?.name || "Unknown"} estimated in {adjustedMatchesTillNextMatch * 2} min</p>;
+        } else {
+          return "Finished battling";
+        }
+      };
 
     const yourStakes = useMemo(() => {
         const types = [
@@ -316,7 +343,10 @@ export const CharacterPage = () => {
     
 
     // Calculate the number of matches left until the next match
-    const matchesLeft = trueNextMatchIndex - currentMatchIdLast;
+    let matchesLeft = trueNextMatchIndex - currentMatchIdLast;
+    if(matchesLeft < 0) {
+        matchesLeft += matchups.length;
+    }
 
     // Predict the next character that will be fought
     const nextMatch = matchups[trueNextMatchIndex];
@@ -373,11 +403,11 @@ export const CharacterPage = () => {
                     </div>
                     <div>
                         <p className="text-sm font-medium mb-1">Next Match:</p>
-                        {characterStatus != "inBattle" && <p className="text-sm">In {matchesLeft * 2} min vs {nextOpponent?.name || "Unknown"}</p>}
-                        <p className="text-sm">Current matchId: {currentMatchIdLast} and {battleState?.currentMatch} True next match: {trueNextMatchIndex}  nextMatchId: {nextMatchIndex}</p>
+                        {getMatchStatusText()}
+                        
+                        </div>
                     </div>
                 </div>
-            </div>
 
             {/* Character info */}
             <div className='w-full lg:w-3/4 space-y-4 lg:space-y-8'>

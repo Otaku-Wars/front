@@ -289,7 +289,6 @@ export const WorldStateView = () => {
           {battleState?.status === Status.Pending && (
             <div className="text-sm text-gray-400 text-center">
               Start in <br/> <span className='text-xl'>{willStartIn}</span>
-              {battleState?.currentMatch}
             </div>
           )}
           {battleState?.status == Status.Battling && (
