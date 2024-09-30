@@ -145,7 +145,7 @@ export function NavBar() {
   }, [authenticated, wallets, address, setActiveWallet])
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-gray-900 text-gray-300 rounded-lg shadow-lg w-full overflow-y-auto custom-scrollbar">
-      <style jsx global>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 10px;
           height: 10px;

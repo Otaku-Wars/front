@@ -423,7 +423,7 @@ export const CharacterPage = () => {
             <div className="flex flex-col items-center lg:sticky lg:top-8 w-full lg:w-1/4 bg-card p-4 rounded-lg shadow bg-gray-900">
                 <div className="flex flex-col space-y-4">
                     <div className="relative flex flex-col items-center pb-6 z-10 lg:w-1/3 sticky top-8">
-                        <style jsx>{`
+                        <style>{`
                             .profile-picture-container {
                                 perspective: 1000px;
                                 transform-style: preserve-3d;

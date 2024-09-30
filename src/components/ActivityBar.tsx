@@ -207,16 +207,16 @@ export const ActivityBar = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (inputMessage.trim() && isLoggedIn) {
-      const newActivity: ChatActivity = {
-        type: ActivityType.Chat,
-        timestamp: Date.now(),
-        username: 'You',
-        message: inputMessage.trim()
-      }
-      setActivities([...activities, newActivity])
-      setInputMessage('')
-    }
+    // if (inputMessage.trim() && isLoggedIn) {
+    //   const newActivity: ChatActivity = {
+    //     type: ActivityType.Chat,
+    //     timestamp: Date.now(),
+    //     username: 'You',
+    //     message: inputMessage.trim()
+    //   }
+    //   setActivities([...activities, newActivity])
+    //   setInputMessage('')
+    // }
   }
 
   const handleLogin = () => {
@@ -225,7 +225,7 @@ export const ActivityBar = () => {
 
   return (
     <div className="bg-gray-900 text-gray-300 rounded-lg shadow-lg flex flex-col h-full w-full">
-      <style jsx global>{`
+      <style>{`
         /* Webkit (Chrome, Safari, newer versions of Opera) */
         .custom-scrollbar::-webkit-scrollbar {
           width: 10px;

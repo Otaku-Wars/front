@@ -440,7 +440,7 @@ export const WorldStateView = () => {
 
   return (
     <div className="bg-gray-900 text-white p-2 sm:p-4">
-      <style jsx global>{`
+      <style>{`
         @keyframes pulse-win {
           0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.5)); }
           50% { transform: scale(1.05); filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.7)); }

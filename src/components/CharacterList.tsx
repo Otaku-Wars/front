@@ -10,7 +10,7 @@ import { Character, Status } from '@memeclashtv/types';
 type SortColumn = 'marketCap' | 'price' | 'performance';
 type SortDirection = 'asc' | 'desc';
 
-export const StatusIndicator = ({ status, matchesLeft, totalMatches }: { status: Character['status'], matchesLeft: number, totalMatches: number }) => {
+export const StatusIndicator = ({ status, matchesLeft, totalMatches }: { status: any, matchesLeft: number, totalMatches: number }) => {
   console.log("AAbb status", status);
   const getStatusColor = () => {
     if (status === 'battling') return 'text-red-400';
@@ -240,7 +240,7 @@ export const CharacterList = () => {
 
   return (
     <div className="bg-gray-900 text-gray-300 rounded-lg shadow-lg h-full w-full overflow-y-auto custom-scrollbar">
-      <style jsx global>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 10px;
           height: 10px;
