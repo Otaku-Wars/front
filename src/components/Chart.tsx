@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatEther, formatNumber } from '../lib/utils';
 import { useConvertEthToUsd } from '../EthPriceProvider';
-import { MatchEndActivity } from '@memeclashtv/types/activity';
+import { MatchEndActivity, TradeActivity } from '@memeclashtv/types/activity';
 
 enum ActivityType {
     MatchEnd = 'MatchEnd',
@@ -14,11 +14,6 @@ enum ActivityType {
 interface BaseActivity {
     type: ActivityType;
     timestamp: number;
-}
-
-interface TradeActivity extends BaseActivity {
-    type: ActivityType.Trade;
-    newPrice: number;
 }
 
 type Activity = MatchEndActivity | TradeActivity;
@@ -88,7 +83,7 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div className="bg-background p-2 rounded shadow-md border border-gray-200">
+                <div className="bg-gray-800 p-2 rounded shadow-md border border-gray-700">
                     <p className="font-bold">{new Date(data.timestamp*1000).toLocaleString()}</p>
                     <p>Price: {formatEther(data.price)} ({formatNumber(convertEthToUsd(data.price))})</p>
                     <p>Activity: {data.activity}</p>
@@ -100,7 +95,7 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId }) => {
 
     return (
         <div className="w-full space-y-4">
-            <div className="h-[400px] bg-background">
+            <div className="h-[400px] bg-gray-900 rounded-lg border border-gray-700 bg">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
                         <defs>
@@ -128,10 +123,10 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId }) => {
                     <button
                         key={range}
                         onClick={() => setTimeRange(range)}
-                        className={`w-full py-2 ${timeRange === range ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                        className={`w-full py-2 ${timeRange === range ? 'bg-gray-700 text-white' : 'bg-gray-800'}`}
                         aria-label={`Toggle ${range} view`}
                     >
-                        {range}
+                        {range.toUpperCase()}
                     </button>
                 ))}
             </div>

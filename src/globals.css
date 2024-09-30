@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: 'ThaleahFat';
-  src: url('/DepartureMono-Regular.woff') format('truetype');
+  src: url('/disposabledroid.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
@@ -72,6 +72,10 @@
     @apply border-border;
   }
   body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
     @apply bg-background text-foreground;
     background-color: #111113;
     font-family: 'ThaleahFat', sans-serif; /* Apply the custom font */

@@ -1,296 +1,325 @@
+import React, { useState, useMemo } from 'react';
+import { ChevronDown, Swords, TrendingUp, TrendingDown, ShoppingCart, AlertTriangle, Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Image } from 'react-bootstrap';
-
-import React, { useEffect, useMemo, useState } from 'react';
-import Card from 'react-bootstrap/Card';
-import ListGroup from 'react-bootstrap/ListGroup';
-import useWebSocket from 'react-use-websocket';
-import { Attribute, Character, CurrentBattleState, Status } from "@memeclashtv/types"
-import { useBattleState, useCharacterPerformance, useCharacters } from "../hooks/api";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import { ArrowDownIcon, ArrowUpIcon, ChevronDown, ChevronUp, Diamond, Flame, Heart, Shield, Zap } from 'lucide-react';
-import { Button } from './ui/button';
-import { ScrollArea } from './ui/scroll-area';
+import { useCharacters, useBattleState, useAllCharacterPerformance } from '../hooks/api';
 import { useConvertEthToUsd } from '../EthPriceProvider';
-import { formatNumber } from '../lib/utils';
-import { useAllCharacterPerformance } from '../hooks/api';
+import { formatNumber, formatPercentage } from '../lib/utils';
 import { getMatchesUntilNextMatchForCharacters } from './CharacterPage';
+import { Character, Status } from '@memeclashtv/types';
+type SortColumn = 'marketCap' | 'price' | 'performance';
+type SortDirection = 'asc' | 'desc';
 
-const cutText = (text, maxLength) => {
-    if (text.length > maxLength) {
-        return text.substring(0, maxLength) + '..';
+export const StatusIndicator = ({ status, matchesLeft, totalMatches }: { status: Character['status'], matchesLeft: number, totalMatches: number }) => {
+  console.log("AAbb status", status);
+  const getStatusColor = () => {
+    if (status === 'battling') return 'text-red-400';
+    if (status === 'waiting-to-battle') return 'text-orange-400';
+    if (status === 'next') return 'text-yellow-400';
+    const ratio = matchesLeft / 12;
+    if (ratio <= 0.25) return 'text-red-400';
+    if (ratio <= 0.5) return 'text-yellow-400';
+    return 'text-green-400';
+  };
+
+  const getStatusText = () => {
+    if (status === 'battling') return 'In battle';
+    if (status === 'waiting-to-battle') return 'Waiting to battle';
+    if (status === 'next') return 'Next up';
+    if (status === 'finished') return 'Finished';
+    return `${matchesLeft} matches till battle`;
+  };
+
+  const urgencyLevel = Math.max(0, Math.min(1, status === 'waiting-to-battle' ? 0.9 : status === 'next' ? 0.7 : 1 - (matchesLeft / 12)));
+  const animationDuration = (() => {
+    const calcDuration = 2 - (urgencyLevel * 1.5);
+    if (typeof calcDuration !== 'number' || isNaN(calcDuration) || calcDuration < 0) {
+      console.warn(`Invalid animation duration calculated: ${calcDuration}. Falling back to 0.5.`);
+      return 0.5; // Fallback duration
     }
-    return text;
+    return Math.max(0.5, calcDuration);
+  })();
+
+  console.log("AAbb urgencyLevel", urgencyLevel);
+  console.log("AAbb status", status);
+  console.log("AAbb getStatusText", getStatusText());
+  console.log("AAbb getStatusColor", getStatusColor());
+  console.log("AAbb animationDuration", animationDuration);
+
+  return (
+    <motion.div className={`flex items-center space-x-1 ${getStatusColor()}`} initial={{ opacity: 1, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+      <motion.div className="relative w-4 h-4 sm:w-5 sm:h-5" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: animationDuration, repeat: Infinity, ease: "easeInOut" }}>
+        {status === 'battling' ? (
+          <Swords className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
+        ) : status === 'waiting-to-battle' ? (
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
+        ) : (
+          <>
+            <motion.div className="absolute inset-0 rounded-full border-2 border-current" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: animationDuration, repeat: Infinity, ease: "easeInOut" }} />
+            <motion.div className="absolute inset-0 rounded-full bg-current" initial={{ scale: 0 }} animate={{ scale: urgencyLevel }} transition={{ duration: animationDuration, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} />
+          </>
+        )}
+      </motion.div>
+      <motion.span className="text-xs sm:text-sm font-bold  whitespace-nowrap" animate={{ scale: [1, 1 + (urgencyLevel * 0.2), 1], textShadow: [`0 0 ${urgencyLevel * 2}px currentColor`, `0 0 ${urgencyLevel * 5}px currentColor`, `0 0 ${urgencyLevel * 2}px currentColor`] }} transition={{ duration: animationDuration, repeat: Infinity, ease: "easeInOut" }}>
+        {getStatusText()}
+      </motion.span>
+      <AnimatePresence>
+        {(urgencyLevel > 0.5 || status === 'waiting-to-battle') && (
+          <motion.span className="text-xs sm:text-sm" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.3 }}>
+            {status === 'waiting-to-battle' ? '⚠️' : '🔥'}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
 };
 
-export const formatFloat = (x, f) => {
-    return Number.parseFloat(x).toExponential(f);
-};
+const getMatchStatusText = (character, matchesTillNextMatch, battleState) => {
+  let adjustedMatchesTillNextMatch = matchesTillNextMatch;
 
-const AttributeIcon = ({ attribute, value }: { attribute: Attribute, value: number }) => {
-    const icons: Record<Attribute, React.ReactNode> = {
-      [Attribute.health]: <Heart className="w-3 h-3 text-green-500" />,
-      [Attribute.power]: <Diamond className="w-3 h-3 text-blue-500" />,
-      [Attribute.attack]: <Flame className="w-3 h-3 text-orange-500" />,
-      [Attribute.defense]: <Shield className="w-3 h-3 text-gray-500" />,
-      [Attribute.speed]: <Zap className="w-3 h-3 text-yellow-500" />
-    }
-  
-    const colors: Record<Attribute, string> = {
-      [Attribute.health]: 'text-green-500',
-      [Attribute.power]: 'text-blue-500',
-      [Attribute.attack]: 'text-orange-500',
-      [Attribute.defense]: 'text-gray-500',
-      [Attribute.speed]: 'text-yellow-500'
-    }
-    console.log("value: ", value)
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger>
-            <div className="flex items-center gap-0.5">
-              {icons[attribute]}
-              <span className={`text-xs font-bold ${colors[attribute]}`}>{value}</span>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{attribute}: {value}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    )
+  if (battleState.status === Status.Pending) {
+    adjustedMatchesTillNextMatch -= 1;
   }
-
-
-export const CharacterListItem = ({ character, performance, matchesTillNextMatch, battleState }: { character: Character, performance: number, matchesTillNextMatch: number, battleState: CurrentBattleState }) => {
+  console.log('battle state', battleState);
+  if (battleState.p1 === character.id || battleState.p2 === character.id) {
+    if (battleState.status === Status.Battling) {
+      return 'battling';
+    } else if (battleState.status === Status.Pending) {
+      return 'waiting-to-battle';
+    } else if (battleState.status === Status.Idle) {
+      return 'finished';
+    }
+  } else if (adjustedMatchesTillNextMatch === 1) {
+    return 'next';
+  } else if (adjustedMatchesTillNextMatch > 0) {
+    return `${adjustedMatchesTillNextMatch} ${adjustedMatchesTillNextMatch === 1 ? 'match' : 'matches'} left`;
+  } else {
+    return 'finished';
+  }
+};
+const CharacterRow = ({ character, performance, matchesLeft, status }: { character: Character, performance: number, matchesLeft: number, status: string }) => {
+  const [isHovered, setIsHovered] = useState(false);
   const convertEthToUsd = useConvertEthToUsd();
   const navigate = useNavigate();
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    setCursorPosition({ x: e.clientX, y: e.clientY });
-  };
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
-
-  const handleClick = () => {
+  const handleRowClick = () => {
     navigate(`/character/${character.id}`);
   };
 
-  const getMatchStatusText = () => {
-    let adjustedMatchesTillNextMatch = matchesTillNextMatch;
+  return (
+    <motion.tr 
+      className="border-b border-gray-700 hover:bg-gray-800/50 transition-colors duration-200 relative group" 
+      onMouseEnter={() => setIsHovered(true)} 
+      onMouseLeave={() => setIsHovered(false)} 
+      initial={{ opacity: 0, y: 20 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.3 }}
+      onClick={handleRowClick}
+    >
+      <td className="p-2 sm:p-3 relative">
+        <div className="flex items-center">
+          <motion.img src={character.pfp} alt={character.name} className="w-6 h-6 sm:w-8 sm:h-8 mr-2 font-bold rounded-full bg-gray-700" whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 300 }} />
+          <div>
+            <div className="font-bold text-lg sm:text-md md:text-md text-white">{character.name}</div>
+            <StatusIndicator status={status} matchesLeft={matchesLeft} totalMatches={character.matchCount} />
+          </div>
+        </div>
+        <AnimatePresence>
+          {isHovered && (
+            <motion.button 
+              className="absolute top-0 left-0 bg-yellow-500 text-black px-2 py-1 sm:px-3 sm:py-1 rounded-br-lg hover:bg-yellow-400 transition-colors text-xs font-bold shadow-md flex items-center space-x-1 z-10" 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: -10 }} 
+              transition={{ duration: 0.2 }}
+            >
+              <ShoppingCart className="w-3 h-3" />
+              <span
+                style={{
+                  textShadow: `
+                    2px 2px 0 #FFFFFF, 
+                    2px 2px 0 #FFFFFF, 
+                    2px 2px 0 #FFFFFF, 
+                    2px 2px 0 #FFFFFF
+                `,
+                }}
+               className="font-bold text-md hidden sm:inline">BUY NOW</span>
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </td>
+      <td className="font-bold text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base ">
+        <motion.div animate={{ scale: isHovered ? 1.05 : 1 }}>
+          {formatNumber(convertEthToUsd(character.price))}
+        </motion.div>
+      </td>
+      <td className={`text-right p-2 sm:p-3 ${performance >= 0 ? 'text-green-400' : 'text-red-400'} text-xs sm:text-sm md:text-base `}>
+        <motion.div className="flex items-center justify-end space-x-1" animate={{ scale: isHovered ? 1.05 : 1 }}>
+          {performance >= 0 ? <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" /> : <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />}
+          <span>{formatPercentage(performance)}</span>
+        </motion.div>
+      </td>
+      <td className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base ">
+        <motion.div animate={{ scale: isHovered ? 1.05 : 1 }}>
+          {formatNumber(convertEthToUsd(character.value))}
+        </motion.div>
+      </td>
+    </motion.tr>
+  );
+};
 
-    if (battleState.status === Status.Pending) {
-      adjustedMatchesTillNextMatch -= 1;
+export const CharacterList = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortColumn, setSortColumn] = useState<SortColumn>('marketCap');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const { data: characters, isLoading, isError } = useCharacters();
+  const { data: battleState } = useBattleState();
+  const convertEthToUsd = useConvertEthToUsd();
+  const yesterday = useMemo(() => (new Date().getTime() / 1000) - 86400, []);
+  const characterPerformance = useAllCharacterPerformance(characters?.map(c => c.id) ?? [], yesterday);
+  console.log("characterPerformance", characterPerformance);
+  const performanceMap = useMemo(() => {
+    return characterPerformance?.reduce((acc, curr) => {
+      acc[curr.characterId] = curr.data;
+      return acc;
+    }, {});
+  }, [characterPerformance]);
+  const matchesTillNextMatchArray = useMemo(() => {
+    if (!battleState) {
+      console.log("No battle state");
+      return {};
     }
+    const characterIds = characters?.map(c => String(c.id)) ?? [];
+    return getMatchesUntilNextMatchForCharacters(characterIds, battleState.currentMatch);
+  }, [characters, battleState]);
 
-    if (battleState.p1 === character.id || battleState.p2 === character.id) {
-      if (battleState.status === Status.Battling) {
-        return "In battle";
-      } else if (battleState.status === Status.Pending) {
-        return "Waiting to battle";
-      } else if (battleState.status === Status.Idle) {
-        return "Finished battling";
+  const filteredCharacters = useMemo(() => {
+    return characters?.filter(character => character.name.toLowerCase().includes(searchTerm.toLowerCase())) ?? [];
+  }, [characters, searchTerm]);
+
+  const sortedCharacters = useMemo(() => {
+    if (!filteredCharacters) return [];
+    return [...filteredCharacters].sort((a, b) => {
+      let aValue, bValue;
+      switch (sortColumn) {
+        case 'marketCap':
+          aValue = a.value;
+          bValue = b.value;
+          break;
+        case 'price':
+          aValue = a.price;
+          bValue = b.price;
+          break;
+        case 'performance':
+          const aPerf = performanceMap[a.id] || 0;
+          const bPerf = performanceMap[b.id] || 0;
+          aValue = aPerf;
+          bValue = bPerf;
+          break;
       }
-    } else if (adjustedMatchesTillNextMatch === 0) {
-      return "Next up";
-    } else if (adjustedMatchesTillNextMatch > 0) {
-      return `${adjustedMatchesTillNextMatch} ${adjustedMatchesTillNextMatch === 1 ? 'match' : 'matches'} left until battle`;
+      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+    });
+  }, [filteredCharacters, sortColumn, sortDirection, performanceMap]);
+
+  const handleSort = (column: SortColumn) => {
+    if (column === sortColumn) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      return "Finished battling";
+      setSortColumn(column);
+      setSortDirection('desc');
     }
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error</div>;
+  }
+
   return (
-    <TableRow 
-      onClick={handleClick}
-      
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={`cursor-pointer py-20 group ${isHovered ? 'breathing-effect-fast' : ''}`}
-      key={character.id}
-      style={{
-        //transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-        //transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-        //boxShadow: isHovered ? '0 0 15px rgba(255, 255, 0, 0.7)' : 'none',
-      }}
-    >
-      <TableCell className="px-3 py-3">
-        <div className="flex items-start items-center space-x-5">
-          <Avatar className="w-8 h-8 border">
-            <AvatarImage src={character.pfp} alt={character.name} />
-            <AvatarFallback>{character.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="font-bold text-[12px]">{character.name}</div>
-            <div className="text-xs text-gray-500">{getMatchStatusText()}</div>
+    <div className="bg-gray-900 text-gray-300 rounded-lg shadow-lg h-full w-full overflow-y-auto custom-scrollbar">
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 10px;
+          height: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #1f2937;
+          border-radius: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #4b5563;
+          border-radius: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+        }
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #4b5563 #1f2937;
+        }
+        .custom-scrollbar {
+          -ms-overflow-style: none;
+        }
+      `}</style>
+      <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-700 z-[100]">
+        <div className="flex flex-col items-center py-3 sm:py-4 px-2 sm:px-4 space-y-2 sm:space-y-4 z-[100]">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white ">Characters</h2>
+          <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md">
+            <input type="text" placeholder="Search characters..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full px-3 sm:px-4 py-1 sm:py-2 bg-gray-800 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base " />
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
-      </TableCell>
-      <TableCell className="p-2 text-md">{formatNumber(convertEthToUsd(character.price))}</TableCell>
-      <TableCell className="p-2">
-        <div className={`flex items-center text-md ${performance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-          {performance >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
-          {Math.abs(performance).toFixed(1)}%
-        </div>
-      </TableCell>
-      <TableCell className="p-2 text-md">
-        {formatNumber(convertEthToUsd(character.value))}
-      </TableCell>
-      {isHovered && (
-        <p 
-          className="fixed text-yellow-500 text-sm font-light breathing-effect-fast"
-          style={{position:'fixed', top: 7, left: '10%' }} // Adjusted position
-        >
-          Buy Me!
-        </p>
-      )}
-    </TableRow>
+      </div>
+      <div className="overflow-x-auto custom-scrollbar">
+        <table className="w-full">
+          <thead className="sticky top-0 bg-gray-900">
+            <tr className="text-gray-400 border-b border-gray-700">
+              <th className="text-left p-2 sm:p-3 text-xs sm:text-sm md:text-base ">Character</th>
+              <th className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base ">
+                <div className="flex items-center space-x-1 cursor-pointer hover:text-white transition-colors duration-200" onClick={() => handleSort('price')}>
+                  <span>Price</span>
+                  <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                </div>
+              </th>
+              <th className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base ">
+                <div className="flex items-center space-x-1 cursor-pointer hover:text-white transition-colors duration-200" onClick={() => handleSort('price')}>
+                  <span>24h</span>
+                  <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                </div>
+              </th>
+              <th className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base ">
+                <div 
+                  className="flex items-center justify-end space-x-1 cursor-pointer hover:text-white transition-colors duration-200" 
+                  onClick={() => handleSort('marketCap')}
+                >
+                  <span>MCap</span>
+                  <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedCharacters.map((character) => {
+              const performance = performanceMap[character.id] || 0;
+              console.log("performance", performance);
+              const matchesLeft = matchesTillNextMatchArray[character.id] || 0;
+              const status = getMatchStatusText(character, matchesLeft, battleState);
+              return (
+                <CharacterRow 
+                  key={character.id} 
+                  character={character} 
+                  performance={performance} 
+                  matchesLeft={matchesLeft} 
+                  status={status}
+                />
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
-
-type SortColumn = 'marketCap' | 'price' | 'performance'
-type SortDirection = 'asc' | 'desc'
-
-
-
-export const CharacterList = () => {
-    const { data: characters, isLoading, isError } = useCharacters();
-    const [sortColumn, setSortColumn] = useState<SortColumn>('marketCap')
-    const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
-    const convertEthToUsd = useConvertEthToUsd()
-    const yesterday = useMemo(() => (new Date().getTime() / 1000) - 86400, []);
-    const { data: battleState } = useBattleState()
-    const characterPerformance = useAllCharacterPerformance(characters?.map(c => c.id) ?? [], yesterday);
-    const performanceMap = useMemo(() => {
-        return characterPerformance?.reduce((acc, curr) => {
-            acc[curr.characterId] = curr.data;
-            return acc;
-        }, {});
-    }, [characterPerformance]);
-    const matchesTillNextMatchArray = useMemo(() => {
-      if (!battleState) {
-        console.log("No battle state")
-        return {}
-      }
-      const characterIds = characters?.map(c => String(c.id)) ?? [];
-      return getMatchesUntilNextMatchForCharacters(characterIds, battleState.currentMatch);
-    }, [characters, battleState]);
-    console.log('matches till next', matchesTillNextMatchArray)
-    const navigate = useNavigate();
-    const sortedCharacters = useMemo(() => {
-        if (!characters) return [];
-        return [...characters].sort((a, b) => {
-            let aValue, bValue;
-            switch (sortColumn) {
-                case 'marketCap':
-                    aValue = a.value;
-                    bValue = b.value;
-                    break;
-                case 'price':
-                    aValue = a.price;
-                    bValue = b.price;
-                    break;
-                case 'performance':
-                    const aPerf = performanceMap[a.id] || 0;
-                    const bPerf = performanceMap[b.id] || 0;
-                    aValue = aPerf;
-                    bValue = bPerf;
-                    break;
-            }
-            return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-        });
-    }, [characters, sortColumn, sortDirection, yesterday]);
-
-    const handleSort = (column: SortColumn) => {
-        if (column === sortColumn) {
-            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-        } else {
-            setSortColumn(column)
-            setSortDirection('desc')
-        }
-    }
-
-    const SortButton = ({ column, children }: { column: SortColumn, children: React.ReactNode }) => (
-        <Button
-            variant="ghost"
-            onClick={() => handleSort(column)}
-            className="h-8 px-2 text-xs font-bold"
-            aria-sort={sortColumn === column ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
-        >
-            {children}
-            {sortColumn === column && (
-                sortDirection === 'asc' ? <ChevronUp className="ml-1 h-3 w-3" /> : <ChevronDown className="ml-1 h-3 w-3" />
-            )}
-        </Button>
-    )
-
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-
-    if (isError) {
-        return <div>Error</div>;
-    }
-
-    const handleCharacterClick = (characterName: string) => {
-        navigate(`/character/${characterName}`);
-    };
-
-    return (
-      <div className='flex flex-col h-full rounded-lg border bg-[#151519]'
-      style={{
-        overflowX: 'hidden'
-      }}>
-        <div className="p-4 bg-[#1F1F23] border-rounded m-3 sticky">
-            <h2 className="text-lg font-bold text-center">Characters {" "}
-              <span className='breathing-effect text-sm font-light text-gray-300 inline-block'> Buy a Character<ArrowDownIcon className='w-4 h-4 inline-block'/></span>
-            </h2>
-          </div>
-        <ScrollArea className="h-full w-full">
-          <Table className="w-full overflow-hidden">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-1/3 min-w-[200px]">Character</TableHead>
-                <TableHead className="w-1/4 p-1 min-w-[80px]">
-                  <SortButton column="price">Price</SortButton>
-                </TableHead>
-                <TableHead className="w-1/6 p-1 min-w-[80px]">
-                  <SortButton column="performance">24h</SortButton>
-                </TableHead>
-                
-                <TableHead className="w-1/4 p-1 min-w-[100px]">
-                  <SortButton column="marketCap">
-                    <span className="hidden sm:inline">MCap</span>
-                    <span className="sm:hidden">MC</span>
-                  </SortButton>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody> 
-                {sortedCharacters
-                    .map((character: any, index: number) => (
-                        <CharacterListItem 
-                        key={index} 
-                        character={character} 
-                        performance={performanceMap[character.id]} 
-                        matchesTillNextMatch={matchesTillNextMatchArray[character.id]}
-                        battleState={battleState}
-                        />
-                    ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-        </div>
-    );
-};

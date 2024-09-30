@@ -29,10 +29,10 @@ export const StreamEmbed = () => {
     return (
       <iframe 
         // src={`https://player.twitch.tv/?channel=ultimateurinater&muted=false&parent=${window.location.hostname}&autoplay=true`}
-        src="https://lvpr.tv?v=53c80nobwpuzre6e&muted=false"
-        height={"100%"}
+        src="https://lvpr.tv?v=53c80nobwpuzre6e&muted=false&lowLatency=force"
         allowFullScreen 
         allow="autoplay; encrypted-media; picture-in-picture" 
+        className="h-full w-full"
       >
       </iframe>
     )

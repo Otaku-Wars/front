@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -21,6 +21,11 @@ import { Users, DollarSign, Coins, TrendingUp, Heart, Zap, Swords, Shield, Wind 
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import ModalUnstake from './ModalUnstake';
 import { formatEther, formatNumber, formatPercentage } from '../lib/utils';
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { Badge } from './ui/badge';
+import { Trophy, Target, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { StatusIndicator } from './CharacterList';
+import { useTimeTill } from './WorldStateView';
 
 type TimeFrame = 'Live' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'ALL';
 
@@ -150,6 +155,7 @@ export const CharacterPage = () => {
     const [startTime, setStartTime] = useState<number>(Math.floor(Date.now() / 1000) - 24 * 60 * 60);
     const [showStakeModal, setShowStakeModal] = useState(false);
     const [selectedAttribute, setSelectedAttribute] = useState<number>(0);
+    const [isFlipped, setIsFlipped] = useState(false);
 
     const { data: character, isLoading } = useCharacter(characterId);
     const { data: characters, isLoading: isCharactersLoading, isFetched: isCharactersFetched } = useCharacters();
@@ -185,7 +191,7 @@ export const CharacterPage = () => {
           } else if (battleState.status === Status.Idle) {
             return "Finished battling";
           }
-        } else if (adjustedMatchesTillNextMatch === 0) {
+        } else if (adjustedMatchesTillNextMatch === 1) {
           return <p>Next up</p>;
         } else if (adjustedMatchesTillNextMatch > 0) {
           return <p>{adjustedMatchesTillNextMatch} {adjustedMatchesTillNextMatch === 1 ? 'match' : 'matches'} left until battle vs <img src={nextOpponent?.pfp} className="w-4 h-4 rounded-full inline-block" alt={nextOpponent?.name} />{nextOpponent?.name || "Unknown"} estimated in {adjustedMatchesTillNextMatch * 2} min</p>;
@@ -321,6 +327,8 @@ export const CharacterPage = () => {
     const totalMatches = matchups.length;
     console.log("Matchups", matchups)
 
+    const willStartIn =  useTimeTill(battleState?.willStartAt ?? 0)
+
     // Determine the current match index from battleState
     useEffect(()=> {
         if (battleState?.currentMatch) {
@@ -357,110 +365,267 @@ export const CharacterPage = () => {
         return holders?.length || 0;
     }, [holders]);
 
-    if (isLoading || isBattleLoading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    const isBattling = characterStatus == "inBattle"
+    const isPendingMatch = characterStatus == "waiting"
 
+    const BuyButton = () => {
+        if (isBattling) {
+            return <Button disabled className="text-4xl flex-1 bg-gray-700 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10 h-40">Trading Locked🔒</Button>
+        }
+        if (isPendingMatch) {
+            return (
+                <Button 
+                style={{
+                    textShadow: `
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000
+                `,
+                }}  
+                className="text-4xl flex-1 breathing-green bg-green-600 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10 h-40"
+                    onClick={() => handleShowModal('Buy')}
+                >
+                    BUY NOW
+                    <span className="absolute top-0 right-0 bg-gray-700 bg-opacity-50 text-sm px-1 py-0.5 rounded-bl font-bold">
+                    {willStartIn.toString().padStart(2, '0')}s left to buy
+                </span>
+            </Button>
+            )
+        }
+        return (
+            <Button 
+                style={{
+                    textShadow: `
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000
+                `,
+                }}  
+                className="text-4xl flex-1 breathing-green bg-green-600 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10 h-40"
+                onClick={() => handleShowModal('Buy')}
+            >
+                BUY NOW
+                <span className="absolute top-0 right-0 bg-gray-700 bg-opacity-50 text-sm px-1 py-0.5 rounded-bl font-bold">
+                    {matchesLeft} matches till next battle
+                </span>
+            </Button>
+        )
+    }
+
+    if (isLoading || isBattleLoading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    console.log("AAbb character status", characterStatus)
     return (
         <div className="flex flex-col lg:flex-row w-full gap-4 lg:gap-8 items-start justify-center p-2 lg:p-4 min-h-screen">
-            <div className="flex flex-col items-center lg:sticky lg:top-8 w-full lg:w-1/4 bg-card p-4 rounded-lg shadow">
-                <Avatar className="w-32 h-32 lg:w-48 lg:h-48 mb-4">
-                    <AvatarImage src={character.pfp} alt={character.name} />
-                    <AvatarFallback>{character.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="text-center mt-2 mb-6">
-                    <CardTitle className="text-2xl lg:text-3xl">{character.name}</CardTitle>
-                    <CardDescription className="text-lg">Tier {getTier(character.value)}</CardDescription>
-                    <StatusBadge status={characterStatus} /> {/* Add StatusBadge here */}
-                </div>
-                <div className="flex flex-row justify-between gap-10 text-center w-full">
-                    <div>
-                        <p className="text-sm text-muted-foreground">Wins</p>
-                        <p className="text-xl font-bold">{character.winCount}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Loses</p>
-                        <p className="text-xl font-bold">{character.lossCount}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Matches</p>
-                        <p className="text-xl font-bold">{character.matchCount}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">Win odds</p>
-                        <p className="text-xl font-bold">{(character?.winCount * 100 / character?.matchCount)?.toFixed(0)}%</p>
-                    </div>
-                </div>
-                <div className="w-full space-y-4">
-                    <div className="w-full mt-6 space-y-2">
-                        {Object.entries(statIcons).map(([stat, icon]) => (
-                            <div key={stat} className="flex justify-between items-center">
-                                <span className="flex items-center gap-2">
-                                    {icon}
-                                    {stat}
-                                </span>
-                                <span>{character[stat.toLowerCase()]}</span>
+            <div className="flex flex-col items-center lg:sticky lg:top-8 w-full lg:w-1/4 bg-card p-4 rounded-lg shadow bg-gray-900">
+                <div className="flex flex-col space-y-4">
+                    <div className="relative flex flex-col items-center pb-6 z-10 lg:w-1/3 sticky top-8">
+                        <style jsx>{`
+                            .profile-picture-container {
+                                perspective: 1000px;
+                                transform-style: preserve-3d;
+                                width: 12rem;
+                                height: 12rem;
+                            }
+
+                            .profile-picture {
+                                width: 100%;
+                                height: 100%;
+                                transition: transform 10s;
+                                transform-style: preserve-3d;
+                                animation: hover-rotate 10s ease-in-out infinite;
+                            }
+
+                            .profile-picture:hover {
+                                animation-play-state: paused;
+                            }
+
+                            .profile-picture-front,
+                            .profile-picture-back {
+                                position: absolute;
+                                width: 100%;
+                                height: 100%;
+                                backface-visibility: hidden;
+                                border-radius: 50%;
+                            }
+
+                            .profile-picture-back {
+                                transform: rotateY(180deg);
+                                background-color: #1f2937;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 3rem;
+                                font-weight: bold;
+                                color: white;
+                            }
+
+                            @keyframes hover-rotate {
+                                0%, 100% { transform: rotateY(-20deg) rotateX(20deg); }
+                                25% { transform: rotateY(20deg) rotateX(-20deg); }
+                                50% { transform: rotateY(-20deg) rotateX(20deg); }
+                                75% { transform: rotateY(20deg) rotateX(-20deg); }
+                            }
+
+                            /* Flipping Animation */
+                            .rotate-y-180 {
+                                transform: rotateY(180deg);
+                            }
+                        `}</style>
+                        <div
+                            className="profile-picture-container relative mb-4 cursor-pointer"
+                            onClick={() => setIsFlipped(!isFlipped)}
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-full p-1">
+                                <div className={`profile-picture ${isFlipped ? 'rotate-y-180' : ''}`}>
+                                    <div className="profile-picture-front">
+                                        <div className="w-full h-full rounded-full bg-gradient-to-br from-yellow-400 via-red-500 to-pink-500 p-2 shadow-lg">
+                                            <Avatar className="w-full h-full border-2 border-solid border-yellow-400 bg-gradient-to-br from-yellow-400 via-red-500 to-pink-500 p-2 shadow-lg">
+                                                <AvatarImage src={character.pfp} alt={character.name} className="object-cover rounded-full" />
+                                                <AvatarFallback>{character.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                        </div>
+                                    </div>
+                                    <div className="profile-picture-back text-4xl font-bold">
+                                        {character.name.charAt(0)}
+                                    </div>
+                                </div>
                             </div>
-                        ))}
+                        </div>
+                        <h2 className="mt-4 text-4xl font-bold">{character.name}</h2>
+                        <div className="flex items-center mt-2 space-x-2">
+                            <Badge variant="secondary" className="text-lg px-3 py-1 bg-yellow-400 text-white font-bold">
+                                Tier {getTier(character.value)}
+                            </Badge>
+                            <Badge variant="outline" className="text-lg px-3 py-1 border-green-400 text-green-400">
+                                {characterStatus}
+                            </Badge>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-sm font-medium mb-1">Next Match:</p>
-                        {getMatchStatusText()}
-                        
+                    <div className="pt-0 z-10 relative lg:w-2/3 lg:pl-8">
+                        <div className="flex flex-row justify-between gap-4 mb-6">
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                                <Trophy className="w-8 h-8 text-yellow-400 mb-2 mx-auto" />
+                                <span className="text-xl text-gray-400">Win Rate</span>
+                                <span className="block text-2xl font-bold text-white">{(character.winCount * 100 / character.matchCount)?.toFixed(0)}%</span>
+                            </div>
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                                <Target className="w-8 h-8 text-blue-400 mb-2 mx-auto" />
+                                <span className="text-xl text-gray-400 font-bold">Matches</span>
+                                <span className="block text-2xl font-bold text-white">{character.matchCount}</span>
+                            </div>
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                                <ThumbsUp className="w-8 h-8 text-green-400 mb-2 mx-auto" />
+                                <span className="text-xl text-gray-400 font-bold">Wins</span>
+                                <span className="block text-2xl font-bold text-white">{character.winCount}</span>
+                            </div>
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                                <ThumbsDown className="w-8 h-8 text-red-400 mb-2 mx-auto" />
+                                <span className="text-xl text-gray-400 font-bold">Losses</span>
+                                <span className="block text-2xl font-bold text-white">{character.lossCount}</span>
+                            </div>
+                        </div>
+                        <div className="space-y-2 mb-6">
+                            {Object.entries(statIcons).map(([stat, icon]) => (
+                                <div key={stat} className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        {icon}
+                                        <span className="text-sm ml-2">{stat}</span>
+                                    </div>
+                                    <span className={`text-xl font-bold ${icon.props.className.split(' ').find(c => c.startsWith('text-'))}`}>
+                                        {character[stat.toLowerCase()]}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mt-6 pt-4 border-t border-gray-700">
+                            <h4 className="font-semibold mb-2 text-lg">Next Match:</h4>
+                            <div className="flex flex-row items-center align-center space-x-4">
+                                <div className="flex flex-col items-center align-center">
+                                    <StatusIndicator 
+                                    status={
+                                        characterStatus == "inBattle" ? 'battling' : 
+                                        characterStatus == "waiting" ? 'waiting-to-battle' : 
+                                        characterStatus == "idle" ? 'idle' :
+                                        characterStatus == "finished" ? 'finished' :
+                                        'idle'
+                                    } 
+                                    matchesLeft={matchesLeft} 
+                                    totalMatches={totalMatches} 
+                                />
+                                </div>
+                                <span className="text-xl font-bold mt-4 ml-[-10px]">vs</span>
+                                <div className="flex space-x-2 mt-4 items-center align-center">
+                                    <Avatar className="w-8 h-8 border-2 border-yellow-400">
+                                        <AvatarImage src={nextOpponent?.pfp} alt={nextOpponent?.name} />
+                                        <AvatarFallback>{nextOpponent?.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-sm font-semibold text-yellow-400">{nextOpponent?.name}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
             {/* Character info */}
-            <div className='w-full lg:w-3/4 space-y-4 lg:space-y-8'>
-                <Card>
+            <div className='w-full lg:w-3/4 space-y-4 lg:space-y-8'>    
+                <Card className='bg-gray-900'>
                     <CardHeader>
-                        <CardTitle>Price Chart</CardTitle>
+                            <h1 className='text-white font-bold text-4xl'>Price Chart</h1>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-                            <div>
-                                <p className="text-sm text-muted-foreground flex items-center">
-                                    <DollarSign className="w-4 h-4 mr-1" />
-                                    Price
-                                </p>
-                                <p className="text-xl font-bold">{formatNumber(convertEthToUsd(character.price))}</p>
-                                <p className="text-sm text-muted-foreground">{formatEther(character.price)} ETH</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-10 mb-6">
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                                <div className="text-xl text-gray-400 font-bold flex flex-row items-center justify-center">
+                                    <DollarSign className="w-4 h-4 text-green-400 mr-1" />
+                                    <h1 className="text-xl font-bold">Price</h1>
+                                </div>
+                                <p className="block text-2xl font-bold text-white">{formatNumber(convertEthToUsd(character.price))} </p>
+                                <span className="text-sm text-muted-foreground">{formatEther(character.price)}</span>
+                                
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground flex items-center">
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                                <div className="text-xl text-muted-foreground flex items-center justify-center">
                                     <TrendingUp className="w-4 h-4 mr-1" />
                                     24h Change
-                                </p>
-                                <p className={`text-xl font-bold ${performance > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                </div>
+                                <p className={`text-2xl font-bold ${performance > 0 ? 'text-green-500' : 'text-red-500'}`}>
                                     {formatPercentage(performance/100)}
                                 </p>
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground flex items-center">
-                                    <DollarSign className="w-4 h-4 mr-1" />
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                                <p className="text-xl text-muted-foreground flex items-center justify-center">
+                                    <DollarSign className="w-4 h-4 mr-1 text-green-400" />
                                     Market Cap
                                 </p>
-                                <p className="text-xl font-bold">{formatNumber(convertEthToUsd(character.value))}</p>
+                                <p className="text-2xl font-bold">{formatNumber(convertEthToUsd(character.value))}</p>
                                 <p className="text-sm text-muted-foreground">{formatEther(character.value)} ETH</p>
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground flex items-center">
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                                <p className="text-xl text-muted-foreground flex items-center">
                                     <Users className="w-4 h-4 mr-1" />
                                     Holders
                                 </p>
-                                <p className="text-xl font-bold">{holderCount}</p>
+                                <p className="text-2xl font-bold">{holderCount}</p>
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground flex items-center">
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                                <p className="text-xl text-muted-foreground flex items-center">
                                     <Coins className="w-4 h-4 mr-1" />
                                     Supply
                                 </p>
-                                <p className="text-xl font-bold">{(character.supply)}</p>
+                                <p className="text-2xl font-bold">{(character.supply)}</p>
                             </div>
+                            
                         </div>
-                        <div className="">
+                        
+                        <div className="mb-4">
                             <Chart activities={combinedActivities as any} characterId={characterId} />
                         </div>
-                        <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 mb-6">
+                        {/* <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 mb-6">
                             {['Live', '1D', '1W', '1M', '3M', 'YTD', '1Y', 'ALL'].map((timeFrame) => (
                                 <button
                                     key={timeFrame}
@@ -474,10 +639,30 @@ export const CharacterPage = () => {
                                     {timeFrame}
                                 </button>
                             ))}
-                        </div>
+                        </div> */}
                         <div className="flex space-x-4">
-                            <Button className="flex-1 text-lg py-6" onClick={() => handleShowModal('Buy')}>Buy</Button>
-                            <Button className="flex-1 text-lg py-6" variant="outline" onClick={() => handleShowModal('Sell')}>Sell</Button>
+                            <BuyButton />
+                            <Button 
+                                style={{
+                                    backgroundColor: '#BA3F3F',
+                                    textShadow: `
+                                        2px 2px 0 #000000, 
+                                        2px 2px 0 #000000, 
+                                        2px 2px 0 #000000, 
+                                        2px 2px 0 #000000, 
+                                        2px 2px 0 #000000
+                                      `,
+                                      color: '#FFFFFF',
+                                      fontWeight: 'bold',
+                                      fontSize: '20px',
+                                      opacity: '0.8',
+                 
+                                }}  
+                                className="text-4xl flex-1 text-lg py-6 hover:bg-red-700 transition-all duration-300 relative overflow-hidden group" 
+                                onClick={() => handleShowModal('Sell')}
+                            >
+                                SELL
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>

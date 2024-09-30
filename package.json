@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@livepeer/react": "^4.2.4",
-    "@memeclashtv/types": "^2.0.0",
+    "@memeclashtv/types": "^2.0.1",
     "@privy-io/react-auth": "^1.78.0",
     "@privy-io/wagmi": "^0.2.12",
     "@radix-ui/react-avatar": "^1.1.0",
@@ -31,6 +31,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
+    "framer-motion": "^11.9.0",
     "identicon.js": "^2.3.3",
     "livepeer": "^3.2.7",
     "lucide-react": "^0.424.0",
@@ -46,6 +47,7 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "use-eth-price": "^1.1.0",
+    "vaul": "^1.0.0",
     "viem": "^2.19.3",
     "wagmi": "^2.12.5"
   },

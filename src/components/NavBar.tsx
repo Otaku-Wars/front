@@ -61,6 +61,11 @@ const CustomButton = ({ children, onClick, shouldBreathDefault = false }) => (
         .breathing {
         animation: breathing 2s ease-in-out infinite;
       }
+
+      .breathing-green {
+        animation: breathing-green 2s ease-in-out infinite;
+      }
+
       @keyframes breathing {
         0%, 100% {
           transform: scale(1);
@@ -72,6 +77,19 @@ const CustomButton = ({ children, onClick, shouldBreathDefault = false }) => (
           background-color: #FFF200;
           box-shadow: 0 0 10px #FFF200;
 
+        }
+      }
+
+      @keyframes breathing-green {
+        0%, 100% {
+          transform: scale(1);
+          background-color: #10B981;
+          
+        }
+        50% {
+          transform: scale(1.05);
+          background-color: #00ff00;
+          box-shadow: 0 0 10px #00ff00;
         }
       }
     `}</style>
@@ -126,7 +144,31 @@ export function NavBar() {
     }
   }, [authenticated, wallets, address, setActiveWallet])
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-[#151519] backdrop-blur supports-[backdrop-filter]:bg-background">
+    <header className="sticky top-0 z-50 w-full border-b bg-gray-900 text-gray-300 rounded-lg shadow-lg w-full overflow-y-auto custom-scrollbar">
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 10px;
+          height: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #1f2937;
+          border-radius: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #4b5563;
+          border-radius: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+        }
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #4b5563 #1f2937;
+        }
+        .custom-scrollbar {
+          -ms-overflow-style: none;
+        }
+      `}</style>
       <div className="flex h-20 items-center w-full pl-5 pr-5">
         <Link to="/" className="mr-6 flex items-center space-x-2 xl:flex-row">
           <img src="/logo.png" alt="MemeClash.Tv Logo" className="h-10 w-auto" />

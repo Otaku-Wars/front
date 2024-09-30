@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Progress } from "./ui/progress";
 import { Copy, LogOut, Wallet, TrendingUp, Lock, ArrowUpRight, ArrowDownLeft, Users, Swords, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
-import { useCharacters, useUser, useAllCharacterPerformance } from '../hooks/api'
+import { useCharacters, useUser, useAllCharacterPerformance, useValueSpent, calculatePnL } from '../hooks/api'
 import { useAddress, useBalance, useWithdraw } from '../hooks/user';
 import { useParams, Link } from 'react-router-dom';
 import { truncateWallet } from './NavBar';
@@ -94,12 +94,29 @@ export const UserPage = () => {
   const yesterday = useMemo(() => new Date().getTime() / 1000 - 24 * 60 * 60, []);
   const characterIds = user?.balances?.map(balance => balance.character) || [];
   const balanceAmounts = user?.balances?.map(balance => balance.balance) || [];
+  console.log("balanceAmounts", balanceAmounts)
   const {data: sellPrices} = useGetSellPrices(characterIds.map((characterId, index) => ({characterId, amount: balanceAmounts[index]})));
   const performanceData = useAllCharacterPerformance(characterIds, yesterday);
-
+  const { data: valueSpents } = useValueSpent(user?.address ?? address, characterIds);
+  console.log("valueSpents", valueSpents)
   const netWorth = useMemo(() => {
     return sellPrices?.reduce((acc, price) => acc + Number(viemFormatEther((price?.result ?? 0) as any)) , 0) ?? 0;
   }, [sellPrices]);
+
+  //calculate total pnl
+  const {totalPnl, totalPercentageChange} = useMemo(() => {
+    let totalPnl = 0;
+    let totalPercentageChange = 0;
+    sellPrices?.forEach((price, index) => {
+      const valueSpent = valueSpents?.[index]?.spent ?? 0;
+      const value = viemFormatEther(price?.result as any);
+      const {percentageChange, absoluteChange} = calculatePnL(Number(valueSpent), Number(value));
+      
+      totalPnl += absoluteChange;
+      totalPercentageChange += percentageChange;
+    });
+    return {totalPnl, totalPercentageChange};
+  }, [sellPrices, valueSpents]);
 
   console.log("Net Worth", netWorth)
 
@@ -215,6 +232,7 @@ export const UserPage = () => {
                 <CardContent>
                   <div className="text-2xl font-bold">{formatNumber(convertEthToUsd(netWorth ?? 0))}</div>
                   <div className="text-xs text-muted-foreground">{formatEther(netWorth ?? 0)} ETH</div>
+                  <div className={`text-xs ${totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>{formatNumber(convertEthToUsd(totalPnl ?? 0))} ({formatPercentage(totalPercentageChange ?? 0)})</div>
                 </CardContent>
               </Card>
               <Card>
@@ -274,9 +292,14 @@ export const UserPage = () => {
             <CardContent>
               {user?.balances?.map((balance: Balance, index: number) => {
                 const character = characters?.find(c => c.id === balance.character);
-                const value = sellPrices ? viemFormatEther((sellPrices[index]?.result ?? 0) as any) : 0;
+                const trueValue = sellPrices ? sellPrices[index]?.result : 0;
+                const value = viemFormatEther(trueValue as any);
+                const valueSpent = valueSpents?.find(v => v.characterId === character?.id)?.spent ?? 0;
                 const performance = performanceData?.find(p => p.characterId === character?.id);
-
+                const {percentageChange, absoluteChange} = calculatePnL(Number(valueSpent), Number(value ));
+                const isPositive = percentageChange >= 0;
+                console.log("aaa valueSpent", valueSpent)
+                console.log("aaa trueValue", value)
                 return (
                   <Link to={`/character/${character?.id}`} key={balance.character} className="flex flex-col mb-4 p-2 rounded hover:bg-accent cursor-pointer transition-colors">
                     <div className="flex items-center justify-between">
@@ -297,9 +320,9 @@ export const UserPage = () => {
                         {performance?.isLoading && <div className="text-sm text-gray-500">Loading performance...</div>}
                         {performance?.isError && <div className="text-red-500">Error loading performance data</div>}
                         {performance?.data !== undefined && (
-                          <div className={`flex items-center text-sm ${performance.data >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {performance.data >= 0 ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
-                            {formatPercentage(performance.data/100)}
+                          <div className={`flex items-end text-sm ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+                            {isPositive ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
+                            {formatNumber(convertEthToUsd(absoluteChange))} ({formatPercentage(percentageChange)})
                           </div>
                         )}
                       </div>

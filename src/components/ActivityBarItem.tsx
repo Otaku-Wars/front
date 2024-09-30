@@ -154,7 +154,7 @@ export const ActivityBar = () => {
       <div className="p-4 border-b">
         <h2 className="text-lg font-semibold">Activity Feed</h2>
       </div>
-      <ScrollArea className="h-[calc(100vh-60px)]">
+      <ScrollArea className="">
         <div className="p-4 space-y-2">
           {activities.map((activity, index) => (
             <ActivityItem key={index} activity={activity} />

@@ -3,7 +3,7 @@ import { apiUrl } from "../main";
 import { Character, CurrentBattleState, User } from "@memeclashtv/types";
 import { MatchEndActivity, StakeActivity, TradeActivity } from "@memeclashtv/types/activity";
 import { useEthPrice } from "../EthPriceProvider";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 
 export const useCharacter = (characterId: number): { data: Character | undefined, isLoading: boolean, isError: boolean } => {
@@ -154,6 +154,7 @@ export const useUser = (address: string): { data: User | undefined, isLoading: b
         stakes: [], // Assuming no stakes for dummy data
         stakeUnlockTime: 0
     };
+    console.log("useUser data", data)
     return { data: data || defaultUser, isLoading, isError, isPending };
 }
 
@@ -187,4 +188,168 @@ export const useConvertEthToUsdApi = (): (eth:number) => number => {
     return useCallback((eth: number) => {
         return eth * price;
     }, [price]);
+}
+
+
+export const useTokenActivities = (
+    characterIds: number[]
+): { 
+    data: (TradeActivity | MatchEndActivity)[][] | undefined, 
+    isLoading: boolean, 
+    isError: boolean 
+} => {
+    const tradesResults = useQueries({
+        queries: characterIds.map(characterId => ({
+            queryKey: ['character', characterId, 'trades'],
+            queryFn: async () => {
+                const response = await fetch(`${apiUrl}/trades/character/${characterId}`);
+                return response.json();
+            },
+            staleTime: 10000,
+        }))
+    });
+
+    const matchesResults = useQueries({
+        queries: characterIds.map(characterId => ({
+            queryKey: ['character', characterId, 'matches'],
+            queryFn: async () => {
+                const response = await fetch(`${apiUrl}/matches/character/${characterId}`);
+                return response.json();
+            },
+            staleTime: 10000,
+        }))
+    });
+
+    console.log("valuespent tradesResults", tradesResults)
+    console.log("valuespent matchesResults", matchesResults)
+
+    const combinedActivities = useMemo(() => {
+        return characterIds.map((characterId, index) => {
+            if (tradesResults[index].isLoading || matchesResults[index].isLoading) {
+                return [];
+            }
+            if (tradesResults[index].isError || matchesResults[index].isError) {
+                return [];
+            }
+            
+            const trades = tradesResults[index].data || [];
+            const matches = matchesResults[index].data || [];
+
+            console.log("valuespent trades", trades)
+            console.log("valuespent matches", matches)
+
+            // Combine both activities
+            const allActivities = [
+                ...trades.map((trade: TradeActivity) => ({
+                    ...trade,
+                    timestamp: trade.timestamp, // Ensure timestamp is available
+                    type: 'trade' // Add a type for easier identification
+                })),
+                ...matches.map((match: MatchEndActivity) => ({
+                    ...match,
+                    timestamp: match.timestamp, // Ensure timestamp is available
+                })),
+            ];
+
+            console.log("valuespent allActivities", allActivities)
+
+            // Sort by timestamp
+            return allActivities.sort((a, b) => a.timestamp - b.timestamp);
+        });
+    }, [tradesResults, matchesResults, characterIds]);
+
+    const isLoading = tradesResults.some(result => result.isLoading) || matchesResults.some(result => result.isLoading);
+    const isError = tradesResults.some(result => result.isError) || matchesResults.some(result => result.isError);
+
+    console.log("valuespent combinedActivities", combinedActivities)
+    return { data: combinedActivities, isLoading, isError };
+}
+
+
+export const useValueSpent = (
+    userAddress: string,
+    characterIds: number[],
+): { 
+    data: {
+        characterId: number, 
+        spent: number,
+    }[] | undefined, 
+    isLoading: boolean, 
+    isError: boolean 
+} => {
+    const { data: tokenActivities, isLoading, isError } = useTokenActivities(characterIds);
+    const { data: user, isLoading: isUserLoading, isError: isUserError } = useUser(userAddress);
+    const pnlDataArray = useMemo(() => {
+        let pnlData = [];
+        let index = 0;
+        for (const characterId of characterIds) {
+            //All the trades and matches for a character
+            console.log("valuespent characterId", characterId)
+            const characterActivities = tokenActivities?.[index] || [];
+            //The balance of the user for a given character
+            const characterUserBalance = user?.balances?.find(balance => balance.character === characterId)?.balance
+            + (user?.stakes?.find(stake => stake.character === characterId)?.balance ?? 0);
+            console.log("valuespent characterUserBalance", characterUserBalance)
+            console.log("valuespent characterActivities", characterActivities)
+            const pnl = calculateValueSpent(
+                userAddress,
+                characterActivities, 
+                characterUserBalance,
+                characterId
+            );
+            pnlData.push({
+                characterId,
+                spent: pnl
+            });
+            index++;
+        }
+        return pnlData;
+    }, [tokenActivities, user, isLoading, isError]);
+
+    return { data: pnlDataArray, isLoading, isError };
+}
+
+export const calculateValueSpent = (
+    userAddress: string,
+    characterActivities: (TradeActivity | MatchEndActivity)[], 
+    characterUserBalance: number,
+    characterId: number
+): number => {
+    let pnl = 0;
+    if (characterUserBalance === 0) {
+        return 0;
+    }
+    console.log("valuespent characterActivities", characterActivities)
+    for (const activity of characterActivities as any) {
+        console.log("valuespent activity", activity)
+        if (
+            activity.type === ("trade" as any) && 
+            activity.character === characterId && 
+            activity.trader.toLowerCase() === userAddress.toLowerCase()
+        ) {
+            const isBuy = activity.isBuy;
+            const ethAmount = activity.ethAmount;
+            if (isBuy) {
+                pnl += ethAmount;
+            } else {
+                pnl -= ethAmount;
+            }
+        }
+    }
+    return pnl;
+}
+
+export const calculatePnL = (
+    valueSpent: number,
+    currentValue: number,
+): {
+    percentageChange: number,
+    absoluteChange: number,
+} => {
+    const percentageChange = ((currentValue - valueSpent) / valueSpent);
+    const absoluteChange = currentValue - valueSpent;
+    return {
+        percentageChange,
+        absoluteChange,
+    };
 }
