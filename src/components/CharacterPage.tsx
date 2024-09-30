@@ -389,7 +389,7 @@ export const CharacterPage = () => {
                 >
                     BUY NOW
                     <span className="absolute top-0 right-0 bg-gray-700 bg-opacity-50 text-sm px-1 py-0.5 rounded-bl font-bold">
-                    {willStartIn.toString().padStart(2, '0')}s left to buy
+                    {(willStartIn ?? 0).toString().padStart(2, '0')}s left to buy
                 </span>
             </Button>
             )
