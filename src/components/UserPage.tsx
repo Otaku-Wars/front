@@ -113,8 +113,9 @@ export const UserPage = () => {
       const {percentageChange, absoluteChange} = calculatePnL(Number(valueSpent), Number(value));
       
       totalPnl += absoluteChange;
-      totalPercentageChange += percentageChange;
+      //totalPercentageChange += percentageChange;
     });
+    totalPercentageChange = totalPnl / netWorth;
     return {totalPnl, totalPercentageChange};
   }, [sellPrices, valueSpents]);
 

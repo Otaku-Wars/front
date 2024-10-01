@@ -273,6 +273,7 @@ export const useValueSpent = (
     data: {
         characterId: number, 
         spent: number,
+        fee: number,
     }[] | undefined, 
     isLoading: boolean, 
     isError: boolean 
@@ -299,7 +300,8 @@ export const useValueSpent = (
             );
             pnlData.push({
                 characterId,
-                spent: pnl
+                spent: pnl.valueSpent,
+                fee: pnl.fee,
             });
             index++;
         }
@@ -309,15 +311,18 @@ export const useValueSpent = (
     return { data: pnlDataArray, isLoading, isError };
 }
 
+//2% fee
+export const FEE_PERCENTAGE = 0.02;
+
 export const calculateValueSpent = (
     userAddress: string,
     characterActivities: (TradeActivity | MatchEndActivity)[], 
     characterUserBalance: number,
     characterId: number
-): number => {
-    let pnl = 0;
+): {valueSpent: number, fee: number} => {
+    let totalValueSpent = 0;
     if (characterUserBalance === 0) {
-        return 0;
+        return {valueSpent: 0, fee: 0};
     }
     console.log("valuespent characterActivities", characterActivities)
     for (const activity of characterActivities as any) {
@@ -330,13 +335,15 @@ export const calculateValueSpent = (
             const isBuy = activity.isBuy;
             const ethAmount = activity.ethAmount;
             if (isBuy) {
-                pnl += ethAmount;
+                totalValueSpent += ethAmount;
             } else {
-                pnl -= ethAmount;
+                totalValueSpent -= ethAmount;
             }
         }
     }
-    return pnl;
+    const fee = totalValueSpent * FEE_PERCENTAGE;
+    const valueSpent = totalValueSpent - fee;
+    return {valueSpent: valueSpent, fee: fee};
 }
 
 export const calculatePnL = (
