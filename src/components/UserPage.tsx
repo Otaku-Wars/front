@@ -46,6 +46,7 @@ export const UserPage = () => {
     const pfp = (user as any)?.pfp;
     const username = (user as any)?.username;
     const convertEthToUsd = useConvertEthToUsd();
+    console.log("user", user)
     
     const { setActiveWallet } = useSetActiveWallet();
     //set active account
@@ -97,26 +98,35 @@ export const UserPage = () => {
   const {data: sellPrices} = useGetSellPrices(characterIds.map((characterId, index) => ({characterId, amount: balanceAmounts[index]})));
   const performanceData = useAllCharacterPerformance(characterIds, yesterday);
   const { data: valueSpents } = useValueSpent(user?.address ?? address, characterIds);
-  console.log("valueSpents", valueSpents)
+  //console.log("AAvalueSpents", valueSpents)
   const netWorth = useMemo(() => {
-    return sellPrices?.reduce((acc, price) => acc + Number(viemFormatEther((price?.result ?? 0) as any)) , 0) ?? 0;
+    return sellPrices?.reduce((acc, price) => {
+      const value = viemFormatEther(price?.result as any);
+      console.log("AAvalueSpent:adding", value)
+      return acc + Number(value);
+    }, 0) ?? 0;
   }, [sellPrices]);
+  console.log("AAvalueSpents netWorth", netWorth)
+
+  const totalSpent = useMemo(() => {
+    return valueSpents?.reduce((acc, valueSpent) => {
+      return acc + Number(valueSpent.spent);
+    }, 0) ?? 0;
+  }, [valueSpents]);
+
+  console.log("AAvalueSpents totalSpent", totalSpent)
 
   //calculate total pnl
   const {totalPnl, totalPercentageChange} = useMemo(() => {
     let totalPnl = 0;
     let totalPercentageChange = 0;
-    sellPrices?.forEach((price, index) => {
-      const valueSpent = valueSpents?.[index]?.spent ?? 0;
-      const value = viemFormatEther(price?.result as any);
-      const {percentageChange, absoluteChange} = calculatePnL(Number(valueSpent), Number(value));
-      
-      totalPnl += absoluteChange;
-      //totalPercentageChange += percentageChange;
-    });
-    totalPercentageChange = totalPnl / netWorth;
+    if (netWorth && totalSpent) {
+      const {absoluteChange, percentageChange} = calculatePnL(totalSpent, netWorth);
+      totalPnl = absoluteChange;
+      totalPercentageChange = percentageChange;
+    }
     return {totalPnl, totalPercentageChange};
-  }, [sellPrices, valueSpents]);
+  }, [netWorth, totalSpent]);
 
   console.log("Net Worth", netWorth)
 
