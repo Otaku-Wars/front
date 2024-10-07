@@ -23,7 +23,6 @@ export const StakeListItem: React.FC<StakeListItemProps> = ({ activity, characte
       case 1: return '💪'; // power
       case 2: return '⚔️'; // attack
       case 3: return '🛡️'; // defense
-      case 4: return '⚡'; // speed
       default: return '❓';
     }
   };

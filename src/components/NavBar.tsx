@@ -105,11 +105,24 @@ export function NavBar() {
   const { login } = useLogin({
     onComplete: async (user, isNewUser, wasAlreadyAuthenticated, loginMethod, linkedAccount) => {
       try {
-        const response = await fetch(`${apiUrl}/users/new/${address}`);
-        return response.json();
+        console.log("loginMethod", loginMethod)
+        const userAddress = user?.wallet?.address;
+        if(isNewUser && loginMethod == 'twitter'){
+          const response = await fetch(`${apiUrl}/users/new/${userAddress}`);
+          return response.json();
+        } else {
+          // Get user from API
+          const response = await fetch(`${apiUrl}/users/${userAddress}`);
+          const userFromApi = await response.json();
+          if(!userFromApi?.username || !userFromApi?.pfp){
+            // Create new user
+            const response = await fetch(`${apiUrl}/users/new/${userAddress}`);
+            return response.json();
+          }
+        }
       } catch (error) {
-          console.error('Error fetching new user:', error);
-          return undefined;
+        console.error('Error fetching new user:', error);
+        return undefined;
       }
     },
   })
@@ -185,26 +198,27 @@ export function NavBar() {
           <nav className="hidden md:flex items-center text-sm font-medium gap-4">
             <Dialog open={showHowToModal} onOpenChange={setShowHowToModal}>
               <DialogTrigger asChild>
-                <Button variant="ghost" className="font-bold" style={{color: '#F6E359'}}>How it works</Button>
+                <Button variant="ghost" className="text-2xl font-bold" style={{color: '#F6E359'}}>How it works</Button>
               </DialogTrigger>
               <DialogContent className="bg-gray-900 text-white p-6">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-bold mb-4">How it works</DialogTitle>
                   <DialogDescription>
                     <p className="mb-4">
-                      <span className="text-yellow-300">MemeClash.TV is a non-stop livestream of AI characters fight. Each character has unique skills and fight each others 24/7.</span>
+                      <span className="text-yellow-300">MemeClash.TV is a non-stop livestream where AI characters fight against each other for market share. Each character has unique skills and fight each others 24/7.</span>
                     </p>
                     <p className="mb-4">
-                      <span className="text-orange-400">Fight and Earn:</span> Characters take 10% of the opponent's money (market cap) when they win.
+                      <span className="text-green-400">Buy Shares:</span> Every character has its own shares. All shares are sold along a bonding curve (y=x/100000) The more people buy, the higher the price.
                     </p>
                     <p className="mb-4">
-                      <span className="text-green-400">Buy Shares:</span> Every character has its own shares. The more people buy, the higher the price.
+                      <span className="text-orange-400">Fight and Earn:</span> Characters take 10% of their opponent market cap when they win. Increases in market cap result in an increase in share price for character. The more a character wins, the more the higher its price.
                     </p>
-                    <p className="mb-4">
+                  
+                    {/* <p className="mb-4">
                       <span className="text-yellow-300">Power Ups:</span> Lock your shares to power up your character.
-                    </p>
+                    </p> */}
                     <p className="mb-4">
-                      <span className="text-blue-400">Make Profit:</span> Sell your shares anytime and secure your profit/loss.
+                      <span className="text-blue-400">Make Profit:</span> Sell your shares anytime, except during a match (because shares are locked) and secure your profits/loss. 
                     </p>
                   </DialogDescription>
                 </DialogHeader>
@@ -215,7 +229,7 @@ export function NavBar() {
               href="https://x.com/MemeClashTv"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-foreground/80 px-4 font-bold text-center"
+              className="transition-colors hover:text-foreground/80 px-4 font-bold text-center text-2xl"
               style={{color: '#F6E359'}}
             >
               Twitter
@@ -242,12 +256,12 @@ export function NavBar() {
           </SheetTrigger>
           <SheetContent side="right">
             <nav className="flex flex-col space-y-4">
-              <Button variant="ghost" className="font-bold" style={{color: '#F6E359'}} onClick={() => setShowHowToModal(true)}>How It Works</Button>
+              <Button variant="ghost" className="text-2xl font-bold" style={{color: '#F6E359'}} onClick={() => setShowHowToModal(true)}>How It Works</Button>
               <a
               href="https://x.com/MemeClashTv"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-foreground/80 px-4 font-bold text-center"
+              className="transition-colors hover:text-foreground/80 px-4 font-bold text-center text-2xl"
               style={{color: '#F6E359'}}
             >
               Twitter

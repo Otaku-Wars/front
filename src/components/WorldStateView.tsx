@@ -112,7 +112,9 @@ const PriceInfo = ({ currentPrice, winPrice, losePrice, value, supply, isRightSi
   const convertEthToUsd = useConvertEthToUsd()
 
   return (
-    <TooltipProvider>
+    <TooltipProvider
+      delayDuration={0}
+    >
       <Tooltip>
         <TooltipTrigger asChild>
           <div className={`flex items-start cursor-help w-full ${priceInfoClasses}`}>
@@ -167,7 +169,9 @@ const PriceInfo = ({ currentPrice, winPrice, losePrice, value, supply, isRightSi
 const MarketInfo = ({ value, supply, isRightSide }: { value: number, supply: number, isRightSide: boolean }) => {
   const convertEthToUsd = useConvertEthToUsd()
   return (
-  <TooltipProvider>
+  <TooltipProvider
+    delayDuration={0}
+  >
     <Tooltip>
       <TooltipTrigger asChild>
         <div className={`flex flex-col ${isRightSide ? 'items-end' : 'items-start'} cursor-help`}>
@@ -196,7 +200,9 @@ const HoldingsInfo = ({ isGameOver, isWinner, isLoser, sharesOwned, holdingsValu
   const loss = loseHoldingsValue - holdingsValue
   console.log("sharesOwned", sharesOwned, "holdingsValue", holdingsValue, "winHoldingsValue", winHoldingsValue, "loseHoldingsValue", loseHoldingsValue, "gain", gain, "loss", loss)
   return (
-    <TooltipProvider>
+    <TooltipProvider
+      delayDuration={0}
+    >
       <Tooltip>
       <TooltipTrigger asChild>
         <div className="flex items-center cursor-help">
@@ -374,18 +380,48 @@ export const WorldStateView = () => {
     console.log("characterAA", character.id, "isWinner", isWinner, "isLoser", isLoser)
     const holdingsValue = !isRightSide ? holdingsValue1 : holdingsValue2;
     const isGameOver = winner && true;
+    const winRate = character.matchCount > 0 && character.winCount > 0 ? character.winCount / character.matchCount : 0;
 
     return (
       <div className={`flex flex-col ${isRightSide ? 'items-start' : 'items-end'} w-full max-w-[45%]`}>
-        <div className={`flex items-center ${isRightSide ? 'flex-row-reverse' : 'flex-row'} mb-1 sm:mb-2`}>
+        <div 
+          className={`flex items-center ${isRightSide ? 'flex-row-reverse' : 'flex-row'} mb-1 sm:mb-2 cursor-pointer`}
+          onClick={() => {
+            navigator(`/character/${character.id}`)
+          }}
+        >
           <div className={`flex flex-col ${isRightSide ? 'items-start ml-1 sm:ml-2' : 'items-end mr-1 sm:mr-2'}`}>
             <h2 className="text-sm sm:text-base md:text-lg font-bold mb-0.5 sm:mb-1">
               {isRightSide && <span className="mr-2">{character.name}</span>}
+              {isRightSide && <TooltipProvider
+                delayDuration={0}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-xs sm:text-sm text-gray-400">{formatPercentage(winRate)}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="text-sm">Win Rate: {formatPercentage(winRate)}</div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>}
               {isPendingMatch && <span className="ml-2 text-gray-400 animate-pulse-glow">WAITING...</span>}
               {isWinner && <span className="ml-2 text-green-400 animate-pulse-win-glow">WON (price now ${winPrice.toLocaleString()})</span>}
               {isLoser && <span className="ml-2 text-red-400 animate-pulse-lose-glow">LOST (price now ${losePrice.toLocaleString()})</span>}
-              {/* {!isWinner && !isLoser && !isPendingMatch && <span className="ml-2 text-gray-400 opacity-90">Who will win?</span>} */}
+              {!isRightSide && <TooltipProvider
+                delayDuration={0}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-xs sm:text-sm text-gray-400">{formatPercentage(winRate)}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="text-sm">Win Rate: {formatPercentage(winRate)}</div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>}
               {!isRightSide && <span className="ml-2">{character.name}</span>}
+
             </h2>
             <CharacterStats character={character} />
           </div>

@@ -3,15 +3,17 @@ import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, Send, Lock, ArrowUpRight, ArrowDownRight, Heart, Shield, Zap, Swords } from 'lucide-react'
 import { ScrollArea, ScrollBar } from "./ui/scroll-area"
-import { BaseActivity, MatchEndActivity, MatchStartActivity, MatchPendingActivity, TradeActivity, StakeActivity } from '@memeclashtv/types/activity'
-import { Character } from '@memeclashtv/types';
-import { useCharacters } from '../hooks/api';
+import { BaseActivity, MatchEndActivity, MatchStartActivity, MatchPendingActivity, TradeActivity, StakeActivity, ChatActivity } from '@memeclashtv/types/activity'
+import { Character, User } from '@memeclashtv/types';
+import { useCharacters, useUsers } from '../hooks/api';
 import { formatNumber } from '../lib/utils';
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { statIcons } from './CharacterPage';
-import { useActivities } from './ActivityListenerProvider'
+import { useActivities, useSendMessage } from './ActivityListenerProvider'
 import { usePrivy, useLogin } from '@privy-io/react-auth'
 import { useNavigate } from 'react-router-dom'
+import { truncateWallet } from './NavBar'
+import { Avatar } from './ui/avatar'
 
 export enum ActivityType {
   MatchPending = 'MatchPending',
@@ -19,13 +21,15 @@ export enum ActivityType {
   MatchEnd = 'MatchEnd',
   Trade = 'Trade',
   Stake = 'Stake',
+  Chat = 'Chat',
 }
 
-// Helper function to format timestamps to hour and minute
-const formatTime = (timestamp: number) => format(new Date(timestamp), 'HH:mm')
+// Helper function to format timestamps to hour and minute with am/pm
+const formatTime = (timestamp: number) => format(new Date(timestamp), 'h:mm a')
 
 // Activity renderer component
-const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: BaseActivity, characters: Character[], convertEthToUsd: any}) => {
+const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activity: BaseActivity, characters: Character[], convertEthToUsd: any, users: User[]}) => {
+  const navigate = useNavigate()
   const renderContent = () => {
     const time = (
       <span className="text-xs text-gray-500 flex items-center mr-2 min-w-[40px]">
@@ -50,12 +54,15 @@ const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: Bas
             <span className="text-yellow-400 font-semibold mr-2">Match Pending:</span>
             <div className="flex items-center">
               <img src={character1?.pfp} alt={character1?.name} className="w-5 h-5 rounded-full object-cover border border-yellow-400" />
+              <p onClick={() => navigate(`/character/${character1?.id}`)}>{character1?.name}</p>
               <span className="mx-1 font-bold">VS</span>
               <img src={character2?.pfp} alt={character2?.name} className="w-5 h-5 rounded-full object-cover border border-yellow-400" />
+              <p onClick={() => navigate(`/character/${character2?.id}`)}>{character2?.name}</p>
             </div>
             <span className="ml-2 text-yellow-400">
-              in {Math.round((matchPending.startTime - Date.now()) / 1000)}s
+              in {Math.round((matchPending.startTime - Date.now() / 1000))}s
             </span>
+            <span className="ml-2 text-yellow-400">buy your shares now!!!</span>
           </motion.div>
         )
 
@@ -72,10 +79,13 @@ const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: Bas
           >
             {time}
             <span className="text-blue-400 font-semibold mr-2">Match Started:</span>
-            <div className="flex items-center">
+            <div className="flex items-center flex-wrap">
               <img src={character1Match?.pfp} alt={character1Match?.name} className="w-5 h-5 rounded-full object-cover border border-blue-400" />
+              <p onClick={() => navigate(`/character/${character1Match?.id}`)}>{character1Match?.name}</p>
               <span className="mx-1 font-bold text-blue-400">VS</span>
               <img src={character2Match?.pfp} alt={character2Match?.name} className="w-5 h-5 rounded-full object-cover border border-blue-400" />
+              <p onClick={() => navigate(`/character/${character2Match?.id}`)}>{character2Match?.name}</p>
+              <span className="mx-1 font-bold text-blue-400">who will win?</span>
             </div>
           </motion.div>
         )
@@ -86,6 +96,7 @@ const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: Bas
         const winnerPrice = winnerIsP1 ? 
         formatNumber(convertEthToUsd(matchEnd?.tokenState?.newPrice1)):
         formatNumber(convertEthToUsd(matchEnd?.tokenState?.newPrice2))
+        const tvlTransferred = formatNumber(convertEthToUsd(matchEnd.tokenState.reward));
         const winnerCharacter = characters?.find(c => c.id === matchEnd?.winner);
         const loserCharacter = characters?.find(c => c.id === (winnerIsP1 ? matchEnd?.p2 : matchEnd?.p1));
         return (
@@ -99,10 +110,14 @@ const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: Bas
             <span className="text-green-400 font-semibold mr-2">Match Results:</span>
             <div className="flex items-center flex-wrap">
               <img src={winnerCharacter?.pfp} alt={winnerCharacter?.name} className="w-5 h-5 rounded-full object-cover border border-green-400" />
-              <span className="mx-1 font-bold text-green-400">wins</span>
-              <span className="text-green-400">{winnerPrice}</span>
+              <p onClick={() => navigate(`/character/${winnerCharacter?.id}`)}>{winnerCharacter?.name}</p>
+              <span className="mx-1 font-bold text-green-400">beat</span>
+              <img src={loserCharacter?.pfp} alt={loserCharacter?.name} className="w-5 h-5 rounded-full object-cover border border-red-400 opacity-50 ml-2" />
+              <p className="text-red-400" onClick={() => navigate(`/character/${loserCharacter?.id}`)}>{loserCharacter?.name}</p>
+              <span className="mx-1 font-bold text-green-400">gaining</span>
+              <span className="text-green-400">{tvlTransferred} in MktCap</span>
+              <span className="mx-1 font-bold text-green-400">price now {winnerPrice}</span>
             </div>
-            <img src={loserCharacter?.pfp} alt={loserCharacter?.name} className="w-5 h-5 rounded-full object-cover border border-red-400 opacity-50 ml-2" />
           </motion.div>
         )
 
@@ -111,11 +126,15 @@ const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: Bas
         const character = characters?.find(c => c.id === trade.character);
         const cost = formatNumber(convertEthToUsd(trade?.ethAmount));
         const amount = trade?.shareAmount;
+        const userTrader = users?.find(u => u.address?.toLowerCase() == trade.trader?.toLowerCase()) as any
+        const traderDisplayName = userTrader?.username ? `@${userTrader?.username}` : truncateWallet(trade.trader);
+        const traderPfp = userTrader?.pfp ? userTrader?.pfp : '/placeholder.svg';
         return (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
+            
             className={`p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full ${trade.isBuy ? 'bg-green-900/50' : 'bg-red-900/50'}`}
           >
             {time}
@@ -123,8 +142,12 @@ const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: Bas
               {trade.isBuy ? 'Buy:' : 'Sell:'}
             </span>
             <div className="flex items-center flex-wrap">
-              <img src={character?.pfp} alt={character?.name} className="w-5 h-5 rounded-full object-cover border border-gray-400" />
-              <span className="mx-1">{amount} shares</span>
+              <img src={traderPfp} alt={traderDisplayName} className="w-5 h-5 rounded-full object-cover border border-gray-400" />
+              <span className="text-gray-400 underline" onClick={() => navigate(`/user/${traderDisplayName}`)}>{traderDisplayName}</span>
+              <span className="mx-1">{trade.isBuy ? 'bought' : 'sold'}  {amount}</span>
+              <img src={character?.pfp} alt={character?.name}  className="w-5 h-5 rounded-full object-cover border border-gray-400" />
+              <span className="text-gray-400" onClick={() => navigate(`/character/${character?.id}`)}>{character?.name}</span>
+              <span className="mx-1">{trade.isBuy ? 'for' : 'at'}</span>
               <span className="font-bold">{cost}</span>
               {trade.isBuy ? <ArrowUpRight className="w-4 h-4 text-green-400 ml-1" /> : <ArrowDownRight className="w-4 h-4 text-red-400 ml-1" />}
             </div>
@@ -148,25 +171,29 @@ const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: Bas
               <img src={characterStake?.pfp} alt={characterStake?.name} className="w-5 h-5 rounded-full object-cover border border-purple-400" />
               <span className="mx-1">{stake.amount}</span>
               {statIcons[stake.attribute]}
-              <span className="ml-1 text-gray-400">by {stake.staker}</span>
+              <span className="ml-1 text-gray-400">by {truncateWallet(stake.staker)}</span>
             </div>
           </motion.div>
         )
 
-      // case ActivityType.Chat:
-      //   const chat = activity as ChatActivity
-      //   return (
-      //     <motion.div
-      //       initial={{ opacity: 0, y: 20 }}
-      //       animate={{ opacity: 1, y: 0 }}
-      //       exit={{ opacity: 0, y: 20 }}
-      //       className="bg-gray-800/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full"
-      //     >
-      //       {time}
-      //       <span className="font-semibold mr-2">{chat.username}:</span>
-      //       <span className="break-all">{chat.message}</span>
-      //     </motion.div>
-      //   )
+      case ActivityType.Chat:
+        const chat = activity as ChatActivity
+        const userChat = users?.find(u => u.address?.toLowerCase() == chat.sender?.toLowerCase()) as any
+        const displayName = userChat?.username ? `@${userChat?.username}` : truncateWallet(chat.sender);
+        const pfp = userChat?.pfp ? userChat?.pfp : '/placeholder.svg';
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="bg-gray-800/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full"
+          >
+            {time}
+            <img src={pfp} alt={displayName} className="w-5 h-5 rounded-full object-cover border border-gray-400" />
+            <span className="font-bold underline mr-2" onClick={() => navigate(`/user/${chat.sender}`)}>{displayName}:</span>
+            <span className="break-all">{chat.message}</span>
+          </motion.div>
+        )
 
       default:
         return <p>Unknown activity type</p>
@@ -182,13 +209,15 @@ const ActivityItem = ({ activity, characters, convertEthToUsd }: { activity: Bas
 
 // Main ActivityBar component
 export const ActivityBar = () => {
-  const activities = useActivities();
+  const activities = useActivities() as any;
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const converEthToUsd = useConvertEthToUsd();
   const { data:characters } = useCharacters();
+  const { data:users } = useUsers();
   const [inputMessage, setInputMessage] = useState('')
   const { authenticated, user } = usePrivy()
   const { login } = useLogin()
+  const sendMessage = useSendMessage()
   const navigate = useNavigate()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
@@ -207,16 +236,10 @@ export const ActivityBar = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // if (inputMessage.trim() && isLoggedIn) {
-    //   const newActivity: ChatActivity = {
-    //     type: ActivityType.Chat,
-    //     timestamp: Date.now(),
-    //     username: 'You',
-    //     message: inputMessage.trim()
-    //   }
-    //   setActivities([...activities, newActivity])
-    //   setInputMessage('')
-    // }
+    if (inputMessage.trim() && isLoggedIn) {
+      sendMessage(inputMessage)
+      setInputMessage('')
+    }
   }
 
   const handleLogin = () => {
@@ -259,8 +282,8 @@ export const ActivityBar = () => {
       <div className="flex-grow overflow-y-auto p-4 flex flex-col-reverse custom-scrollbar">
         <div ref={scrollAreaRef} />
         <AnimatePresence initial={false}>
-          {activities.slice().map((activity, index) => (
-            <ActivityItem key={index} activity={activity} characters={characters} convertEthToUsd={converEthToUsd} />
+          {activities?.map((activity, index) => (
+            <ActivityItem key={index} activity={activity} characters={characters} convertEthToUsd={converEthToUsd} users={users} />
           ))}
         </AnimatePresence>
       </div>

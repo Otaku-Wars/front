@@ -70,7 +70,7 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
                   <AvatarFallback>{displayName}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-semibold">{truncateWallet(holder.address)}</p>
+                  <p className="font-semibold">{displayName}</p>
                   <p className="text-sm text-muted-foreground">{holder.balance}</p>
                 </div>
               </div>

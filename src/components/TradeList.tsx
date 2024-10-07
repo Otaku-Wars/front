@@ -27,20 +27,21 @@ const timeSince = (date: number) => {
 const TraderCard = ({ 
   pfp,
   trader,
+  id
 }: { 
   pfp: string,
-  trader: string
+  trader: string,
+  id: string
 }) => {
   const navigate = useNavigate(); // Initialize useNavigate
-  const displayName = (trader as any)?.username ?? truncateWallet(trader);
   return (
     <div 
       className="flex items-center space-x-4 cursor-pointer" 
-      onClick={() => navigate(`/user/${trader}`)} // Navigate to user's page on click
+      onClick={() => navigate(`/user/${id}`)} // Navigate to user's page on click
     >
       <Avatar className="h-10 w-10">
         <AvatarImage src={pfp ?? "/placeholder.svg?height=40&width=40"} alt={trader} />
-        <AvatarFallback>{trader?.[0]}</AvatarFallback>
+        <AvatarFallback>{id}</AvatarFallback>
       </Avatar>
       <div className="flex-grow">
         <p className="font-semibold">{trader}</p>
@@ -94,10 +95,11 @@ export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImag
         {trades.map((trade, index) => {
           const user = users?.find(user => user?.address?.toLowerCase() == trade?.trader?.toLowerCase())
           const pfp = (user as any)?.pfp;
+          const displayName = (user as any)?.username ? `@${(user as any)?.username}` : truncateWallet(user?.address);
           return (
           <TableRow key={index}>
             <TableCell>
-              <TraderCard trader={user?.address} pfp={pfp}/> {/* Pass userId here */}
+              <TraderCard id={user?.address} trader={displayName} pfp={pfp}/> {/* Pass userId here */}
             </TableCell>
             <TableCell>
               <span className={`font-semibold ${trade.isBuy ? 'text-green-500' : 'text-red-500'}`}>

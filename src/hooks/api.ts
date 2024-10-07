@@ -1,7 +1,7 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { apiUrl } from "../main";
 import { Character, CurrentBattleState, User } from "@memeclashtv/types";
-import { MatchEndActivity, StakeActivity, TradeActivity } from "@memeclashtv/types/activity";
+import { Activity, MatchEndActivity, StakeActivity, TradeActivity } from "@memeclashtv/types/activity";
 import { useEthPrice } from "../EthPriceProvider";
 import { useCallback, useMemo } from "react";
 
@@ -265,6 +265,15 @@ export const useTokenActivities = (
     return { data: combinedActivities, isLoading, isError };
 }
 
+
+//Fetch activites only once, on window load
+export const initActivities = async (count: number): Promise<Activity[]>  => {
+    const response = await fetch(`${apiUrl}/activities/${count}`);
+    const data = await response.json();
+    const activities = data?.activities || [];
+    console.log("initActivities activities", activities)
+    return activities;
+}
 
 export const useValueSpent = (
     userAddress: string,

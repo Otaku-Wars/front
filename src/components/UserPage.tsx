@@ -7,7 +7,7 @@ import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Progress } from "./ui/progress";
-import { Copy, LogOut, Wallet, TrendingUp, Lock, ArrowUpRight, ArrowDownLeft, Users, Swords, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
+import { Copy, LogOut, Wallet, TrendingUp, WalletIcon, Lock, ArrowUpRight, ArrowDownLeft, Users, Swords, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
 import { useCharacters, useUser, useAllCharacterPerformance, useValueSpent, calculatePnL } from '../hooks/api'
 import { useAddress, useBalance, useWithdraw } from '../hooks/user';
 import { useParams, Link } from 'react-router-dom';
@@ -27,7 +27,6 @@ const attributeNames = {
   [Attribute.power]: "Power",
   [Attribute.attack]: "Attack",
   [Attribute.defense]: "Defense",
-  [Attribute.speed]: "Speed",
 };
 
 export const UserPage = () => {
@@ -123,7 +122,7 @@ export const UserPage = () => {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <Card className="mb-8">
+      <Card className="mb-8 bg-gray-900">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
             <CardTitle className="text-2xl font-bold">@{displayName}</CardTitle>
@@ -137,7 +136,7 @@ export const UserPage = () => {
         <CardContent>
           <div className="grid gap-4">
             <div className="flex items-center justify-between">
-              <Button variant="outline" size="sm" onClick={handleCopyAddress}>
+              <Button className='bg-gray-800 border-gray-700' variant="outline" size="sm" onClick={handleCopyAddress}>
                 <Copy className="mr-2 h-4 w-4" />
                 Copy Address
               </Button>
@@ -149,18 +148,49 @@ export const UserPage = () => {
             <div className="grid grid-cols-2 gap-4">
             
                   <Button 
-                    onClick={async ()=> {
+                    style={{
+                      textShadow: `
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000
+                      `,
+                      //bright blue
+                      color: '#FFFFFF',
+                      fontWeight: 'bold',
+                      fontSize: '20px',
+                      opacity: '0.8',
+                    }}  
+                    className="breathing w-full bg-yellow-600 text-black text-lg font-bold hover:bg-yellow-700 transition-all duration-300 text-xs sm:text-sm md:text-base relative overflow-hidden group py-10 text-white"
+                    onClick={async () => {
                       await fundWallet(address, {chain: currentChain})
                     }}
-                    className="w-full"
-                    >
-                    <ArrowUpRight className="mr-2 h-4 w-4" />
-                    Deposit
+                  >
+                    <WalletIcon color='black' className="mr-2 h-4 w-4" />
+                    DEPOSIT
                   </Button>
                 
               <Dialog open={showWithdrawModal} onOpenChange={setShowWithdrawModal}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    style={{
+                      textShadow: `
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000
+                      `,
+                      //gray
+                      backgroundColor: '#374151',
+                      color: '#FFFFFF',
+                      fontWeight: 'bold',
+                      fontSize: '20px',
+                      opacity: '0.8',
+                    }}  
+                    className="text-4xl flex-1  bg-blue-600 text-white text-2xl font-bold transition-all duration-300 relative overflow-hidden group py-10"
+                    >
                     <ArrowDownLeft className="mr-2 h-4 w-4" />
                     Withdraw
                   </Button>
@@ -211,71 +241,45 @@ export const UserPage = () => {
               </Dialog>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    <Wallet className="inline mr-2 h-4 w-4" />
-                    Cash Balance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatNumber(convertEthToUsd(parseFloat(userBalance ?? "0")) ?? 0)}</div>
-                  <div className="text-xs text-muted-foreground">{formatEther(parseFloat(userBalance ?? "0"))} ETH</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    <TrendingUp className="inline mr-2 h-4 w-4" />
-                    Portfolio Value
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatNumber(convertEthToUsd(netWorth ?? 0))}</div>
-                  <div className="text-xs text-muted-foreground">{formatEther(netWorth ?? 0)} ETH</div>
-                  <div className={`text-xs ${totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>{formatNumber(convertEthToUsd(totalPnl ?? 0))} ({formatPercentage(totalPercentageChange ?? 0)})</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    <Users className="inline mr-2 h-4 w-4" />
-                    Characters Owned
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{charactersOwnedCount}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    <Swords className="inline mr-2 h-4 w-4" />
-                    Total Stakes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalStakesCount}</div>
-                </CardContent>
-              </Card>
+              <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                <Wallet className="w-8 h-8 text-yellow-400 mb-2 mx-auto" />
+                <span className="text-xl text-gray-400">Cash Balance</span>
+                <span className="block text-2xl font-bold text-white">{formatNumber(convertEthToUsd(parseFloat(userBalance ?? "0")) ?? 0)}</span>
+                <span className="text-xs text-muted-foreground">{formatEther(parseFloat(userBalance ?? "0"))} ETH</span>
+              </div>
+              <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                <TrendingUp className="w-8 h-8 text-blue-400 mb-2 mx-auto" />
+                <span className="text-xl text-gray-400">Portfolio Value</span>
+                <span className="block text-2xl font-bold text-white">{formatNumber(convertEthToUsd(netWorth ?? 0))}</span>
+                <span className="text-xs text-muted-foreground">{formatEther(netWorth ?? 0)} ETH</span>
+                <div className={`inline-flex items-center px-3 py-1 rounded-full ${totalPnl >= 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                  {totalPnl >= 0 ? <ArrowUpIcon className="h-4 w-4 mr-1" /> : <ArrowDownIcon className="h-4 w-4 mr-1" />}
+                  <span className="text-sm font-medium">
+                    {formatNumber(convertEthToUsd(totalPnl ?? 0))} ({formatPercentage(totalPercentageChange ?? 0)})
+                  </span>
+                </div>
+                {/* <span className={`inline-block px-2 py-1 mt-2 text-xs font-semibold rounded-full ${totalPnl >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {totalPnl >= 0 ? 'Profit' : 'Loss'}
+                </span> */}
+              </div>
+              <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                <Users className="w-8 h-8 text-green-400 mb-2 mx-auto" />
+                <span className="text-xl text-gray-400">Characters Owned</span>
+                <span className="block text-2xl font-bold text-white">{charactersOwnedCount}</span>
+              </div>
+              <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                <Swords className="w-8 h-8 text-red-400 mb-2 mx-auto" />
+                <span className="text-xl text-gray-400">Total Stakes</span>
+                <span className="block text-2xl font-bold text-white">{totalStakesCount}</span>
+              </div>
             </div>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  <Lock className="inline mr-2 h-4 w-4" />
-                  Stake Unlock Time
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-lg font-semibold">
-                  {new Date(user?.stakeUnlockTime * 1000).toLocaleString()}
-                </div>
-                <div className="text-md font-medium">
-                  Time until unlock: {getTimeUntilUnlock(timeTill)}
-                </div>
-                {/* <Progress value={50} className="mt-2" /> */}
-              </CardContent>
-            </Card>
+            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700 mt-4">
+              <Lock className="w-8 h-8 text-purple-400 mb-2 mx-auto" />
+              <span className="text-xl text-gray-400">Stake Unlock Time</span>
+              <span className="block text-lg font-semibold text-white">{ user?.stakeUnlockTime ? new Date(user?.stakeUnlockTime * 1000).toLocaleString() : "No Stake"}</span>
+              {user?.stakeUnlockTime && <span className="text-md font-medium text-gray-400">Time until unlock: {getTimeUntilUnlock(timeTill)}</span>}
+              {!user?.stakeUnlockTime && <span className="text-md font-medium text-gray-400">Stake is not active</span>}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -286,7 +290,7 @@ export const UserPage = () => {
           <TabsTrigger value="stakes">Stakes</TabsTrigger>
         </TabsList>
         <TabsContent value="holdings">
-          <Card>
+          <Card className="bg-gray-900">
             <CardHeader>
               <CardTitle>Your Holdings</CardTitle>
             </CardHeader>
@@ -297,35 +301,29 @@ export const UserPage = () => {
                 const value = viemFormatEther(trueValue as any);
                 const valueSpent = valueSpents?.find(v => v.characterId === character?.id)?.spent ?? 0;
                 const performance = performanceData?.find(p => p.characterId === character?.id);
-                const {percentageChange, absoluteChange} = calculatePnL(Number(valueSpent), Number(value ));
+                const {percentageChange, absoluteChange} = calculatePnL(Number(valueSpent), Number(value));
                 const isPositive = percentageChange >= 0;
-                console.log("aaa valueSpent", valueSpent)
-                console.log("aaa trueValue", value)
+
                 return (
-                  <Link to={`/character/${character?.id}`} key={balance.character} className="flex flex-col mb-4 p-2 rounded hover:bg-accent cursor-pointer transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Avatar className="h-10 w-10 mr-4">
-                          <AvatarImage src={character?.pfp} alt={character?.name} />
-                          <AvatarFallback>{character?.name.substring(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-semibold">{character?.name}</div>
-                          <div className="text-sm text-muted-foreground">{balance.balance.toLocaleString()} Shares</div>
-                        </div>
+                  <Link to={`/character/${character?.id}`} key={balance.character} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 mb-4 border border-gray-700 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-lg">
+                    <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+                      <Avatar className="h-16 w-16 ring-2 ring-primary ring-offset-4 ring-offset-gray-800">
+                        <AvatarImage src={character?.pfp} alt={character?.name} />
+                        <AvatarFallback>{character?.name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-bold text-xl mb-1">{character?.name}</h3>
+                        <p className="text-sm text-gray-400">{balance.balance.toLocaleString()} Shares</p>
                       </div>
-                      <div className="text-right">
-                        <div className="font-semibold">{formatNumber(convertEthToUsd(Number(value)))}</div>
-                        <div className="text-sm text-muted-foreground">{formatEther(Number(value))} ETH</div>
-                        {/* Performance Section */}
-                        {performance?.isLoading && <div className="text-sm text-gray-500">Loading performance...</div>}
-                        {performance?.isError && <div className="text-red-500">Error loading performance data</div>}
-                        {performance?.data !== undefined && (
-                          <div className={`flex items-end text-sm ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
-                            {isPositive ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
-                            {formatNumber(convertEthToUsd(absoluteChange))} ({formatPercentage(percentageChange)})
-                          </div>
-                        )}
+                    </div>
+                    <div className="text-left sm:text-right mt-4 sm:mt-0 w-full sm:w-auto">
+                      <p className="font-bold text-2xl mb-1">{formatNumber(convertEthToUsd(Number(value)))}</p>
+                      <p className="text-sm text-gray-400 mb-2">{formatEther(Number(value))} ETH</p>
+                      <div className={`inline-flex items-center px-3 py-1 rounded-full ${isPositive ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                        {isPositive ? <ArrowUpIcon className="h-4 w-4 mr-1" /> : <ArrowDownIcon className="h-4 w-4 mr-1" />}
+                        <span className="text-sm font-medium">
+                          {formatNumber(convertEthToUsd(absoluteChange))} ({formatPercentage(percentageChange)})
+                        </span>
                       </div>
                     </div>
                   </Link>
@@ -335,7 +333,7 @@ export const UserPage = () => {
           </Card>
         </TabsContent>
         <TabsContent value="stakes">
-          <Card>
+          <Card className="bg-gray-900">
             <CardHeader>
               <CardTitle>Your Stakes</CardTitle>
             </CardHeader>

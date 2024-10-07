@@ -211,8 +211,8 @@ export const CharacterList = () => {
           bValue = b.price;
           break;
         case 'performance':
-          const aPerf = performanceMap[a.id] || 0;
-          const bPerf = performanceMap[b.id] || 0;
+          const aPerf = Number(performanceMap[a.id]) || 0;
+          const bPerf = Number(performanceMap[b.id]) || 0;
           aValue = aPerf;
           bValue = bPerf;
           break;
@@ -285,7 +285,7 @@ export const CharacterList = () => {
                 </div>
               </th>
               <th className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base ">
-                <div className="flex items-center space-x-1 cursor-pointer hover:text-white transition-colors duration-200" onClick={() => handleSort('price')}>
+                <div className="flex items-center space-x-1 cursor-pointer hover:text-white transition-colors duration-200" onClick={() => handleSort('performance')}>
                   <span>24h</span>
                   <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                 </div>
@@ -311,7 +311,7 @@ export const CharacterList = () => {
                 <CharacterRow 
                   key={character.id} 
                   character={character} 
-                  performance={performance} 
+                  performance={performance/100} 
                   matchesLeft={matchesLeft} 
                   status={status}
                 />

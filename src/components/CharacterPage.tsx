@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -17,7 +17,7 @@ import { Chart } from './Chart';
 import { MatchEndActivity, TradeActivity } from '@memeclashtv/types/activity';
 import ModalStake from './ModalStake'; // Adjust the path as necessary
 import { Attribute, Status } from '@memeclashtv/types';
-import { Users, DollarSign, Coins, TrendingUp, Heart, Zap, Swords, Shield, Wind } from 'lucide-react'
+import { Users, DollarSign, Coins, TrendingUp, Heart, Zap, Swords, Shield, Wind, LockIcon } from 'lucide-react'
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import ModalUnstake from './ModalUnstake';
 import { formatEther, formatNumber, formatPercentage } from '../lib/utils';
@@ -45,7 +45,6 @@ export const statIcons = {
     Power: <Zap className="w-4 h-4 text-blue-500" />,
     Attack: <Swords className="w-4 h-4 text-orange-500" />,
     Defense: <Shield className="w-4 h-4 text-gray-500" />,
-    Speed: <Wind className="w-4 h-4 text-yellow-500" />
 }
 
 // Function to generate round-robin matchups
@@ -156,7 +155,7 @@ export const CharacterPage = () => {
     const [showStakeModal, setShowStakeModal] = useState(false);
     const [selectedAttribute, setSelectedAttribute] = useState<number>(0);
     const [isFlipped, setIsFlipped] = useState(false);
-
+    const navigate = useNavigate();
     const { data: character, isLoading } = useCharacter(characterId);
     const { data: characters, isLoading: isCharactersLoading, isFetched: isCharactersFetched } = useCharacters();
     const { data: yourShares } = useCharacterSharesBalance(characterId, address);
@@ -173,7 +172,7 @@ export const CharacterPage = () => {
     const unlockTime = user?.stakeUnlockTime;
 
     const totalStakes = useMemo(() => {
-        return character?.healthStakes + character?.powerStakes + character?.attackStakes + character?.defenseStakes + character?.speedStakes;
+        return character?.healthStakes + character?.powerStakes + character?.attackStakes + character?.defenseStakes;
     }, [character]);
 
     const getMatchStatusText = () => {
@@ -206,7 +205,6 @@ export const CharacterPage = () => {
             "defense",
             "health",
             "power",
-            "speed"
         ]
         const stakes = {};
         types.forEach(stat => {
@@ -224,7 +222,6 @@ export const CharacterPage = () => {
             "defense",
             "health",
             "power",
-            "speed"
         ];
         const stakes = {}; // Create a mutable object
         types.forEach(stat => {
@@ -368,34 +365,44 @@ export const CharacterPage = () => {
     const isBattling = characterStatus == "inBattle"
     const isPendingMatch = characterStatus == "waiting"
 
-    const BuyButton = () => {
+    const BuyButton = React.memo(() => {
+        const buttonRef = useRef<HTMLButtonElement>(null);
+
+        useEffect(() => {
+            if (buttonRef.current) {
+                // Initialize animation logic here if needed
+            }
+        }, []); // Empty dependency array to ensure this runs only once
+
         if (isBattling) {
-            return <Button disabled className="text-4xl flex-1 bg-gray-700 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10 h-40">Trading Locked🔒</Button>
+            return <Button disabled className="text-4xl flex-1 bg-gray-700 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10">Buying Locked🔒</Button>
         }
         if (isPendingMatch) {
             return (
                 <Button 
-                style={{
-                    textShadow: `
-                    2px 2px 0 #000000, 
-                    2px 2px 0 #000000, 
-                    2px 2px 0 #000000, 
-                    2px 2px 0 #000000, 
-                    2px 2px 0 #000000
-                `,
-                }}  
-                className="text-4xl flex-1 breathing-green bg-green-600 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10 h-40"
+                    ref={buttonRef}
+                    style={{
+                        textShadow: `
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000, 
+                        2px 2px 0 #000000
+                    `,
+                    }}  
+                    className="text-4xl flex-1 breathing-green bg-green-600 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10"
                     onClick={() => handleShowModal('Buy')}
                 >
                     BUY NOW
                     <span className="absolute top-0 right-0 bg-gray-700 bg-opacity-50 text-sm px-1 py-0.5 rounded-bl font-bold">
-                    {(willStartIn ?? 0).toString().padStart(2, '0')}s left to buy
-                </span>
-            </Button>
+                        {(willStartIn ?? 0).toString().padStart(2, '0')}s left to buy
+                    </span>
+                </Button>
             )
         }
         return (
             <Button 
+                ref={buttonRef}
                 style={{
                     textShadow: `
                     2px 2px 0 #000000, 
@@ -405,13 +412,27 @@ export const CharacterPage = () => {
                     2px 2px 0 #000000
                 `,
                 }}  
-                className="text-4xl flex-1 breathing-green bg-green-600 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10 h-40"
+                className="text-4xl flex-1 breathing-green bg-green-600 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10"
                 onClick={() => handleShowModal('Buy')}
             >
                 BUY NOW
                 <span className="absolute top-0 right-0 bg-gray-700 bg-opacity-50 text-sm px-1 py-0.5 rounded-bl font-bold">
                     {matchesLeft} matches till next battle
                 </span>
+            </Button>
+        )
+    });
+
+    const SellButton = () => {
+        if (isBattling) {
+            return <Button disabled className="text-4xl flex-1 bg-gray-700 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10">Selling Locked🔒</Button>
+        }
+        return (
+            <Button 
+                className="text-4xl flex-1 bg-red-600 text-white text-2xl font-bold hover:bg-red-700 transition-all duration-300 relative overflow-hidden group py-10"
+                onClick={() => handleShowModal('Sell')}
+            >
+                SELL NOW
             </Button>
         )
     }
@@ -422,7 +443,7 @@ export const CharacterPage = () => {
         <div className="flex flex-col lg:flex-row w-full gap-4 lg:gap-8 items-start justify-center p-2 lg:p-4 min-h-screen">
             <div className="flex flex-col items-center lg:sticky lg:top-8 w-full lg:w-1/4 bg-card p-4 rounded-lg shadow bg-gray-900">
                 <div className="flex flex-col space-y-4">
-                    <div className="relative flex flex-col items-center pb-6 z-10 lg:w-1/3 sticky top-8">
+                    <div className="flex flex-col items-center align-center pb-6">
                         <style>{`
                             .profile-picture-container {
                                 perspective: 1000px;
@@ -454,7 +475,6 @@ export const CharacterPage = () => {
 
                             .profile-picture-back {
                                 transform: rotateY(180deg);
-                                background-color: #1f2937;
                                 display: flex;
                                 align-items: center;
                                 justify-content: center;
@@ -474,20 +494,21 @@ export const CharacterPage = () => {
                             .rotate-y-180 {
                                 transform: rotateY(180deg);
                             }
+
+                            .gloss-effect {
+                                background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 60%);
+                                pointer-events: none;
+                            }
                         `}</style>
-                        <div
-                            className="profile-picture-container relative mb-4 cursor-pointer"
-                            onClick={() => setIsFlipped(!isFlipped)}
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-full p-1">
+                        <div className="profile-picture-container mb-4 cursor-pointer" onClick={() => setIsFlipped(!isFlipped)}>
+                            <div className="absolute inset-0 rounded-full">
                                 <div className={`profile-picture ${isFlipped ? 'rotate-y-180' : ''}`}>
-                                    <div className="profile-picture-front">
-                                        <div className="w-full h-full rounded-full bg-gradient-to-br from-yellow-400 via-red-500 to-pink-500 p-2 shadow-lg">
-                                            <Avatar className="w-full h-full border-2 border-solid border-yellow-400 bg-gradient-to-br from-yellow-400 via-red-500 to-pink-500 p-2 shadow-lg">
-                                                <AvatarImage src={character.pfp} alt={character.name} className="object-cover rounded-full" />
-                                                <AvatarFallback>{character.name.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                        </div>
+                                    <div className="profile-picture-front relative">
+                                        <div className="gloss-effect absolute inset-0 rounded-full"></div>
+                                        <Avatar className="w-full h-full border-2 border-solid bg-gradient-to-br from-yellow-400 via-red-500 to-pink-500 p-2 shadow-lg">
+                                            <AvatarImage src={character.pfp} alt={character.name} className="object-cover rounded-full" />
+                                            <AvatarFallback>{character.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
                                     </div>
                                     <div className="profile-picture-back text-4xl font-bold">
                                         {character.name.charAt(0)}
@@ -505,7 +526,7 @@ export const CharacterPage = () => {
                             </Badge>
                         </div>
                     </div>
-                    <div className="pt-0 z-10 relative lg:w-2/3 lg:pl-8">
+                    <div className="pt-0 z-10 relative w-full">
                         <div className="flex flex-row justify-between gap-4 mb-6">
                             <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
                                 <Trophy className="w-8 h-8 text-yellow-400 mb-2 mx-auto" />
@@ -528,6 +549,7 @@ export const CharacterPage = () => {
                                 <span className="block text-2xl font-bold text-white">{character.lossCount}</span>
                             </div>
                         </div>
+                        
                         <div className="space-y-2 mb-6">
                             {Object.entries(statIcons).map(([stat, icon]) => (
                                 <div key={stat} className="flex items-center justify-between">
@@ -541,9 +563,9 @@ export const CharacterPage = () => {
                                 </div>
                             ))}
                         </div>
-                        <div className="mt-6 pt-4 border-t border-gray-700">
-                            <h4 className="font-semibold mb-2 text-lg">Next Match:</h4>
-                            <div className="flex flex-row items-center align-center space-x-4">
+                        <div className="flex items-center align-center mt-6 pt-4 border-t border-gray-700 gap-4">
+                            <h4 className="font-semibold text-lg">Next Match:</h4>
+                            <div className="flex flex-row items-center align-center gap-4">
                                 <div className="flex flex-col items-center align-center">
                                     <StatusIndicator 
                                     status={
@@ -557,8 +579,9 @@ export const CharacterPage = () => {
                                     totalMatches={totalMatches} 
                                 />
                                 </div>
-                                <span className="text-xl font-bold mt-4 ml-[-10px]">vs</span>
-                                <div className="flex space-x-2 mt-4 items-center align-center">
+                                <div className="text-xl font-bold">vs</div>
+                                <div className="flex items-center align-center cursor-pointer"
+                                onClick={()=> navigate(`/character/${nextOpponent?.id}`)}>
                                     <Avatar className="w-8 h-8 border-2 border-yellow-400">
                                         <AvatarImage src={nextOpponent?.pfp} alt={nextOpponent?.name} />
                                         <AvatarFallback>{nextOpponent?.name.charAt(0)}</AvatarFallback>
@@ -567,6 +590,7 @@ export const CharacterPage = () => {
                                 </div>
                             </div>
                         </div>
+                        
                     </div>
                 </div>
             </div>
@@ -642,64 +666,53 @@ export const CharacterPage = () => {
                         </div> */}
                         <div className="flex space-x-4">
                             <BuyButton />
-                            <Button 
-                                style={{
-                                    backgroundColor: '#BA3F3F',
-                                    textShadow: `
-                                        2px 2px 0 #000000, 
-                                        2px 2px 0 #000000, 
-                                        2px 2px 0 #000000, 
-                                        2px 2px 0 #000000, 
-                                        2px 2px 0 #000000
-                                      `,
-                                      color: '#FFFFFF',
-                                      fontWeight: 'bold',
-                                      fontSize: '20px',
-                                      opacity: '0.8',
-                 
-                                }}  
-                                className="text-4xl flex-1 text-lg py-6 hover:bg-red-700 transition-all duration-300 relative overflow-hidden group" 
-                                onClick={() => handleShowModal('Sell')}
-                            >
-                                SELL
-                            </Button>
+                            <SellButton />
+                            
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* Stats */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>
-                            Stats <span className="text-right text-sm text-gray-600">Total stakes: {totalStakes}</span>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-6">
-                            {['Health', 'Power', 'Attack', 'Defense', 'Speed'].map((stat) => (
-                                <div key={stat} className="space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-medium flex items-center">
-                                            {statIcons[stat]}
-                                            <span className="ml-2">{stat}</span>
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center gap-5">
-                                        <Progress value={(character[stat.toLowerCase()] / 100) * 100} className="h-4" />
-                                        <Button className='ml-4' size="lg" onClick={() => handleOpenStakeModal(Attribute[stat?.toLowerCase()])}>Stake</Button>
-                                    </div>
-                                    <div className="flex justify-start text-sm text-muted-foreground items-center gap-10">
-                                        <span>Total stakes: {character[`${stat.toLowerCase()}Stakes`]} </span>
-                                        <span>Your stakes: {yourStakes[stat.toLowerCase()]}
-                                            {yourStakes[stat.toLowerCase()] > 0 && 
-                                                <Button className='ml-2' size="sm" variant="outline" onClick={() => handleOpenUnstakeModal(Attribute[stat?.toLowerCase()])}>Unstake</Button>
-                                            }
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
+                <Card className="relative">
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+                        <div className="text-center text-white">
+                            <LockIcon className="w-22 h-22 mx-auto mb-2" />
+                            <p className="text-3xl font-bold">Staking coming Soon</p>
                         </div>
-                    </CardContent>
+                    </div>
+                    <div className="blur-sm pointer-events-none">
+                        <CardHeader>
+                            <CardTitle>
+                                Stats <span className="text-right text-sm text-gray-600">Total stakes: {totalStakes}</span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-6">
+                                {['Health', 'Power', 'Attack', 'Defense'].map((stat) => (
+                                    <div key={stat} className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-medium flex items-center">
+                                                {statIcons[stat]}
+                                                <span className="ml-2">{stat}</span>
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center gap-5">
+                                            <Progress value={(character[stat.toLowerCase()] / 100) * 100} className="h-4" />
+                                            <Button className='ml-4' size="lg" onClick={() => handleOpenStakeModal(Attribute[stat?.toLowerCase()])}>Stake</Button>
+                                        </div>
+                                        <div className="flex justify-start text-sm text-muted-foreground items-center gap-10">
+                                            <span>Total stakes: {character[`${stat.toLowerCase()}Stakes`]} </span>
+                                            <span>Your stakes: {yourStakes[stat.toLowerCase()]}
+                                                {yourStakes[stat.toLowerCase()] > 0 && 
+                                                    <Button className='ml-2' size="sm" variant="outline" onClick={() => handleOpenUnstakeModal(Attribute[stat?.toLowerCase()])}>Unstake</Button>
+                                                }
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </div>
                 </Card>
                 
                 {/* Tab lists */}

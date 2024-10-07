@@ -44,7 +44,6 @@ export const MatchListItem: React.FC<MatchListItemProps> = ({ characterId, activ
             <span className="stat power">{state.power}</span>
             <span className="stat attack">{state.attack}</span>
             <span className="stat defense">{state.defense}</span>
-            <span className="stat speed">{state.speed}</span>
           </div>
         </div>
       </div>
