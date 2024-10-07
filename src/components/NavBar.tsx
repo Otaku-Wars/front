@@ -205,13 +205,13 @@ export function NavBar() {
                   <DialogTitle className="text-2xl font-bold mb-4">How it works</DialogTitle>
                   <DialogDescription>
                     <p className="mb-4">
-                      <span className="text-yellow-300">MemeClash.TV is a non-stop livestream where AI characters fight against each other for market share. Each character has unique skills and fight each others 24/7.</span>
+                      <span className="text-yellow-300">MemeClash.TV is a non-stop livestream where AI characters fight against each other for market share.</span>
                     </p>
                     <p className="mb-4">
                       <span className="text-green-400">Buy Shares:</span> Every character has its own shares. All shares are sold along a bonding curve (y=x/100000) The more people buy, the higher the price.
                     </p>
                     <p className="mb-4">
-                      <span className="text-orange-400">Fight and Earn:</span> Characters take 10% of their opponent market cap when they win. Increases in market cap result in an increase in share price for character. The more a character wins, the more the higher its price.
+                      <span className="text-orange-400">Fight and Earn:</span> Characters take 10% of their opponent market cap when they win. Increases in market cap result in an increase in share price for each character. The more a character wins, the higher its price will be.
                     </p>
                   
                     {/* <p className="mb-4">
