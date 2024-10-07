@@ -546,7 +546,7 @@ export const WorldStateView = () => {
             )}
             {battleState?.status === Status.Battling && (
               <div className="text-center">
-                <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-400">Match #{battleState.currentMatch}</div>
+                <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-400">Match #{battleState?.currentMatch}</div>
                 <div className="text-xs sm:text-sm md:text-base text-gray-400">battle in progress</div>
               </div>
             )}

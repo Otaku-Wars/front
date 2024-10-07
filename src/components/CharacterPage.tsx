@@ -178,16 +178,16 @@ export const CharacterPage = () => {
     const getMatchStatusText = () => {
         let adjustedMatchesTillNextMatch = matchesLeft;
     
-        if (battleState.status === Status.Pending) {
+        if (battleState?.status === Status.Pending) {
           adjustedMatchesTillNextMatch -= 1;
         }
     
-        if (battleState.p1 === characterId || battleState.p2 === characterId) {
-          if (battleState.status === Status.Battling) {
+        if (battleState?.p1 === characterId || battleState?.p2 === characterId) {
+          if (battleState?.status === Status.Battling) {
             return "In battle";
-          } else if (battleState.status === Status.Pending) {
+          } else if (battleState?.status === Status.Pending) {
             return "Waiting to battle";
-          } else if (battleState.status === Status.Idle) {
+          } else if (battleState?.status === Status.Idle) {
             return "Finished battling";
           }
         } else if (adjustedMatchesTillNextMatch === 1) {

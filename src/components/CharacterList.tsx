@@ -77,16 +77,16 @@ export const StatusIndicator = ({ status, matchesLeft, totalMatches }: { status:
 const getMatchStatusText = (character, matchesTillNextMatch, battleState) => {
   let adjustedMatchesTillNextMatch = matchesTillNextMatch;
 
-  if (battleState.status === Status.Pending) {
+  if (battleState?.status === Status.Pending) {
     adjustedMatchesTillNextMatch -= 1;
   }
   console.log('battle state', battleState);
-  if (battleState.p1 === character.id || battleState.p2 === character.id) {
-    if (battleState.status === Status.Battling) {
+  if (battleState?.p1 === character.id || battleState?.p2 === character.id) {
+    if (battleState?.status === Status.Battling) {
       return 'battling';
-    } else if (battleState.status === Status.Pending) {
+    } else if (battleState?.status === Status.Pending) {
       return 'waiting-to-battle';
-    } else if (battleState.status === Status.Idle) {
+    } else if (battleState?.status === Status.Idle) {
       return 'finished';
     }
   } else if (adjustedMatchesTillNextMatch === 1) {
