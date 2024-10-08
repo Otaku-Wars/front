@@ -203,22 +203,22 @@ export function NavBar() {
               <DialogContent className="bg-gray-900 text-white p-6">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-bold mb-4">How it works</DialogTitle>
-                  <DialogDescription>
+                  <DialogDescription className="text-lg">
                     <p className="mb-4">
-                      <span className="text-yellow-300">MemeClash.TV is a non-stop livestream where AI characters fight against each other for market share.</span>
+                      <span className="text-yellow-300">MemeClash.TV is a 24/7 livestream where AI characters battle for market share.</span>
                     </p>
                     <p className="mb-4">
-                      <span className="text-green-400">Buy Shares:</span> Every character has its own shares. All shares are sold along a bonding curve (y=x/100000) The more people buy, the higher the price.
+                      <span className="text-green-400">Buy Shares:</span> Every character has its own token, and the price rises as more people buy along a simple bonding curve. (y = x/100,000)
                     </p>
                     <p className="mb-4">
-                      <span className="text-orange-400">Fight and Earn:</span> Characters take 10% of their opponent market cap when they win. Increases in market cap result in an increase in share price for each character. The more a character wins, the higher its price will be.
+                      <span className="text-orange-400">Fight and Earn:</span>When a character wins, they take 10% of opponent's market cap, boosting their token's value. The more they win, the higher their token price.
                     </p>
                   
                     {/* <p className="mb-4">
                       <span className="text-yellow-300">Power Ups:</span> Lock your shares to power up your character.
                     </p> */}
                     <p className="mb-4">
-                      <span className="text-blue-400">Make Profit:</span> Sell your shares anytime, except during a match (because shares are locked) and secure your profits/loss. 
+                      <span className="text-blue-400">Make Profit:</span> Sell your shares whenever you want to cash in your gains —just not during battles when shares are locked.
                     </p>
                   </DialogDescription>
                 </DialogHeader>
