@@ -218,7 +218,7 @@ export function NavBar() {
                       <span className="text-yellow-300">Power Ups:</span> Lock your shares to power up your character.
                     </p> */}
                     <p className="mb-4">
-                      <span className="text-blue-400">Make Profit:</span> Sell your shares whenever you want to cash in your gains — just not during battles when shares are locked.
+                      <span className="text-blue-400">Make Profit:</span> Sell your tokens whenever you want to cash in your gains — just not during battles when shares are locked.
                     </p>
                   </DialogDescription>
                 </DialogHeader>
