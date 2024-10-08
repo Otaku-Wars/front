@@ -630,14 +630,14 @@ export const CharacterPage = () => {
                                 <p className="text-sm text-muted-foreground">{formatEther(character.value)} ETH</p>
                             </div>
                             <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
-                                <p className="text-xl text-muted-foreground flex items-center">
+                                <p className="text-xl text-muted-foreground flex items-center justify-center">
                                     <Users className="w-4 h-4 mr-1" />
                                     Holders
                                 </p>
                                 <p className="text-2xl font-bold">{holderCount}</p>
                             </div>
                             <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
-                                <p className="text-xl text-muted-foreground flex items-center">
+                                <p className="text-xl text-muted-foreground flex items-center justify-center">
                                     <Coins className="w-4 h-4 mr-1" />
                                     Supply
                                 </p>
