@@ -21,6 +21,7 @@ import { useSetActiveWallet } from '@privy-io/wagmi';
 import { formatEther, formatNumber, formatPercentage } from '../lib/utils';
 import { useGetSellPrices } from '../hooks/contract';
 import { formatEther as viemFormatEther } from 'viem';
+import { buildDataUrl } from './ActivityBar';
 
 const attributeNames = {
   [Attribute.health]: "Health",
@@ -43,7 +44,7 @@ export const UserPage = () => {
     const [showWithdrawModal, setShowWithdrawModal] = useState(false);
     const [withdrawAddress, setWithdrawAddress] = useState(''); // State for withdraw address
     const [withdrawAmount, setWithdrawAmount] = useState(''); // State for withdraw amount
-    const pfp = (user as any)?.pfp;
+    const pfp = (user as any)?.pfp ?? buildDataUrl(user?.address);  
     const username = (user as any)?.username;
     const convertEthToUsd = useConvertEthToUsd();
     console.log("user", user)
@@ -155,7 +156,7 @@ export const UserPage = () => {
                 Logout
               </Button>}
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            {isYourAccount && <div className="grid grid-cols-2 gap-4">
             
                   <Button 
                     style={{
@@ -249,7 +250,7 @@ export const UserPage = () => {
                   <Button onClick={handleWithdraw} disabled={withdrawPending}>Confirm Withdrawal</Button> {/* Call handleWithdraw on click */}
                 </DialogContent>
               </Dialog>
-            </div>
+            </div>}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
                 <Wallet className="w-8 h-8 text-yellow-400 mb-2 mx-auto" />

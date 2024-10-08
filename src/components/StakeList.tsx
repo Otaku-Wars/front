@@ -8,6 +8,7 @@ import { ArrowDownIcon, ArrowUpIcon, HeartIcon, ShieldIcon, SwordIcon, ZapIcon, 
 import { StakeActivity } from '@memeclashtv/types/activity';
 import { truncateWallet } from './NavBar';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { buildDataUrl } from './ActivityBar';
 
 export enum ActivityType {
   MatchPending = 'MatchPending',
@@ -78,7 +79,7 @@ export const StakeList: React.FC<StakeListProps> = ({ characterId, characterImag
           {stakes.map((activity, index) => {
             const user = users?.find(user => user?.address?.toLowerCase() === activity?.staker?.toLowerCase());
             const displayName = (user as any)?.username ?? truncateWallet(user?.address);
-            const pfp = (user as any)?.pfp;
+            const pfp = (user as any)?.pfp ?? buildDataUrl(user?.address);
 
             return (
               <TableRow key={index}>

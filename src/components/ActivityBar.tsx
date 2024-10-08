@@ -14,6 +14,12 @@ import { usePrivy, useLogin } from '@privy-io/react-auth'
 import { useNavigate } from 'react-router-dom'
 import { truncateWallet } from './NavBar'
 import { Avatar } from './ui/avatar'
+import Jazzicon from '@raugfer/jazzicon';
+
+// builds an image data url for embedding
+export function buildDataUrl(address: string): string {
+  return 'data:image/svg+xml;base64,' + btoa(Jazzicon(address));
+}
 
 export enum ActivityType {
   MatchPending = 'MatchPending',
@@ -54,13 +60,13 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
             <span className="text-yellow-400 font-semibold mr-2">Match Pending:</span>
             <div className="flex items-center">
               <img src={character1?.pfp} alt={character1?.name} className="w-5 h-5 rounded-full object-cover border border-yellow-400" />
-              <p onClick={() => navigate(`/character/${character1?.id}`)}>{character1?.name}</p>
+              <p className='hover:underline cursor-pointer' onClick={() => navigate(`/character/${character1?.id}`)}>{character1?.name}</p>
               <span className="mx-1 font-bold">VS</span>
               <img src={character2?.pfp} alt={character2?.name} className="w-5 h-5 rounded-full object-cover border border-yellow-400" />
-              <p onClick={() => navigate(`/character/${character2?.id}`)}>{character2?.name}</p>
+              <p className='hover:underline cursor-pointer' onClick={() => navigate(`/character/${character2?.id}`)}>{character2?.name}</p>
             </div>
             <span className="ml-2 text-yellow-400">
-              in {Math.round((matchPending.startTime - Date.now() / 1000))}s
+              in {Math.round((matchPending.startTime - activity.timestamp))}s
             </span>
             <span className="ml-2 text-yellow-400">buy your shares now!!!</span>
           </motion.div>
@@ -81,10 +87,10 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
             <span className="text-blue-400 font-semibold mr-2">Match Started:</span>
             <div className="flex items-center flex-wrap">
               <img src={character1Match?.pfp} alt={character1Match?.name} className="w-5 h-5 rounded-full object-cover border border-blue-400" />
-              <p onClick={() => navigate(`/character/${character1Match?.id}`)}>{character1Match?.name}</p>
+              <p className='hover:underline cursor-pointer' onClick={() => navigate(`/character/${character1Match?.id}`)}>{character1Match?.name}</p>
               <span className="mx-1 font-bold text-blue-400">VS</span>
               <img src={character2Match?.pfp} alt={character2Match?.name} className="w-5 h-5 rounded-full object-cover border border-blue-400" />
-              <p onClick={() => navigate(`/character/${character2Match?.id}`)}>{character2Match?.name}</p>
+              <p className='hover:underline cursor-pointer' onClick={() => navigate(`/character/${character2Match?.id}`)}>{character2Match?.name}</p>
               <span className="mx-1 font-bold text-blue-400">who will win?</span>
             </div>
           </motion.div>
@@ -110,10 +116,10 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
             <span className="text-green-400 font-semibold mr-2">Match Results:</span>
             <div className="flex items-center flex-wrap">
               <img src={winnerCharacter?.pfp} alt={winnerCharacter?.name} className="w-5 h-5 rounded-full object-cover border border-green-400" />
-              <p onClick={() => navigate(`/character/${winnerCharacter?.id}`)}>{winnerCharacter?.name}</p>
+              <p className='hover:underline cursor-pointer' onClick={() => navigate(`/character/${winnerCharacter?.id}`)}>{winnerCharacter?.name}</p>
               <span className="mx-1 font-bold text-green-400">beat</span>
               <img src={loserCharacter?.pfp} alt={loserCharacter?.name} className="w-5 h-5 rounded-full object-cover border border-red-400 opacity-50 ml-2" />
-              <p className="text-red-400" onClick={() => navigate(`/character/${loserCharacter?.id}`)}>{loserCharacter?.name}</p>
+              <p className='hover:underline cursor-pointer text-red-400' onClick={() => navigate(`/character/${loserCharacter?.id}`)}>{loserCharacter?.name}</p>
               <span className="mx-1 font-bold text-green-400">gaining</span>
               <span className="text-green-400">{tvlTransferred} in MktCap</span>
               <span className="mx-1 font-bold text-green-400">price now {winnerPrice}</span>
@@ -128,7 +134,7 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
         const amount = trade?.shareAmount;
         const userTrader = users?.find(u => u.address?.toLowerCase() == trade.trader?.toLowerCase()) as any
         const traderDisplayName = userTrader?.username ? `@${userTrader?.username}` : truncateWallet(trade.trader);
-        const traderPfp = userTrader?.pfp ? userTrader?.pfp : '/placeholder.svg';
+        const traderPfp = userTrader?.pfp ? userTrader?.pfp : buildDataUrl(trade.trader);
         return (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -143,10 +149,10 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
             </span>
             <div className="flex items-center flex-wrap">
               <img src={traderPfp} alt={traderDisplayName} className="w-5 h-5 rounded-full object-cover border border-gray-400" />
-              <span className="text-gray-400 underline" onClick={() => navigate(`/user/${traderDisplayName}`)}>{traderDisplayName}</span>
+              <span className="text-gray-400 hover:underline cursor-pointer" onClick={() => navigate(`/user/${trade.trader}`)}>{traderDisplayName}</span>
               <span className="mx-1">{trade.isBuy ? 'bought' : 'sold'}  {amount}</span>
               <img src={character?.pfp} alt={character?.name}  className="w-5 h-5 rounded-full object-cover border border-gray-400" />
-              <span className="text-gray-400" onClick={() => navigate(`/character/${character?.id}`)}>{character?.name}</span>
+              <span className="text-gray-400 hover:underline cursor-pointer" onClick={() => navigate(`/character/${character?.id}`)}>{character?.name}</span>
               <span className="mx-1">{trade.isBuy ? 'for' : 'at'}</span>
               <span className="font-bold">{cost}</span>
               {trade.isBuy ? <ArrowUpRight className="w-4 h-4 text-green-400 ml-1" /> : <ArrowDownRight className="w-4 h-4 text-red-400 ml-1" />}
@@ -180,7 +186,7 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
         const chat = activity as ChatActivity
         const userChat = users?.find(u => u.address?.toLowerCase() == chat.sender?.toLowerCase()) as any
         const displayName = userChat?.username ? `@${userChat?.username}` : truncateWallet(chat.sender);
-        const pfp = userChat?.pfp ? userChat?.pfp : '/placeholder.svg';
+        const pfp = userChat?.pfp ? userChat?.pfp : buildDataUrl(chat.sender);
         return (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -190,7 +196,7 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
           >
             {time}
             <img src={pfp} alt={displayName} className="w-5 h-5 rounded-full object-cover border border-gray-400" />
-            <span className="font-bold underline mr-2" onClick={() => navigate(`/user/${chat.sender}`)}>{displayName}:</span>
+            <span className="font-bold hover:underline cursor-pointer mr-2" onClick={() => navigate(`/user/${chat.sender}`)}>{displayName}:</span>
             <span className="break-all">{chat.message}</span>
           </motion.div>
         )

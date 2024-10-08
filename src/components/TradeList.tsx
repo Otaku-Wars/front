@@ -10,6 +10,7 @@ import { truncateWallet } from './NavBar';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { formatNumber, formatPercentage } from '../lib/utils';
+import { buildDataUrl } from './ActivityBar';
 
 interface TradeListProps {
   characterId: number;
@@ -94,7 +95,7 @@ export const TradeList: React.FC<TradeListProps> = ({ characterId, characterImag
       <TableBody>
         {trades.map((trade, index) => {
           const user = users?.find(user => user?.address?.toLowerCase() == trade?.trader?.toLowerCase())
-          const pfp = (user as any)?.pfp;
+          const pfp = (user as any)?.pfp ?? buildDataUrl(user?.address);
           const displayName = (user as any)?.username ? `@${(user as any)?.username}` : truncateWallet(user?.address);
           return (
           <TableRow key={index}>
