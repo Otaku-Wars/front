@@ -358,7 +358,7 @@ export const WorldStateView = () => {
 
 
   const isPendingMatch = battleState?.status == Status.Pending
-  const winner = battleState?.lastMatchResult?.winner
+  const winner = battleState?.lastMatchResult?.winner ?? null
   const willStartIn = useTimeTill(battleState?.willStartAt ?? 0)
   const isBattling = battleState?.status == Status.Battling
 
@@ -374,12 +374,12 @@ export const WorldStateView = () => {
     const loseHoldingsValue = !isRightSide ? yourShares1LossValue : yourShares2LossValue
     const winPercentChange = currentPrice > 0 ? ((winPrice - currentPrice) / currentPrice) : 0
     const losePercentChange = currentPrice > 0 ? ((losePrice - currentPrice) / currentPrice) : 0
-    const isWinner = winner && winner == character.id
-    const isLoser = winner && winner !== character.id
+    const isWinner = winner !== null && winner == character.id
+    const isLoser = winner !== null && winner !== character.id
     const newHoldingsValue = isWinner ? winHoldingsValue : loseHoldingsValue
     console.log("characterAA", character.id, "isWinner", isWinner, "isLoser", isLoser)
     const holdingsValue = !isRightSide ? holdingsValue1 : holdingsValue2;
-    const isGameOver = winner && true;
+    const isGameOver = winner !== null && true;
     const winRate = character.matchCount > 0 && character.winCount > 0 ? character.winCount / character.matchCount : 0;
 
     return (
