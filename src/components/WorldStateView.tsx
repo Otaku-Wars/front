@@ -240,7 +240,7 @@ const HoldingsInfo = ({ isGameOver, isWinner, isLoser, sharesOwned, holdingsValu
         <div className="text-lg">
           <div className='text-yellow-400 font-bold'>Current Share Worth: {formatNumber(convertEthToUsd(holdingsValue))}</div>
           <div className="text-green-400">If Win: Your shares would be worth <span className='font-bold underline'>{formatNumber(convertEthToUsd(winHoldingsValue))} (+{formatNumber(convertEthToUsd(gain))}) </span></div>
-          <div className="text-red-400">If Lose: Your shares would be worth <span className='font-bold underline'>${formatNumber(convertEthToUsd(loseHoldingsValue))} ({formatNumber(convertEthToUsd(loss))})</span></div>
+          <div className="text-red-400">If Lose: Your shares would be worth <span className='font-bold underline'>{formatNumber(convertEthToUsd(loseHoldingsValue))} ({formatNumber(convertEthToUsd(loss))})</span></div>
         </div>
       </TooltipContent>
     </Tooltip>

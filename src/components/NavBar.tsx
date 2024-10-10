@@ -150,9 +150,14 @@ export function NavBar() {
   useEffect(() => {
     if(authenticated && address){
       const wallet = wallets.find((wallet: ConnectedWallet) => wallet.address === address)
+      //check if wallet is active wallet
+      console.log("wallets", wallets)
       if(wallet){
-        console.log("setting active wallet", wallet)
-        setActiveWallet(wallet)
+        const isActiveWallet = wallet.address.toLowerCase() === mainAddress?.toLowerCase()
+        if(!isActiveWallet){
+          //setActiveWallet(wallet)
+          console.log("setting active wallet", wallet)
+        }
       }
     }
   }, [authenticated, wallets, address, setActiveWallet])
@@ -188,11 +193,14 @@ export function NavBar() {
           <span className="hidden text-3xl font-bold xl:inline-block mt-1">
             <img src="/logo-text.png" alt="MemeClash.Tv" className="h-10 w-auto" />
           </span>
-          {currentSong && (
+          <span className="text-lg font-bold text-yellow-300">
+            BETA
+          </span>
+          {/* {currentSong && (
             <span className="text-sm text-foreground/60 w-10" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', animation: 'scroll 10s linear infinite' }}>
               Now Playing: {currentSong}
             </span>
-          )}
+          )} */}
         </Link>
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <nav className="hidden md:flex items-center text-sm font-medium gap-4">

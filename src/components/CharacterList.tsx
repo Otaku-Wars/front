@@ -239,7 +239,7 @@ export const CharacterList = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-gray-300 rounded-lg shadow-lg h-full w-full overflow-y-auto custom-scrollbar">
+    <div className="bg-gray-900 text-gray-300 rounded-lg shadow-lg h-[600px] w-full overflow-hidden">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 10px;
@@ -273,7 +273,7 @@ export const CharacterList = () => {
           </div>
         </div>
       </div>
-      <div className="overflow-x-auto custom-scrollbar">
+      <div className="overflow-x-auto overflow-y-auto h-full custom-scrollbar">
         <table className="w-full">
           <thead className="sticky top-0 bg-gray-900">
             <tr className="text-gray-400 border-b border-gray-700">
