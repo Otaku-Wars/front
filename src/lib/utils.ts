@@ -13,6 +13,14 @@ export const formatNumber = (num: number) => {
   }).format(num)
 }
 
+export const formatMarketCap = (num: number) => {
+  return new Intl.NumberFormat('en-US', { 
+    style: 'currency', 
+    currency: 'USD',
+    maximumSignificantDigits: 4,
+  }).format(num)
+}
+
 export const formatEther = (num: number) => {
   return new Intl.NumberFormat('en-US', { 
     style: 'currency', 
@@ -27,7 +35,6 @@ export const formatEther = (num: number) => {
 export const formatPercentage = (num: number) => {
   return new Intl.NumberFormat('en-US', { 
     style: 'percent', 
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 1,
+    maximumSignificantDigits: 2,
   }).format(num)
 }

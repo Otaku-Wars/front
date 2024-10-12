@@ -162,7 +162,7 @@ export function NavBar() {
     }
   }, [authenticated, wallets, address, setActiveWallet])
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-gray-900 text-gray-300 rounded-lg shadow-lg w-full overflow-y-auto custom-scrollbar">
+    <header className="sticky top-0 z-50 w-full border-b bg-gray-900 text-gray-300 w-full overflow-y-auto custom-scrollbar">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 10px;
@@ -206,7 +206,7 @@ export function NavBar() {
           <nav className="hidden md:flex items-center text-sm font-medium gap-4">
             <Dialog open={showHowToModal} onOpenChange={setShowHowToModal}>
               <DialogTrigger asChild>
-                <Button variant="ghost" className="text-2xl font-bold" style={{color: '#F6E359'}}>How it works</Button>
+                <Button variant="ghost" className="text-2xl" style={{color: '#F6E359'}}>How it works</Button>
               </DialogTrigger>
               <DialogContent className="bg-gray-900 text-white p-6">
                 <DialogHeader>
@@ -237,7 +237,7 @@ export function NavBar() {
               href="https://x.com/MemeClashTv"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-foreground/80 px-4 font-bold text-center text-2xl"
+              className="transition-colors hover:text-foreground/80 px-4 text-center text-2xl"
               style={{color: '#F6E359'}}
             >
               Twitter
@@ -264,12 +264,12 @@ export function NavBar() {
           </SheetTrigger>
           <SheetContent side="right">
             <nav className="flex flex-col space-y-4">
-              <Button variant="ghost" className="text-2xl font-bold" style={{color: '#F6E359'}} onClick={() => setShowHowToModal(true)}>How It Works</Button>
+              <Button variant="ghost" className="text-2xl" style={{color: '#F6E359'}} onClick={() => setShowHowToModal(true)}>How It Works</Button>
               <a
               href="https://x.com/MemeClashTv"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-foreground/80 px-4 font-bold text-center text-2xl"
+              className="transition-colors hover:text-foreground/80 px-4 text-center text-2xl"
               style={{color: '#F6E359'}}
             >
               Twitter

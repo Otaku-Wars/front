@@ -124,7 +124,7 @@ const PriceInfo = ({ currentPrice, winPrice, losePrice, value, supply, isRightSi
             </div>
             <div className={`flex flex-col items-start ${isRightSide ? 'mr-1 sm:mr-2' : 'ml-1 sm:ml-2'} ${textAlignClass} ${isLoser ? greyOutClass : ''}`}>
               <span className="text-xs text-gray-400">If Win</span>
-              <span className={`text-sm sm:text-base md:text-lg font-extrabold ${isLoser ? 'text-gray-500' : 'text-green-400 animate-pulse-win'}`}>
+              <span className={`text-sm text-nowrap sm:text-base md:text-lg font-extrabold ${isLoser ? 'text-gray-500' : 'text-green-400 animate-pulse-win'}`}>
                 {isRightSide ? (
                   <>
                     <span className="animate-arrow-up inline-block mr-1">↑</span>{formatNumber(winPrice)} ({formatPercentage(percentChangeWin)})
@@ -138,14 +138,14 @@ const PriceInfo = ({ currentPrice, winPrice, losePrice, value, supply, isRightSi
             </div>
             <div className={`flex flex-col items-start ${textAlignClass} ${isWinner ? greyOutClass : ''}`}>
               <span className="text-xs text-gray-400">If Lose</span>
-              <span className={`text-sm sm:text-base md:text-lg font-extrabold ${isWinner ? 'text-gray-500' : 'text-red-400 animate-pulse-lose'}`}>
+              <span className={`text-sm text-nowrap sm:text-base md:text-lg font-extrabold ${isWinner ? 'text-gray-500' : 'text-red-400 animate-pulse-lose'}`}>
                 {isRightSide ? (
                   <>
                     <span className="animate-arrow-down inline-block mr-1">↓</span>${losePrice.toLocaleString()} ({formatPercentage(percentChangeLose)})
                   </>
                 ) : (
                   <>
-                    ${losePrice.toLocaleString()}<span className="animate-arrow-down inline-block ml-1">↓</span> ({formatPercentage(percentChangeLose)})
+                    {formatNumber(losePrice)}<span className="animate-arrow-down inline-block ml-1">↓</span> ({formatPercentage(percentChangeLose)})
                   </>
                 )}
               </span>
@@ -174,14 +174,14 @@ const MarketInfo = ({ value, supply, isRightSide }: { value: number, supply: num
   >
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className={`flex flex-col ${isRightSide ? 'items-end' : 'items-start'} cursor-help`}>
+        {/* <div className={`flex flex-col ${isRightSide ? 'items-end' : 'items-start'} cursor-help`}>
           <span className="text-xs text-gray-400">MCap</span>
           <div className="flex items-center">
             {!isRightSide && <Briefcase className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400 mr-0.5" />}
             <span className="text-xs sm:text-sm">{formatNumber(convertEthToUsd(value))}</span>
             {isRightSide && <Briefcase className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400 ml-0.5" />}
           </div>
-        </div>
+        </div> */}
       </TooltipTrigger>
       <TooltipContent>
         <div className="text-sm">
@@ -392,7 +392,7 @@ export const WorldStateView = () => {
         >
           <div className={`flex flex-col ${isRightSide ? 'items-start ml-1 sm:ml-2' : 'items-end mr-1 sm:mr-2'}`}>
             <h2 className="text-sm sm:text-base md:text-lg font-bold mb-0.5 sm:mb-1">
-              {isRightSide && <span className="mr-2">{character.name}</span>}
+              {isRightSide && <span className="mr-2 text-2xl">{character.name}</span>}
               {isRightSide && <TooltipProvider
                 delayDuration={0}
               >
@@ -405,9 +405,6 @@ export const WorldStateView = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>}
-              {isPendingMatch && <span className="ml-2 text-gray-400 animate-pulse-glow">WAITING...</span>}
-              {isWinner && <span className="ml-2 text-green-400 animate-pulse-win-glow">WON (price now ${winPrice.toLocaleString()})</span>}
-              {isLoser && <span className="ml-2 text-red-400 animate-pulse-lose-glow">LOST (price now ${losePrice.toLocaleString()})</span>}
               {!isRightSide && <TooltipProvider
                 delayDuration={0}
               >
@@ -420,10 +417,15 @@ export const WorldStateView = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>}
-              {!isRightSide && <span className="ml-2">{character.name}</span>}
+              {!isRightSide && <span className="ml-2 text-2xl">{character.name}</span>}
 
             </h2>
-            <CharacterStats character={character} />
+            {true && <div>
+              {isPendingMatch && <span className="ml-2 text-gray-400 animate-pulse-glow">WAITING...</span>}
+              {isWinner && <span className="ml-2 text-green-400 animate-pulse-win-glow">WON (price now ${winPrice.toLocaleString()})</span>}
+              {isLoser && <span className="ml-2 text-red-400 animate-pulse-lose-glow">LOST (price now ${losePrice.toLocaleString()})</span>}
+            </div>}
+            {/* <CharacterStats character={character} /> */}
           </div>
           <img src={character.pfp} alt={character.name} className={`w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-2 border-yellow-500 ${isRightSide ? 'ml-1 sm:ml-2' : 'mr-1 sm:mr-2'}`} />
         </div>
@@ -475,7 +477,7 @@ export const WorldStateView = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white p-2 sm:p-4">
+    <div className="bg-gray-900 text-white">
       <style>{`
         @keyframes pulse-win {
           0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.5)); }
@@ -528,7 +530,7 @@ export const WorldStateView = () => {
           animation: pulse-lose 2s cubic-bezier(0.4, 0, 0.6, 1) infinite, pulse-glow 1s ease-in-out infinite;
         }
       `}</style>
-      <div className="max-w-7xl mx-auto bg-gray-900 border border-gray-700 rounded-xl p-2 sm:p-4 md:p-6 shadow-lg">
+      <div className="max-w-7xl mx-auto bg-gray-900 border p-2 sm:p-4 md:p-6 shadow-lg">
         <div className="flex flex-row justify-between items-center">
           {renderCharacterInfo(character1, character1SharesOwnedByYou, false)}
           <div className="flex flex-col items-center justify-center ">

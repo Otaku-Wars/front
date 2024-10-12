@@ -553,5 +553,7 @@ export default () => {
     if (!src) {
         return <div>Loading...</div>;
     }
-    return <StreamEmbed />;
+    return (<div className="h-full w-full border border-gray-700">
+        <StreamEmbed />
+    </div>);
 }

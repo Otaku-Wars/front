@@ -54,15 +54,15 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-yellow-900/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full"
+            className="bg-yellow-900/50 opacity-50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full border-b border-yellow-700"
           >
             {time}
             <span className="text-yellow-400 font-semibold mr-2">Match Pending:</span>
             <div className="flex items-center">
-              <img src={character1?.pfp} alt={character1?.name} className="w-5 h-5 rounded-full object-cover border border-yellow-400" />
+              <img src={character1?.pfp} alt={character1?.name} className="w-5 h-5 rounded-full object-cover border border-yellow-400 mr-1" />
               <p className='hover:underline cursor-pointer' onClick={() => navigate(`/character/${character1?.id}`)}>{character1?.name}</p>
               <span className="mx-1 font-bold">VS</span>
-              <img src={character2?.pfp} alt={character2?.name} className="w-5 h-5 rounded-full object-cover border border-yellow-400" />
+              <img src={character2?.pfp} alt={character2?.name} className="w-5 h-5 rounded-full object-cover border border-yellow-400 mr-1" />
               <p className='hover:underline cursor-pointer' onClick={() => navigate(`/character/${character2?.id}`)}>{character2?.name}</p>
             </div>
             <span className="ml-2 text-yellow-400">
@@ -81,15 +81,15 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-blue-900/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full"
+            className="bg-blue-900/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full border-b border-blue-700"
           >
             {time}
             <span className="text-blue-400 font-semibold mr-2">Match Started:</span>
             <div className="flex items-center flex-wrap">
-              <img src={character1Match?.pfp} alt={character1Match?.name} className="w-5 h-5 rounded-full object-cover border border-blue-400" />
+              <img src={character1Match?.pfp} alt={character1Match?.name} className="w-5 h-5 rounded-full object-cover border border-blue-400 mr-1" />
               <p className='hover:underline cursor-pointer' onClick={() => navigate(`/character/${character1Match?.id}`)}>{character1Match?.name}</p>
               <span className="mx-1 font-bold text-blue-400">VS</span>
-              <img src={character2Match?.pfp} alt={character2Match?.name} className="w-5 h-5 rounded-full object-cover border border-blue-400" />
+              <img src={character2Match?.pfp} alt={character2Match?.name} className="w-5 h-5 rounded-full object-cover border border-blue-400 mr-1" />
               <p className='hover:underline cursor-pointer' onClick={() => navigate(`/character/${character2Match?.id}`)}>{character2Match?.name}</p>
               <span className="mx-1 font-bold text-blue-400">who will win?</span>
             </div>
@@ -110,19 +110,19 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-green-900/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full"
+            className="bg-green-900/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full border-b border-green-700"
           >
             {time}
             <span className="text-green-400 font-semibold mr-2">Match Results:</span>
             <div className="flex items-center flex-wrap">
-              <img src={winnerCharacter?.pfp} alt={winnerCharacter?.name} className="w-5 h-5 rounded-full object-cover border border-green-400" />
+              <img src={winnerCharacter?.pfp} alt={winnerCharacter?.name} className="w-5 h-5 rounded-full object-cover border border-green-400 mr-1" />
               <p className='hover:underline cursor-pointer' onClick={() => navigate(`/character/${winnerCharacter?.id}`)}>{winnerCharacter?.name}</p>
               <span className="mx-1 font-bold text-green-400">beat</span>
-              <img src={loserCharacter?.pfp} alt={loserCharacter?.name} className="w-5 h-5 rounded-full object-cover border border-red-400 opacity-50 ml-2" />
+              <img src={loserCharacter?.pfp} alt={loserCharacter?.name} className="w-5 h-5 rounded-full object-cover border border-red-400 opacity-50 mr-1" />
               <p className='hover:underline cursor-pointer text-red-400' onClick={() => navigate(`/character/${loserCharacter?.id}`)}>{loserCharacter?.name}</p>
-              <span className="mx-1 font-bold text-green-400">gaining</span>
-              <span className="text-green-400">{tvlTransferred} in MktCap</span>
-              <span className="mx-1 font-bold text-green-400">price now {winnerPrice}</span>
+              <span className="ml-1 font-bold text-green-400">gaining</span>
+              <span className="ml-1 text-green-400">{tvlTransferred} in MktCap</span>
+              <span className="ml-1 font-bold text-green-400">price now {winnerPrice}</span>
             </div>
           </motion.div>
         )
@@ -141,17 +141,17 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             
-            className={`p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full ${trade.isBuy ? 'bg-green-900/50' : 'bg-red-900/50'}`}
+            className={`p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full ${trade.isBuy ? 'bg-green-900/50 border-b border-green-700' : 'bg-red-900/50 border-b border-red-700'}`}
           >
             {time}
             <span className={`font-semibold mr-2 ${trade.isBuy ? 'text-green-400' : 'text-red-400'}`}>
               {trade.isBuy ? 'Buy:' : 'Sell:'}
             </span>
             <div className="flex items-center flex-wrap">
-              <img src={traderPfp} alt={traderDisplayName} className="w-5 h-5 rounded-full object-cover border border-gray-400" />
+              <img src={traderPfp} alt={traderDisplayName} className="w-5 h-5 rounded-full object-cover border border-gray-400 mr-1" />
               <span className="text-gray-400 hover:underline cursor-pointer" onClick={() => navigate(`/user/${trade.trader}`)}>{traderDisplayName}</span>
               <span className="mx-1">{trade.isBuy ? 'bought' : 'sold'}  {amount}</span>
-              <img src={character?.pfp} alt={character?.name}  className="w-5 h-5 rounded-full object-cover border border-gray-400" />
+              <img src={character?.pfp} alt={character?.name}  className="w-5 h-5 rounded-full object-cover border border-gray-400 mr-1" />
               <span className="text-gray-400 hover:underline cursor-pointer" onClick={() => navigate(`/character/${character?.id}`)}>{character?.name}</span>
               <span className="mx-1">{trade.isBuy ? 'for' : 'at'}</span>
               <span className="font-bold">{cost}</span>
@@ -169,7 +169,7 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-purple-900/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full"
+            className="bg-purple-900/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full border-b border-purple-700"
           >
             {time}
             <span className="text-purple-400 font-semibold mr-2">Stake:</span>
@@ -192,7 +192,7 @@ const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activi
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-gray-800/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full"
+            className="bg-gray-800/50 p-2 rounded-lg shadow-lg flex flex-wrap items-center text-sm w-full border-b border-gray-700"
           >
             {time}
             <img src={pfp} alt={displayName} className="w-5 h-5 rounded-full object-cover border border-gray-400" />
@@ -253,7 +253,7 @@ export const ActivityBar = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-gray-300 rounded-lg shadow-lg flex flex-col h-full w-full">
+    <div className="bg-gray-900 text-gray-300 shadow-lg flex flex-col h-full w-full border">
       <style>{`
         /* Webkit (Chrome, Safari, newer versions of Opera) */
         .custom-scrollbar::-webkit-scrollbar {
@@ -282,7 +282,7 @@ export const ActivityBar = () => {
       `}</style>
       <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-700">
         <div className="flex justify-center items-center py-4">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">Activity Feed</h2>
+          <h2 className="text-2xl font-bold text-white">Activity Feed</h2>
         </div>
       </div>
       <div className="flex-grow overflow-y-auto p-4 flex flex-col-reverse custom-scrollbar">

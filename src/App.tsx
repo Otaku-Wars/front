@@ -12,7 +12,7 @@ import "./globals.css"
 function Home() {
   return (
     <div className="h-full w-full overflow-y-auto">
-      <div className="flex h-full justify-between gap-[0px]">
+      <div className="flex h-full justify-between">
         <div className="flex w-[27%] flex-col h-full items-center">
           <CharacterList />
         </div>
@@ -30,7 +30,7 @@ function Home() {
 
 function App() {
   return (
-    <div className="h-[90vh] w-[100vw]">
+    <div className="h-[91vh] w-[100vw]">
       <Router>
         <NavBar />
         <Routes>

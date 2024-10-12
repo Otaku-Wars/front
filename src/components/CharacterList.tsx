@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useCharacters, useBattleState, useAllCharacterPerformance } from '../hooks/api';
 import { useConvertEthToUsd } from '../EthPriceProvider';
-import { formatNumber, formatPercentage } from '../lib/utils';
+import { formatMarketCap, formatNumber, formatPercentage } from '../lib/utils';
 import { getMatchesUntilNextMatchForCharacters } from './CharacterPage';
 import { Character, Status } from '@memeclashtv/types';
 type SortColumn = 'marketCap' | 'price' | 'performance';
@@ -108,7 +108,7 @@ const CharacterRow = ({ character, performance, matchesLeft, status }: { charact
 
   return (
     <motion.tr 
-      className="border-b border-gray-700 hover:bg-gray-800/50 transition-colors duration-200 relative group" 
+      className="border-b border-gray-700 hover:bg-gray-800/50 transition-colors duration-200 relative group cursor-pointer" 
       onMouseEnter={() => setIsHovered(true)} 
       onMouseLeave={() => setIsHovered(false)} 
       initial={{ opacity: 0, y: 20 }} 
@@ -117,11 +117,14 @@ const CharacterRow = ({ character, performance, matchesLeft, status }: { charact
       onClick={handleRowClick}
     >
       <td className="p-2 sm:p-3 relative">
-        <div className="flex items-center">
-          <motion.img src={character.pfp} alt={character.name} className="w-6 h-6 sm:w-8 sm:h-8 mr-2 font-bold rounded-full bg-gray-700" whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 300 }} />
-          <div>
-            <div className="font-bold text-lg sm:text-md md:text-md text-white">{character.name}</div>
-            <StatusIndicator status={status} matchesLeft={matchesLeft} totalMatches={character.matchCount} />
+        <div className="flex items-center my-2">
+          <motion.img src={character.pfp} alt={character.name} className="w-6 h-6 mr-2 font-bold rounded-full bg-gray-700 border-2 border-white/10" whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 300 }} />
+          <div className=""
+            
+          >
+            <div className="font-bold text-lg sm:text-md md:text-md text-white">
+              {character.name}
+            </div>
           </div>
         </div>
         <AnimatePresence>
@@ -161,9 +164,12 @@ const CharacterRow = ({ character, performance, matchesLeft, status }: { charact
       </td>
       <td className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base ">
         <motion.div animate={{ scale: isHovered ? 1.05 : 1 }}>
-          {formatNumber(convertEthToUsd(character.value))}
+          {formatMarketCap(convertEthToUsd(character.value))}
         </motion.div>
       </td>
+      <div className='absolute bottom-0 left-10 pb-2'>
+        <StatusIndicator status={status} matchesLeft={matchesLeft} totalMatches={character.matchCount} />
+      </div>
     </motion.tr>
   );
 };
@@ -239,7 +245,7 @@ export const CharacterList = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-gray-300 rounded-lg shadow-lg h-[600px] w-full overflow-hidden">
+    <div className="bg-gray-900 text-gray-300 shadow-lg h-full w-full overflow-hidden border">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 10px;
@@ -266,7 +272,7 @@ export const CharacterList = () => {
       `}</style>
       <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-700 z-[100]">
         <div className="flex flex-col items-center py-3 sm:py-4 px-2 sm:px-4 space-y-2 sm:space-y-4 z-[100]">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white ">Characters</h2>
+          <h2 className="text-2xl font-bold text-white ">Characters</h2>
           <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md">
             <input type="text" placeholder="Search characters..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full px-3 sm:px-4 py-1 sm:py-2 bg-gray-800 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base " />
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
