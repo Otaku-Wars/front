@@ -440,16 +440,16 @@ export const CharacterPage = () => {
     if (isLoading || isBattleLoading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
     console.log("AAbb character status", characterStatus)
     return (
-        <div className="flex flex-col lg:flex-row w-full gap-4 lg:gap-8 items-start justify-center p-2 lg:p-4 min-h-screen">
-            <div className="flex flex-col items-center lg:sticky lg:top-8 w-full lg:w-1/4 bg-card p-4 rounded-lg shadow bg-gray-900">
-                <div className="flex flex-col space-y-4">
-                    <div className="flex flex-col items-center align-center pb-6">
+        <div className="flex flex-col lg:flex-row w-full gap-4 lg:gap-4 items-start justify-center p-2 lg:p-4 min-h-screen">
+            <div className="flex flex-col items-center lg:sticky lg:top-8 w-full lg:w-1/4 bg-card p-4 rounded-lg shadow bg-gray-900 lg:max-h-[calc(100vh-10rem)] overflow-y-auto border border-gray-700">
+                <div className="flex flex-col space-y-4 w-full h-full">
+                    <div className="flex flex-col items-center pb-6">
                         <style>{`
                             .profile-picture-container {
                                 perspective: 1000px;
                                 transform-style: preserve-3d;
-                                width: 12rem;
-                                height: 12rem;
+                                width: 150px;
+                                height: 150px;
                             }
 
                             .profile-picture {
@@ -478,7 +478,7 @@ export const CharacterPage = () => {
                                 display: flex;
                                 align-items: center;
                                 justify-content: center;
-                                font-size: 3rem;
+                                font-size: 2vw;
                                 font-weight: bold;
                                 color: white;
                             }
@@ -500,7 +500,7 @@ export const CharacterPage = () => {
                                 pointer-events: none;
                             }
                         `}</style>
-                        <div className="profile-picture-container mb-4 cursor-pointer" onClick={() => setIsFlipped(!isFlipped)}>
+                        <div className="profile-picture-container mb-1 cursor-pointer" onClick={() => setIsFlipped(!isFlipped)}>
                             <div className="absolute inset-0 rounded-full">
                                 <div className={`profile-picture ${isFlipped ? 'rotate-y-180' : ''}`}>
                                     <div className="profile-picture-front relative">
@@ -510,43 +510,43 @@ export const CharacterPage = () => {
                                             <AvatarFallback>{character.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                     </div>
-                                    <div className="profile-picture-back text-4xl font-bold">
+                                    <div className="profile-picture-back text-2xl lg:text-4xl font-bold">
                                         {character.name.charAt(0)}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <h2 className="mt-4 text-4xl font-bold">{character.name}</h2>
+                        <h2 className="text-2xl font-bold text-center">{character.name}</h2>
                         <div className="flex items-center mt-2 space-x-2">
-                            <Badge variant="secondary" className="text-lg px-3 py-1 bg-yellow-400 text-white font-bold">
+                            <Badge variant="secondary" className="text-xs lg:text-sm px-2 py-1 bg-yellow-400 text-white font-bold">
                                 Tier {getTier(character.value)}
                             </Badge>
-                            <Badge variant="outline" className="text-lg px-3 py-1 border-green-400 text-green-400">
+                            <Badge variant="outline" className="text-xs lg:text-sm px-2 py-1 border-green-400 text-green-400">
                                 {characterStatus}
                             </Badge>
                         </div>
                     </div>
                     <div className="pt-0 z-10 relative w-full">
-                        <div className="flex flex-row justify-between gap-4 mb-6">
-                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
-                                <Trophy className="w-8 h-8 text-yellow-400 mb-2 mx-auto" />
-                                <span className="text-xl text-gray-400">Win Rate</span>
-                                <span className="block text-2xl font-bold text-white">{(character.winCount * 100 / character.matchCount)?.toFixed(0)}%</span>
+                        <div className="flex flex-wrap justify-between gap-4 mb-6">
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700 flex-1 min-w-[80px]">
+                                <Trophy className="w-5 h-5 lg:w-6 lg:h-6 text-yellow-400 mb-2 mx-auto" />
+                                <span className="text-xs lg:text-sm text-gray-400">Win Rate</span>
+                                <span className="block text-base lg:text-lg font-bold text-white">{(character.winCount * 100 / character.matchCount)?.toFixed(0)}%</span>
                             </div>
-                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
-                                <Target className="w-8 h-8 text-blue-400 mb-2 mx-auto" />
-                                <span className="text-xl text-gray-400 font-bold">Matches</span>
-                                <span className="block text-2xl font-bold text-white">{character.matchCount}</span>
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700 flex-1 min-w-[80px]">
+                                <Target className="w-5 h-5 lg:w-6 lg:h-6 text-blue-400 mb-2 mx-auto" />
+                                <span className="text-xs lg:text-sm text-gray-400 font-bold">Matches</span>
+                                <span className="block text-base lg:text-lg font-bold text-white">{character.matchCount}</span>
                             </div>
-                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
-                                <ThumbsUp className="w-8 h-8 text-green-400 mb-2 mx-auto" />
-                                <span className="text-xl text-gray-400 font-bold">Wins</span>
-                                <span className="block text-2xl font-bold text-white">{character.winCount}</span>
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700 flex-1 min-w-[80px]">
+                                <ThumbsUp className="w-5 h-5 lg:w-6 lg:h-6 text-green-400 mb-2 mx-auto" />
+                                <span className="text-xs lg:text-sm text-gray-400 font-bold">Wins</span>
+                                <span className="block text-base lg:text-lg font-bold text-white">{character.winCount}</span>
                             </div>
-                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
-                                <ThumbsDown className="w-8 h-8 text-red-400 mb-2 mx-auto" />
-                                <span className="text-xl text-gray-400 font-bold">Losses</span>
-                                <span className="block text-2xl font-bold text-white">{character.lossCount}</span>
+                            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700 flex-1 min-w-[80px]">
+                                <ThumbsDown className="w-5 h-5 lg:w-6 lg:h-6 text-red-400 mb-2 mx-auto" />
+                                <span className="text-xs lg:text-sm text-gray-400 font-bold">Losses</span>
+                                <span className="block text-base lg:text-lg font-bold text-white">{character.lossCount}</span>
                             </div>
                         </div>
                         
@@ -555,18 +555,18 @@ export const CharacterPage = () => {
                                 <div key={stat} className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         {icon}
-                                        <span className="text-sm ml-2">{stat}</span>
+                                        <span className="text-xs lg:text-sm ml-2">{stat}</span>
                                     </div>
-                                    <span className={`text-xl font-bold ${icon.props.className.split(' ').find(c => c.startsWith('text-'))}`}>
+                                    <span className={`text-base lg:text-lg font-bold ${icon.props.className.split(' ').find(c => c.startsWith('text-'))}`}>
                                         {character[stat.toLowerCase()]}
                                     </span>
                                 </div>
                             ))}
                         </div>
-                        <div className="flex items-center align-center mt-6 pt-4 border-t border-gray-700 gap-4">
-                            <h4 className="font-semibold text-lg">Next Match:</h4>
-                            <div className="flex flex-row items-center align-center gap-4">
-                                <div className="flex flex-col items-center align-center">
+                        <div className="flex items-center mt-6 pt-4 border-t border-gray-700 gap-4 flex-wrap">
+                            <h4 className="font-semibold text-xs lg:text-sm">Next Match:</h4>
+                            <div className="flex flex-row items-center gap-4">
+                                <div className="flex flex-col items-center">
                                     <StatusIndicator 
                                     status={
                                         characterStatus == "inBattle" ? 'battling' : 
@@ -579,14 +579,14 @@ export const CharacterPage = () => {
                                     totalMatches={totalMatches} 
                                 />
                                 </div>
-                                <div className="text-xl font-bold">vs</div>
-                                <div className="flex items-center align-center cursor-pointer"
+                                <div className="text-xs lg:text-sm font-bold">vs</div>
+                                <div className="flex items-center cursor-pointer"
                                 onClick={()=> navigate(`/character/${nextOpponent?.id}`)}>
-                                    <Avatar className="w-8 h-8 border-2 border-yellow-400">
+                                    <Avatar className="w-5 h-5 lg:w-6 lg:h-6 border-2 border-yellow-400">
                                         <AvatarImage src={nextOpponent?.pfp} alt={nextOpponent?.name} />
                                         <AvatarFallback>{nextOpponent?.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
-                                    <span className="text-sm font-semibold text-yellow-400">{nextOpponent?.name}</span>
+                                    <span className="text-xs lg:text-sm font-semibold text-yellow-400">{nextOpponent?.name}</span>
                                 </div>
                             </div>
                         </div>
@@ -596,7 +596,7 @@ export const CharacterPage = () => {
             </div>
 
             {/* Character info */}
-            <div className='w-full lg:w-3/4 space-y-4 lg:space-y-8'>    
+            <div className='w-full lg:w-3/4 '>    
                 <Card className='bg-gray-900'>
                     <CardHeader>
                             <h1 className='text-white font-bold text-4xl'>Price Chart</h1>
