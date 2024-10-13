@@ -366,61 +366,36 @@ export const CharacterPage = () => {
     const isPendingMatch = characterStatus == "waiting"
 
     const BuyButton = React.memo(() => {
-        const buttonRef = useRef<HTMLButtonElement>(null);
-
-        useEffect(() => {
-            if (buttonRef.current) {
-                // Initialize animation logic here if needed
-            }
-        }, []); // Empty dependency array to ensure this runs only once
-
         if (isBattling) {
-            return <Button disabled className="text-4xl flex-1 bg-gray-700 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10">Buying Locked🔒</Button>
-        }
-        if (isPendingMatch) {
             return (
-                <Button 
-                    ref={buttonRef}
-                    style={{
-                        textShadow: `
-                        2px 2px 0 #000000, 
-                        2px 2px 0 #000000, 
-                        2px 2px 0 #000000, 
-                        2px 2px 0 #000000, 
-                        2px 2px 0 #000000
-                    `,
-                    }}  
-                    className="text-4xl flex-1 breathing-green bg-green-600 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10"
-                    onClick={() => handleShowModal('Buy')}
-                >
-                    BUY NOW
-                    <span className="absolute top-0 right-0 bg-gray-700 bg-opacity-50 text-sm px-1 py-0.5 rounded-bl font-bold">
-                        {(willStartIn ?? 0).toString().padStart(2, '0')}s left to buy
-                    </span>
+                <Button disabled className="text-4xl flex-1 bg-gray-700 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10">
+                    Buying Locked🔒
                 </Button>
-            )
+            );
         }
+        const buttonStyle = {
+            textShadow: `
+                2px 2px 0 #000000, 
+                2px 2px 0 #000000, 
+                2px 2px 0 #000000, 
+                2px 2px 0 #000000, 
+                2px 2px 0 #000000
+            `,
+        };
+        const buttonText = isPendingMatch ? `${(willStartIn ?? 0).toString().padStart(2, '0')}s left to buy` : `${matchesLeft} matches till next battle`;
+
         return (
-            <Button 
-                ref={buttonRef}
-                style={{
-                    textShadow: `
-                    2px 2px 0 #000000, 
-                    2px 2px 0 #000000, 
-                    2px 2px 0 #000000, 
-                    2px 2px 0 #000000, 
-                    2px 2px 0 #000000
-                `,
-                }}  
+            <Button
+                style={buttonStyle}
                 className="text-4xl flex-1 breathing-green bg-green-600 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10"
                 onClick={() => handleShowModal('Buy')}
             >
                 BUY NOW
                 <span className="absolute top-0 right-0 bg-gray-700 bg-opacity-50 text-sm px-1 py-0.5 rounded-bl font-bold">
-                    {matchesLeft} matches till next battle
+                    {buttonText}
                 </span>
             </Button>
-        )
+        );
     });
 
     const SellButton = () => {
@@ -674,13 +649,13 @@ export const CharacterPage = () => {
 
                 {/* Stats */}
                 <Card className="relative">
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+                    {/* <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
                         <div className="text-center text-white">
                             <LockIcon className="w-22 h-22 mx-auto mb-2" />
                             <p className="text-3xl font-bold">Staking coming Soon</p>
                         </div>
-                    </div>
-                    <div className="blur-sm pointer-events-none">
+                    </div> */}
+                    {/* <div className="blur-sm pointer-events-none"> */}
                         <CardHeader>
                             <CardTitle>
                                 Stats <span className="text-right text-sm text-gray-600">Total stakes: {totalStakes}</span>
@@ -712,7 +687,7 @@ export const CharacterPage = () => {
                                 ))}
                             </div>
                         </CardContent>
-                    </div>
+                    {/* </div> */}
                 </Card>
                 
                 {/* Tab lists */}

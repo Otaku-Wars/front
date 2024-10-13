@@ -85,7 +85,7 @@ const BuyTradeButton = ({ onClick, preNewHoldingsValue, newHoldingsValue, shares
 }
 
 const CharacterStats = ({ character }: { character: Character }) => (
-  <div className="flex justify-between items-center mt-1 w-full">
+  <div className="flex justify-between items-center mt-1">
     <div className="flex items-center">
       <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-green-400 mr-0.5" />
       <span className="text-xs sm:text-sm text-green-400">{character.health}</span>
@@ -357,10 +357,11 @@ export const WorldStateView = () => {
   }, [character1WinMarketCap, character2WinMarketCap, character1LossMarketCap, character2LossMarketCap, character1SharesOwnedByYou, character2SharesOwnedByYou])
 
 
-  const isPendingMatch = battleState?.status == Status.Pending
   const winner = battleState?.lastMatchResult?.winner ?? null
   const willStartIn = useTimeTill(battleState?.willStartAt ?? 0)
-  const isBattling = battleState?.status == Status.Battling
+  const isBattling = battleState?.status == Status.Battling || (willStartIn == 0 && battleState?.status == Status.Pending)
+  const isPendingMatch = battleState?.status == Status.Pending
+
 
   console.log("battleState winner", winner)
 
@@ -384,12 +385,17 @@ export const WorldStateView = () => {
 
     return (
       <div className={`flex flex-col ${isRightSide ? 'items-start' : 'items-end'} w-full max-w-[45%]`}>
-        <div 
-          className={`flex items-center ${isRightSide ? 'flex-row-reverse' : 'flex-row'} mb-1 sm:mb-2 cursor-pointer`}
+        
+        <div className={`flex items-center ${isRightSide ? 'flex-row-reverse' : 'flex-row'} mb-1 sm:mb-2 cursor-pointer`}
           onClick={() => {
             navigator(`/character/${character.id}`)
           }}
         >
+          <div className={``}>
+            {isPendingMatch && <span className="ml-2 text-gray-400 animate-pulse-glow">WAITING...</span>}
+            {isWinner && <span className="ml-2 text-green-400 animate-pulse-win-glow">WON (price now ${winPrice.toLocaleString()})</span>}
+            {isLoser && <span className="ml-2 text-red-400 animate-pulse-lose-glow">LOST (price now ${losePrice.toLocaleString()})</span>}
+          </div>
           <div className={`flex flex-col ${isRightSide ? 'items-start ml-1 sm:ml-2' : 'items-end mr-1 sm:mr-2'}`}>
             <h2 className="text-sm sm:text-base md:text-lg font-bold mb-0.5 sm:mb-1">
               {isRightSide && <span className="mr-2 text-2xl">{character.name}</span>}
@@ -420,12 +426,8 @@ export const WorldStateView = () => {
               {!isRightSide && <span className="ml-2 text-2xl">{character.name}</span>}
 
             </h2>
-            {true && <div>
-              {isPendingMatch && <span className="ml-2 text-gray-400 animate-pulse-glow">WAITING...</span>}
-              {isWinner && <span className="ml-2 text-green-400 animate-pulse-win-glow">WON (price now ${winPrice.toLocaleString()})</span>}
-              {isLoser && <span className="ml-2 text-red-400 animate-pulse-lose-glow">LOST (price now ${losePrice.toLocaleString()})</span>}
-            </div>}
-            {/* <CharacterStats character={character} /> */}
+            
+            <CharacterStats character={character} />
           </div>
           <img src={character.pfp} alt={character.name} className={`w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-2 border-yellow-500 ${isRightSide ? 'ml-1 sm:ml-2' : 'mr-1 sm:mr-2'}`} />
         </div>

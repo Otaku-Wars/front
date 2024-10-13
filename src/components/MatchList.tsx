@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { CharacterAttributeState, MatchEndActivity } from '@memeclashtv/types/activity';
 import { MatchListItem } from './MatchListItem';
 import { useCharacterMatches } from '../hooks/api';
@@ -11,7 +11,6 @@ interface MatchListProps {
   characters: Character[];
 }
 
-import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { ArrowDownIcon, ArrowUpIcon, HeartIcon, ShieldIcon, SwordIcon, ZapIcon } from "lucide-react"
@@ -71,6 +70,38 @@ const CharacterCard = ({
 export const MatchList: React.FC<MatchListProps> = ({ characterId, characters }) => {
   const { data: activities, isLoading, isError } = useCharacterMatches(characterId);
   const convertEthToUsd = useConvertEthToUsd();
+  const [visibleActivities, setVisibleActivities] = useState<MatchEndActivity[]>([]);
+  const [page, setPage] = useState(0);
+  const observer = useRef<IntersectionObserver | null>(null);
+
+  const loadMoreActivities = useCallback(() => {
+    if (activities) {
+      const newPage = page + 1;
+      const newActivities = activities.slice(0, newPage * 10);
+      setVisibleActivities(newActivities);
+      setPage(newPage);
+    }
+  }, [activities, page]);
+
+  const lastActivityRef = useCallback(
+    (node) => {
+      if (isLoading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && activities && visibleActivities.length < activities.length) {
+          loadMoreActivities();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isLoading, activities, visibleActivities, loadMoreActivities]
+  );
+
+  React.useEffect(() => {
+    if (activities) {
+      setVisibleActivities(activities.slice(0, 10));
+    }
+  }, [activities]);
 
   if (isLoading) {
     return <div className="match-list-loading">Loading match history...</div>;
@@ -97,15 +128,15 @@ export const MatchList: React.FC<MatchListProps> = ({ characterId, characters })
         </TableRow>
       </TableHeader>
       <TableBody>
-        {activities.map((match: MatchEndActivity) => {
+        {visibleActivities.map((match: MatchEndActivity, index: number) => {
           const isPlayer1 = match.p1 === characterId;
           const playerIndex = isPlayer1 ? '1' : '2';
           const opponentIndex = isPlayer1 ? '2' : '1';
 
           return (
-            <TableRow key={match.id}>
+            <TableRow key={match.id} ref={index === visibleActivities.length - 1 ? lastActivityRef : null}>
               <TableCell>
-                <Link to={`/character/${match.p1}`}> {/* Added Link */}
+                <Link to={`/character/${match.p1}`}>
                   <CharacterCard 
                     convertEthToUsd={convertEthToUsd}
                     id={match.p1} 
@@ -117,7 +148,7 @@ export const MatchList: React.FC<MatchListProps> = ({ characterId, characters })
                 </Link>
               </TableCell>
               <TableCell>
-                <Link to={`/character/${match.p2}`}> {/* Added Link */}
+                <Link to={`/character/${match.p2}`}>
                   <CharacterCard 
                     convertEthToUsd={convertEthToUsd}
                     id={match.p2} 

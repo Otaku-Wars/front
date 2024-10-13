@@ -107,6 +107,7 @@ export const useCharacterMatches = (characterId: number): { data: MatchEndActivi
         staleTime: 10000,
     });
     //order by timestamp
+    //and only
     const sortedData = data?.sort((a, b) => b.timestamp - a.timestamp);
     return { data: sortedData, isLoading, isError };
 }
