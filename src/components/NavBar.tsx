@@ -187,14 +187,16 @@ export function NavBar() {
         localStorage.removeItem('referral')
         setSearchParams({ref: ''})
       }else if(address && !affiliateIsSet && authenticated){
-        //make api request to set affiliate
-        const accessToken = await getAccessToken()
-        const response = await fetch(`${apiUrl}/users/${address}/set-affiliate`, {
+        const affiliateAddress = localStorage.getItem('referral') ?? searchParams.get('ref')
+        if(affiliateAddress && affiliateAddress.toLowerCase() !== address.toLowerCase()){
+          //make api request to set affiliate
+          const accessToken = await getAccessToken()
+          const response = await fetch(`${apiUrl}/users/${address}/set-affiliate`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`
           },
           method: 'POST',
-          body: JSON.stringify({affiliate: localStorage.getItem('referral') ?? searchParams.get('ref')}),
+          body: JSON.stringify({affiliate: affiliateAddress}),
         })
       }
     }
