@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useMemo, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatEther, formatNumber } from '../lib/utils';

@@ -7,8 +7,8 @@ import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Progress } from "./ui/progress";
-import { Copy, LogOut, Wallet, TrendingUp, WalletIcon, Lock, ArrowUpRight, ArrowDownLeft, Users, Swords, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
-import { useCharacters, useUser, useAllCharacterPerformance, useValueSpent, calculatePnL } from '../hooks/api'
+import { Copy, LogOut, Wallet, TrendingUp, WalletIcon, Lock, ArrowUpRight, ArrowDownLeft, Users, Swords, ArrowUpIcon, ArrowDownIcon, ChartPie } from "lucide-react";
+import { useCharacters, useUser, useAllCharacterPerformance, useValueSpent, calculatePnL, usePortfolio } from '../hooks/api'
 import { useAddress, useBalance, useWithdraw } from '../hooks/user';
 import { useParams, Link } from 'react-router-dom';
 import { truncateWallet } from './NavBar';
@@ -22,6 +22,7 @@ import { formatEther, formatNumber, formatPercentage } from '../lib/utils';
 import { useGetSellPrices } from '../hooks/contract';
 import { formatEther as viemFormatEther } from 'viem';
 import { buildDataUrl } from './ActivityBar';
+import { FaMoneyBill } from 'react-icons/fa';
 
 const attributeNames = {
   [Attribute.health]: "Health",
@@ -29,6 +30,10 @@ const attributeNames = {
   [Attribute.attack]: "Attack",
   [Attribute.defense]: "Defense",
 };
+
+export const generateAffiliateLink = (address: string) => {
+  return `${window.location.origin}/?ref=${address}`
+}
 
 export const UserPage = () => {
     const { fundWallet } = useFundWallet()
@@ -97,23 +102,21 @@ export const UserPage = () => {
   const balanceAmounts = user?.balances?.map(balance => balance.balance) || [];
   console.log("balanceAmounts", balanceAmounts)
   const {data: sellPrices} = useGetSellPrices(characterIds.map((characterId, index) => ({characterId, amount: balanceAmounts[index]})));
-  const performanceData = useAllCharacterPerformance(characterIds, yesterday);
-  const { data: valueSpents } = useValueSpent(user?.address ?? address, characterIds);
+  //const performanceData = useAllCharacterPerformance(characterIds, yesterday);
   //console.log("AAvalueSpents", valueSpents)
   const netWorth = useMemo(() => {
     return sellPrices?.reduce((acc, price) => {
-      const value = viemFormatEther(price?.result as any);
+      const value = viemFormatEther(price?.result ?? 0 as any);
       console.log("AAvalueSpent:adding", value)
       return acc + Number(value);
     }, 0) ?? 0;
   }, [sellPrices]);
   console.log("AAvalueSpents netWorth", netWorth)
 
-  const totalSpent = useMemo(() => {
-    return valueSpents?.reduce((acc, valueSpent) => {
-      return acc + Number(valueSpent.spent);
-    }, 0) ?? 0;
-  }, [valueSpents]);
+  const totalSpent = user?.pnl?.costBasis ?? 0;
+  const totalFees = user?.pnl?.fees ?? 0;
+  const referrals = user?.referralCount ?? 0;
+  const rewards = user?.rewards ?? 0;
 
   console.log("AAvalueSpents totalSpent", totalSpent)
 
@@ -211,7 +214,7 @@ export const UserPage = () => {
                     <DialogTitle>Withdraw Funds</DialogTitle>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
+                    <div className="grid grid-cols-6 items-center gap-4">
                       <label htmlFor="withdrawAddress" className="text-right">
                         Address
                       </label>
@@ -254,7 +257,7 @@ export const UserPage = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
                 <Wallet className="w-8 h-8 text-yellow-400 mb-2 mx-auto" />
-                <span className="text-xl text-gray-400">Cash Balance</span>
+                <span className="text-xl text-gray-400">Wallet Balance</span>
                 <span className="block text-2xl font-bold text-white">{formatNumber(convertEthToUsd(parseFloat(userBalance ?? "0")) ?? 0)}</span>
                 <span className="text-xs text-muted-foreground">{formatEther(parseFloat(userBalance ?? "0"))} ETH</span>
               </div>
@@ -283,8 +286,63 @@ export const UserPage = () => {
                 <span className="text-xl text-gray-400">Total Stakes</span>
                 <span className="block text-2xl font-bold text-white">{totalStakesCount}</span>
               </div>
+              
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700 mt-4">
+            {/* Affiliate section */}
+            <h1 className="text-2xl mt-10 font-bold">Rewards sharing <span className="text-sm text-gray-400">(Earn 50% of trading fees)</span></h1>
+            <div className="grid grid-cols-4 gap-4 w-full">
+              <Button 
+                style={{
+                  textShadow: `
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000, 
+                    2px 2px 0 #000000
+                  `,
+                  //bright blue
+                  color: '#FFFFFF',
+                  fontWeight: 'bold',
+                  fontSize: '20px',
+                  opacity: '0.8',
+                }}  
+                className="bg-yellow-600 col-span-3 text-black text-lg font-bold hover:bg-yellow-700 transition-all duration-300 text-xs sm:text-sm md:text-base relative overflow-hidden group py-10 text-white h-full"
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  navigator.clipboard.writeText(generateAffiliateLink(address as string));
+                  alert(`Copied ${generateAffiliateLink(address as string)} to clipboard`);
+                }}
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                Copy Affiliate Link
+              </Button>
+              <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                <span className="text-xl text-gray-400">Copy your link and share it with friends to earn 50% of their Trading fees!</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            
+            <div className="col-span-1 bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                <Users className="w-8 h-8 text-green-400 mb-2 mx-auto" />
+                <span className="text-xl text-gray-400">Total Referrals</span>
+                <span className="block text-2xl font-bold text-white">{referrals}</span>
+            </div>
+              <div className="col-span-3 bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                <FaMoneyBill className="w-8 h-8 text-green-400 mb-2 mx-auto" />
+                <span className="text-xl text-gray-400">Fees earned</span>
+                <span className="block text-2xl font-bold text-white">{formatNumber(convertEthToUsd(rewards ?? 0))}</span>
+              </div>
+              {/* <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                <Users className="w-8 h-8 text-green-400 mb-2 mx-auto" />
+                <span className="text-xl text-gray-400">Fees Paid</span>
+                <span className="block text-2xl font-bold text-white">{formatNumber(convertEthToUsd(totalFees ?? 0))}</span>
+              </div> */}
+            </div>
+
+            {/* Stake unlock time */}
+            <h1 className="text-2xl mt-10 font-bold">Staking <span className="text-sm text-gray-400">(coming soon)</span></h1>
+            <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
               <Lock className="w-8 h-8 text-purple-400 mb-2 mx-auto" />
               <span className="text-xl text-gray-400">Stake Unlock Time</span>
               <span className="block text-lg font-semibold text-white">{ user?.stakeUnlockTime ? new Date(user?.stakeUnlockTime * 1000).toLocaleString() : "No Stake"}</span>
@@ -309,9 +367,10 @@ export const UserPage = () => {
               {user?.balances?.map((balance: Balance, index: number) => {
                 const character = characters?.find(c => c.id === balance.character);
                 const trueValue = sellPrices ? sellPrices[index]?.result : 0;
-                const value = viemFormatEther(trueValue as any);
-                const valueSpent = valueSpents?.find(v => v.characterId === character?.id)?.spent ?? 0;
-                const performance = performanceData?.find(p => p.characterId === character?.id);
+                const value = viemFormatEther(trueValue as any ?? 0);
+                const valueSpent = balance?.pnl?.costBasis ?? 0;
+
+                //const performance = performanceData?.find(p => p.characterId === character?.id);
                 const {percentageChange, absoluteChange} = calculatePnL(Number(valueSpent), Number(value));
                 const isPositive = percentageChange >= 0;
 

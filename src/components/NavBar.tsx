@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ConnectedWallet, useLogin, usePrivy, useWallets } from '@privy-io/react-auth'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Menu } from "lucide-react"
 
 import { Button } from "../components/ui/button"
@@ -97,7 +97,7 @@ const CustomButton = ({ children, onClick, shouldBreathDefault = false }) => (
 )
 
 export function NavBar() {
-  const { authenticated, user } = usePrivy()
+  const { authenticated, user, getAccessToken } = usePrivy()
   const { data: battleState } = useBattleState()
   const address = user?.wallet?.address;
   const {setActiveWallet} = useSetActiveWallet()
@@ -137,6 +137,17 @@ export function NavBar() {
 
   const [showHowToModal, setShowHowToModal] = useState(false)
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const param = searchParams.get('ref')
+    if(param){
+      //set local storage
+      localStorage.setItem('referral', param)
+      console.log("referral", param)
+    }
+  }, [searchParams])
+
   const userApi = useUser(address)
   const pfp = (userApi as any)?.pfp;
   const username = (userApi as any)?.username;
@@ -146,6 +157,14 @@ export function NavBar() {
       truncateWallet(address):
       "Loading..."
     "Loading.."
+
+  const affiliateIsSet = useMemo(() => {
+    if(userApi && !userApi.isError && userApi.data){
+      const userFromApi = userApi.data
+      return userFromApi.affiliate !== null
+    }
+    return false
+  }, [userApi]) 
 
   useEffect(() => {
     if(authenticated && address){
@@ -161,6 +180,26 @@ export function NavBar() {
       }
     }
   }, [authenticated, wallets, address, setActiveWallet])
+
+  useEffect(() => {
+    const setAffiliate = async () => {
+      if(affiliateIsSet){
+        localStorage.removeItem('referral')
+        setSearchParams({ref: ''})
+      }else if(address && !affiliateIsSet && authenticated){
+        //make api request to set affiliate
+        const accessToken = await getAccessToken()
+        const response = await fetch(`${apiUrl}/users/${address}/set-affiliate`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          },
+          method: 'POST',
+          body: JSON.stringify({affiliate: localStorage.getItem('referral') ?? searchParams.get('ref')}),
+        })
+      }
+    }
+    setAffiliate()
+  }, [affiliateIsSet, authenticated, address])
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-gray-900 text-gray-300 w-full overflow-y-auto custom-scrollbar">
       <style>{`

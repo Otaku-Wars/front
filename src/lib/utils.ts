@@ -10,6 +10,7 @@ export const formatNumber = (num: number) => {
     style: 'currency', 
     currency: 'USD',
     maximumFractionDigits: 4,
+    maximumSignificantDigits: 4,
   }).format(num)
 }
 
@@ -27,14 +28,13 @@ export const formatEther = (num: number) => {
     currency: 'ETH',
     // minimumFractionDigits: 2,
     // maximumFractionDigits: 10,
-    minimumSignificantDigits: 1,
-    maximumSignificantDigits: 7,
+    maximumSignificantDigits: 4,
   }).format(num)
 }
 
 export const formatPercentage = (num: number) => {
   return new Intl.NumberFormat('en-US', { 
     style: 'percent', 
-    maximumSignificantDigits: 2,
+    maximumSignificantDigits: 4,
   }).format(num)
 }

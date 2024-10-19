@@ -1,10 +1,45 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { apiUrl } from "../main";
-import { Character, CurrentBattleState, User } from "@memeclashtv/types";
-import { Activity, MatchEndActivity, StakeActivity, TradeActivity } from "@memeclashtv/types/activity";
+import { Balance, Character, CurrentBattleState, PortfolioEntry, User } from "@memeclashtv/types";
+import { Activity, ActivityType, MatchEndActivity, StakeActivity, TradeActivity } from "@memeclashtv/types/activity";
 import { useEthPrice } from "../EthPriceProvider";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
+import { getSellPriceMc } from "../utils";
 
+
+export const getTrade = async (characterId: number): Promise<TradeActivity | undefined> => {
+    const response = await fetch(`${apiUrl}/trades/character/${characterId}`);
+    return response.json();
+}
+
+export const getMatch = async (characterId: number): Promise<MatchEndActivity | undefined> => {
+    const response = await fetch(`${apiUrl}/matches/character/${characterId}`);
+    return response.json();
+}
+
+export const useTrade = (timestamp: number): { data: TradeActivity | undefined, isLoading: boolean, isError: boolean } => {
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['trades', timestamp],
+        queryFn: async () => {
+            const response = await fetch(`${apiUrl}/trades/${timestamp}`);
+            return response.json();
+        },
+        staleTime: Infinity,
+    });
+    return { data, isLoading, isError };
+}
+
+export const useMatch = (timestamp: number): { data: MatchEndActivity | undefined, isLoading: boolean, isError: boolean } => {
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['matches', timestamp],
+        queryFn: async () => {
+            const response = await fetch(`${apiUrl}/matches/${timestamp}`);
+            return response.json();
+        },
+        staleTime: Infinity,
+    });
+    return { data, isLoading, isError };
+}
 
 export const useCharacter = (characterId: number): { data: Character | undefined, isLoading: boolean, isError: boolean } => {
     const { data, isLoading, isError } = useCharacters();
@@ -97,6 +132,19 @@ export const useBattleState = (): { data: CurrentBattleState | undefined, isLoad
     return { data, isLoading, isError };
 }
 
+export const useMatches = (): { data: MatchEndActivity[] | undefined, isLoading: boolean, isError: boolean } => {
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['matches'],
+        queryFn: async () => {
+            const response = await fetch(`${apiUrl}/matches`);
+            return response.json();
+        },
+        staleTime: 10000,
+    });
+    const sortedData = data?.sort((a, b) => b.timestamp - a.timestamp);
+    return { data: sortedData, isLoading, isError };
+}
+
 export const useCharacterMatches = (characterId: number): { data: MatchEndActivity[] | undefined, isLoading: boolean, isError: boolean } => {
     const { data, isLoading, isError } = useQuery({
         queryKey: ['character', characterId, 'matches'],
@@ -171,6 +219,33 @@ export const useUsers = (): { data: User[] | undefined, isLoading: boolean, isEr
 
     return { data, isLoading, isError, isPending };
 }
+
+export const usePortfolio = (userAddress: string): { data: PortfolioEntry[] | undefined, isLoading: boolean, isError: boolean } => {
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['portfolio', userAddress],
+        queryFn: async () => {
+            const response = await fetch(`${apiUrl}/users/${userAddress}/portfolio`);
+            return response.json();
+        },
+        staleTime: 10000,
+    });
+
+    return { data, isLoading, isError };
+}
+
+export const usePortfolioAfterTime = (userAddress: string, timestamp: number): { data: PortfolioEntry[] | undefined, isLoading: boolean, isError: boolean } => {
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['portfolio', userAddress, timestamp],
+        queryFn: async () => {
+            const response = await fetch(`${apiUrl}/users/${userAddress}/portfolio/after/${timestamp}`);
+            return response.json();
+        },
+        staleTime: 10000,
+    });
+
+    return { data, isLoading, isError };
+}
+
 // export const useEthPrice = (): { data: number | undefined, isLoading: boolean, isError: boolean } => {
 //     const { data, isLoading, isError } = useQuery({
 //         queryKey: ['ethPrice'],
@@ -266,6 +341,24 @@ export const useTokenActivities = (
     return { data: combinedActivities, isLoading, isError };
 }
 
+export const useAllTokenActivities = (
+): { 
+    data: (TradeActivity | MatchEndActivity)[] | undefined, 
+    isLoading: boolean, 
+    isError: boolean 
+} => {
+    const { data: characters, isLoading: isCharactersLoading, isError: isCharactersError } = useCharacters();
+    const characterIds = characters?.map(c => c.id) || [];
+    const { data: tokenActivities, isLoading: isTokenActivitiesLoading, isError: isTokenActivitiesError } = useTokenActivities(characterIds);
+    const flattenedActivities = useMemo(() => {
+        let _activities = tokenActivities?.flat() || [];
+        _activities.sort((a, b) => b.timestamp - a.timestamp);
+        return _activities;
+    }, [tokenActivities]);
+
+    return { data: flattenedActivities, isLoading: isTokenActivitiesLoading, isError: isTokenActivitiesError };
+}
+
 
 //Fetch activites only once, on window load
 export const initActivities = async (count: number): Promise<Activity[]>  => {
@@ -283,14 +376,19 @@ export const useValueSpent = (
     data: {
         characterId: number, 
         spent: number,
-        fee: number,
     }[] | undefined, 
     isLoading: boolean, 
     isError: boolean 
 } => {
     const { data: tokenActivities, isLoading, isError } = useTokenActivities(characterIds);
     const { data: user, isLoading: isUserLoading, isError: isUserError } = useUser(userAddress);
-    const pnlDataArray = useMemo(() => {
+    const [pnlDataArray, setPnlDataArray] = useState<{
+        characterId: number, 
+        spent: number,
+    }[]>([]);
+    
+    useEffect(() => {
+        const pnlDataArrayFunction = async () => {
         let pnlData = [];
         let index = 0;
         for (const characterId of characterIds) {
@@ -302,20 +400,24 @@ export const useValueSpent = (
             + (user?.stakes?.find(stake => stake.character === characterId)?.balance ?? 0);
             console.log("valuespent characterUserBalance", characterUserBalance)
             console.log("valuespent characterActivities", characterActivities)
-            const pnl = calculateValueSpent(
+            const pnl = await calculateValueSpent(
                 userAddress,
                 characterActivities, 
                 characterUserBalance,
                 characterId
             );
+            console.log("valuespent pnl", {...pnl, characterId})
             pnlData.push({
                 characterId,
                 spent: pnl.valueSpent,
-                fee: pnl.fee,
             });
             index++;
+            }
+            setPnlDataArray(pnlData);
+        };
+        if(tokenActivities && user && !isLoading && !isError) {
+            pnlDataArrayFunction();
         }
-        return pnlData;
     }, [tokenActivities, user, isLoading, isError]);
 
     return { data: pnlDataArray, isLoading, isError };
@@ -324,36 +426,58 @@ export const useValueSpent = (
 //2% fee
 export const FEE_PERCENTAGE = 0.02;
 
-export const calculateValueSpent = (
+export const calculateValueSpent = async (
     userAddress: string,
     characterActivities: (TradeActivity | MatchEndActivity)[], 
     characterUserBalance: number,
     characterId: number
-): {valueSpent: number, fee: number} => {
+): Promise<{
+    valueSpent: number, 
+    fee: number,
+}> => {
+    let shareAmount = 0;
     let totalValueSpent = 0;
+    let totalFees = 0;
+    let supplyOfLastBuy = 0;
+    let marketCapOfLastBuy = 0;
     if (characterUserBalance === 0) {
         return {valueSpent: 0, fee: 0};
     }
     console.log("valuespent characterActivities", characterActivities)
     for (const activity of characterActivities as any) {
+        if(shareAmount > characterUserBalance) {
+            break;
+        }
         console.log("valuespent activity", activity)
         if (
             activity.type === ("trade" as any) && 
             activity.character === characterId && 
             activity.trader.toLowerCase() === userAddress.toLowerCase()
         ) {
-            const isBuy = activity.isBuy;
-            const ethAmount = activity.ethAmount;
+            const trade = activity as TradeActivity;
+            const isBuy = trade.isBuy;
+            const ethAmount = trade.ethAmount;
+            const fee = trade.protocolEthAmount;
+            console.log("valuespent trade", ethAmount, fee)
             if (isBuy) {
                 totalValueSpent += ethAmount;
-            } else {
-                totalValueSpent -= ethAmount;
+                shareAmount += trade.shareAmount;
+                //totalFees += fee;
+                supplyOfLastBuy = trade.newSupply;
+                marketCapOfLastBuy = trade.newMarketCap;
             }
         }
+
+        //
+        if(shareAmount > characterUserBalance) {
+            //If share amount is greater than characterUserBalance, now find the value of a sell of shareAmount - characterUserBalance
+            const valueToRemove = await getSellPriceMc(supplyOfLastBuy, marketCapOfLastBuy, shareAmount - characterUserBalance);
+            totalValueSpent -= valueToRemove;
+            //break from loop
+            break;
+        }
     }
-    const fee = totalValueSpent * FEE_PERCENTAGE;
-    const valueSpent = totalValueSpent - fee;
-    return {valueSpent: valueSpent, fee: fee};
+    return {valueSpent: totalValueSpent, fee: totalFees};
 }
 
 export const calculatePnL = (

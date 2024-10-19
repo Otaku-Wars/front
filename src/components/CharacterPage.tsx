@@ -649,13 +649,13 @@ export const CharacterPage = () => {
 
                 {/* Stats */}
                 <Card className="relative">
-                    {/* <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
                         <div className="text-center text-white">
                             <LockIcon className="w-22 h-22 mx-auto mb-2" />
                             <p className="text-3xl font-bold">Staking coming Soon</p>
                         </div>
-                    </div> */}
-                    {/* <div className="blur-sm pointer-events-none"> */}
+                    </div>
+                    <div className="blur-sm pointer-events-none">
                         <CardHeader>
                             <CardTitle>
                                 Stats <span className="text-right text-sm text-gray-600">Total stakes: {totalStakes}</span>
@@ -687,7 +687,7 @@ export const CharacterPage = () => {
                                 ))}
                             </div>
                         </CardContent>
-                    {/* </div> */}
+                    </div>
                 </Card>
                 
                 {/* Tab lists */}
