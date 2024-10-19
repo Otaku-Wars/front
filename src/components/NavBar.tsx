@@ -197,7 +197,12 @@ export function NavBar() {
           },
           method: 'POST',
           body: JSON.stringify({affiliate: affiliateAddress}),
-        })
+          })
+        }else if(affiliateAddress && affiliateAddress.toLowerCase() == address.toLowerCase()){
+          localStorage.removeItem('referral')
+          setSearchParams({ref: ''})
+        }
+
       }
     }
     setAffiliate()
