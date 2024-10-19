@@ -201,7 +201,11 @@ export const useUser = (address: string): { data: User | undefined, isLoading: b
         address,
         balances: [], // Assuming no balances for dummy data
         stakes: [], // Assuming no stakes for dummy data
-        stakeUnlockTime: 0
+        stakeUnlockTime: 0,
+        pnl: {
+            costBasis: 0,
+            fees: 0,
+        }
     };
     console.log("useUser data", data)
     return { data: data || defaultUser, isLoading, isError, isPending };
