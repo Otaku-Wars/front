@@ -32,7 +32,7 @@ const attributeNames = {
 };
 
 export const generateAffiliateLink = (address: string) => {
-  return `${window.location.origin}/?ref=${address}`
+  return `${window.location.host}/#/?ref=${address}`
 }
 
 export const UserPage = () => {
