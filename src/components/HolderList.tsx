@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { formatNumber } from '../lib/utils';
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { buildDataUrl } from './ActivityBar';
+import { zeroAddress } from 'viem';
 
 interface HolderListProps {
   characterId: number
@@ -59,8 +60,8 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
       <TableBody>
         {sortedHolders.map((holder, index) => {
           const user = users?.find(user => user?.address?.toLowerCase() == holder?.address?.toLowerCase())
-          const displayName = (user as any)?.username ?? truncateWallet(user?.address);
-          const pfp = (user as any)?.pfp ?? buildDataUrl(user?.address);
+          const displayName = (user as any)?.username ?? truncateWallet(user?.address ?? zeroAddress);
+          const pfp = (user as any)?.pfp ?? buildDataUrl(user?.address ?? zeroAddress);
           return (
           <TableRow key={holder.address} onClick={() => navigate(`/user/${user?.address}`)}> {/* Added onClick for navigation */}
             <TableCell className="font-medium">#{index + 1}</TableCell>

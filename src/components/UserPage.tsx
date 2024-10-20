@@ -290,7 +290,7 @@ export const UserPage = () => {
             </div>
             {/* Affiliate section */}
             <h1 className="text-2xl mt-10 font-bold">Rewards sharing <span className="text-sm text-gray-400">(Earn 50% of trading fees)</span></h1>
-            <div className="grid grid-cols-4 gap-4 w-full">
+            {isYourAccount && <div className="grid grid-cols-4 gap-4 w-full">
               <Button 
                 style={{
                   textShadow: `
@@ -320,7 +320,7 @@ export const UserPage = () => {
               <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
                 <span className="text-xl text-gray-400">Copy your link and share it with friends to earn 50% of their Trading fees!</span>
               </div>
-            </div>
+            </div>}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             
             <div className="col-span-1 bg-gray-800 p-4 rounded-lg text-center border border-gray-700">

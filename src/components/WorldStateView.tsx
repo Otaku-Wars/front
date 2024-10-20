@@ -254,6 +254,23 @@ export const WorldStateView = () => {
   const convertEthToUsd = useConvertEthToUsd()
   const { data: characters, isLoading: charactersLoading, isError: charactersError } = useCharacters()
   const { data: battleState, isLoading, isError } = useBattleState()
+  const [showModal, setShowModal] = useState(false);
+  const [characterId, setCharacterId] = useState(0)
+  const [characterName, setCharacterName] = useState('')
+  const [modalAction, setModalAction] = useState<'Buy' | 'Sell'>('Buy')
+  const handleShowModal = (action: 'Buy' | 'Sell', characterId: number, characterName: string) => {
+    setCharacterId(characterId)
+    setCharacterName(characterName)
+    setModalAction(action);
+    setShowModal(true);
+    
+  };
+
+  const handleCloseModal = () => {
+    console.log("mounted Calling handle close")
+    setShowModal(false);
+  }
+
   const navigator = useNavigate()
 
   const [character1, character2] = useMemo(() => {
@@ -470,7 +487,7 @@ export const WorldStateView = () => {
             willStartIn={willStartIn}
             isBattling={isBattling}
             onClick={() => {
-              navigator(`/character/${character.id}`)
+              handleShowModal('Buy', character.id, character.name)
             }}
           />
         </div>
@@ -558,6 +575,15 @@ export const WorldStateView = () => {
           {renderCharacterInfo(character2, character2SharesOwnedByYou, true)}
         </div>
       </div>
+      <ModalBuySell 
+        isInBattle={false}
+        characterId={characterId}
+        show={showModal}
+        handleClose={handleCloseModal}
+        handleOpen={handleShowModal}
+        actionType={modalAction as any}
+        characterName={characterName}
+      />
     </div>
   )
 }
