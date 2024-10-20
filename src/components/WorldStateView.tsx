@@ -580,7 +580,7 @@ export const WorldStateView = () => {
         characterId={characterId}
         show={showModal}
         handleClose={handleCloseModal}
-        handleOpen={handleShowModal}
+        handleOpen={handleShowModal as any}
         actionType={modalAction as any}
         characterName={characterName}
       />
