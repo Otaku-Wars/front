@@ -284,7 +284,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Fee (2%):</span>
-                  <span className="text-white">-${formatNumber(convertEthToUsd(feeProceeds))}</span>
+                  <span className="text-white">-{formatNumber(convertEthToUsd(feeProceeds))}</span>
                 </div>
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-gray-700">
@@ -305,7 +305,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
           </div>
           <div className="flex items-center space-x-2">
             <FaArrowDown className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-400">1 ETH = ${formatNumber(convertEthToUsd(1))}</span>
+            <span className="text-sm text-gray-400">1 ETH = {formatNumber(convertEthToUsd(1))}</span>
           </div>
         </div>
         <DialogFooter>
