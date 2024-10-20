@@ -19,7 +19,7 @@ import { useConvertEthToUsd } from '../EthPriceProvider';
 import { useTimeTill } from './WorldStateView';
 import { useSetActiveWallet } from '@privy-io/wagmi';
 import { formatEther, formatNumber, formatPercentage } from '../lib/utils';
-import { useGetSellPrices } from '../hooks/contract';
+import { useGetSellPrices, useGetSellPricesWithoutFee } from '../hooks/contract';
 import { formatEther as viemFormatEther } from 'viem';
 import { buildDataUrl } from './ActivityBar';
 import { FaMoneyBill } from 'react-icons/fa';
@@ -101,7 +101,7 @@ export const UserPage = () => {
   const characterIds = user?.balances?.map(balance => balance.character) || [];
   const balanceAmounts = user?.balances?.map(balance => balance.balance) || [];
   console.log("balanceAmounts", balanceAmounts)
-  const {data: sellPrices} = useGetSellPrices(characterIds.map((characterId, index) => ({characterId, amount: balanceAmounts[index]})));
+  const {data: sellPrices} = useGetSellPricesWithoutFee(characterIds.map((characterId, index) => ({characterId, amount: balanceAmounts[index]})));
   //const performanceData = useAllCharacterPerformance(characterIds, yesterday);
   //console.log("AAvalueSpents", valueSpents)
   const netWorth = useMemo(() => {

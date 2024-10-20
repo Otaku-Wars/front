@@ -102,6 +102,23 @@ export const useGetSellPrices = (objects: {characterId: number, amount: number}[
     return { data };
 }
 
+export const useGetSellPricesWithoutFee = (objects: {characterId: number, amount: number}[]) => {
+  const {
+    data
+  } = useReadContracts({
+    contracts: objects?.map(({characterId, amount}) => {
+      return {
+        abi: WorldABI as any,
+        address: contractAddress,
+        functionName: 'getSellPrice',
+        args: [characterId, BigNumber.from(amount ?? 0)],
+      } as any
+    })
+  } as any);
+
+  return { data };
+}
+
 // Hook to get the staked amount of a user
 export function useStakedAmount(characterId: number, address: string, attribute: number) {
   return useReadContract({
