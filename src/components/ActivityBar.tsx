@@ -15,10 +15,11 @@ import { useNavigate } from 'react-router-dom'
 import { truncateWallet } from './NavBar'
 import { Avatar } from './ui/avatar'
 import Jazzicon from '@raugfer/jazzicon';
+import { zeroAddress } from 'viem'
 
 // builds an image data url for embedding
 export function buildDataUrl(address: string): string {
-  return 'data:image/svg+xml;base64,' + btoa(Jazzicon(address));
+  return 'data:image/svg+xml;base64,' + btoa(Jazzicon(address ?? zeroAddress));
 }
 
 export enum ActivityType {
