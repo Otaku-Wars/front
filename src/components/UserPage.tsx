@@ -259,13 +259,13 @@ export const UserPage = () => {
                 <Wallet className="w-8 h-8 text-yellow-400 mb-2 mx-auto" />
                 <span className="text-xl text-gray-400">Wallet Balance</span>
                 <span className="block text-2xl font-bold text-white">{formatNumber(convertEthToUsd(parseFloat(userBalance ?? "0")) ?? 0)}</span>
-                <span className="text-xs text-muted-foreground">{formatEther(parseFloat(userBalance ?? "0"))} ETH</span>
+                <span className="text-xs text-muted-foreground">{formatEther(parseFloat(userBalance ?? "0"))}</span>
               </div>
               <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
                 <TrendingUp className="w-8 h-8 text-blue-400 mb-2 mx-auto" />
                 <span className="text-xl text-gray-400">Portfolio Value</span>
                 <span className="block text-2xl font-bold text-white">{formatNumber(convertEthToUsd(netWorth ?? 0))}</span>
-                <span className="text-xs text-muted-foreground">{formatEther(netWorth ?? 0)} ETH</span>
+                <span className="text-xs text-muted-foreground">{formatEther(netWorth ?? 0)} <br/></span>
                 <div className={`inline-flex items-center px-3 py-1 rounded-full ${totalPnl >= 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                   {totalPnl >= 0 ? <ArrowUpIcon className="h-4 w-4 mr-1" /> : <ArrowDownIcon className="h-4 w-4 mr-1" />}
                   <span className="text-sm font-medium">
