@@ -19,6 +19,7 @@ export const useBalance = (address: `0x${string}`) => {
 console.log("getting balance", data)
   return {
     balance: data?.formatted,
+    balanceNumber: parseFloat(data?.formatted ?? '0'),
     isLoading,
     isError,
     error,

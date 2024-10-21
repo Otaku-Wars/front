@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Heart, Gem, Flame, Shield, TrendingUp, TrendingDown, Users, Briefcase } from 'lucide-react'
 import { Button } from "../components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip"
 import { useCharacters, useBattleState, useUser } from '../hooks/api'
 import { useConvertEthToUsd } from '../EthPriceProvider'
 import { useNavigate } from 'react-router-dom'
-import { useAddress } from '../hooks/user'
+import { useAddress, useBalance } from '../hooks/user'
 import { CurrentBattleState, Status, Character } from "@memeclashtv/types"
 import { getBuyPrice, getSellPriceMc } from '../utils'
 import { formatNumber, formatPercentage } from '../lib/utils'
 import { ModalBuySell } from './ModalBuySell'
+import { useFundWallet, usePrivy } from '@privy-io/react-auth'
+import { currentChain } from '../main'
 
 export const useTimeTill = (time: number) => {
   const [timeTill, setTimeTill] = useState<number | null>(null)
@@ -251,20 +253,33 @@ const HoldingsInfo = ({ isGameOver, isWinner, isLoser, sharesOwned, holdingsValu
 export const WorldStateView = () => {
   const address = useAddress()
   const { data: user } = useUser(address)
+  const { authenticated, login } = usePrivy()
+  const { fundWallet } = useFundWallet()
   const convertEthToUsd = useConvertEthToUsd()
+  const { balanceNumber } = useBalance(address);
+  const shouldFund = useMemo(() => {
+    return balanceNumber <= 0;
+    }, [balanceNumber])
   const { data: characters, isLoading: charactersLoading, isError: charactersError } = useCharacters()
   const { data: battleState, isLoading, isError } = useBattleState()
   const [showModal, setShowModal] = useState(false);
   const [characterId, setCharacterId] = useState(0)
   const [characterName, setCharacterName] = useState('')
   const [modalAction, setModalAction] = useState<'Buy' | 'Sell'>('Buy')
-  const handleShowModal = (action: 'Buy' | 'Sell', characterId: number, characterName: string) => {
+  const handleShowModal = useCallback((action: 'Buy' | 'Sell', characterId: number, characterName: string) => {
+    if(!authenticated) {
+      login();
+      return;
+    }
+    if(shouldFund) {
+      fundWallet(address, {chain: currentChain});
+      return;
+    }
     setCharacterId(characterId)
     setCharacterName(characterName)
     setModalAction(action);
     setShowModal(true);
-    
-  };
+  }, [authenticated, login, shouldFund, address]);
 
   const handleCloseModal = () => {
     console.log("mounted Calling handle close")

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -8,7 +8,7 @@ import { useAddress, useBalance } from '../hooks/user';
 import {  formatEther } from 'viem';
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { Link } from 'react-router-dom';
-import { usePrivy } from '@privy-io/react-auth';
+import { useFundWallet, usePrivy } from '@privy-io/react-auth';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import { FaMinus } from 'react-icons/fa';
 import { FaPlus } from 'react-icons/fa';
@@ -16,6 +16,7 @@ import { FaDollarSign } from 'react-icons/fa';
 import { FaWallet } from 'react-icons/fa';
 import { FaArrowDown } from 'react-icons/fa';
 import { formatNumber, formatEther as formatEther2 } from '../lib/utils';
+import { currentChain } from '../main';
 
 interface ModalBuySellProps {
   show: boolean;
@@ -37,6 +38,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   isInBattle,
 }) => {
   const { ready } = usePrivy();
+  const { fundWallet } = useFundWallet()
   console.log('mounted ModalBuySell with show:', show);
   const [internalShow, setInternalShow] = useState(show);
   const [amount, setAmount] = useState<any>(0);
@@ -119,15 +121,6 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     }
   };
 
-  const handlePlaceTrade = () => {
-    if (currentAction === 'Buy') {
-      console.log(`Attempting to buy ${amount} shares with ${ethAmount} ETH`);
-      buyShares();
-    } else {
-      sellShares();
-    }
-  };
-
   const incrementAmount = () => {
     // Reset error and success states
     setBuyError(null);
@@ -174,6 +167,26 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   //lets find out what 100% of the proceeds is
   const totalProceeds = finalSellPrice / 0.98;
   const feeProceeds = totalProceeds * 0.02;
+
+
+  const shouldFundOnBuyAmount = useMemo(() => {
+    const balance = parseFloat(userBalance?.balance ?? '0') ?? 0;
+    console.log("shouldFundOnBuyAmount", totalCost, balance)
+    return Math.max(0, totalCost - balance);
+  }, [userBalance, totalCost]);
+
+  const handlePlaceTrade =  useCallback(() => {
+    if(shouldFundOnBuyAmount > 0 && currentAction === 'Buy') {
+      fundWallet(address, {chain: currentChain, amount: shouldFundOnBuyAmount.toString()});
+      return;
+    }
+    if (currentAction === 'Buy') {
+      console.log(`Attempting to buy ${amount} shares with ${ethAmount} ETH`);
+      buyShares();
+    } else {
+      sellShares();
+    }
+  }, [shouldFundOnBuyAmount, currentAction, buyShares, sellShares, address, fundWallet]);
 
   return (
     <Dialog open={internalShow} onOpenChange={trueClose}>

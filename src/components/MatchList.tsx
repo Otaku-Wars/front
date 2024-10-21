@@ -44,13 +44,13 @@ const CharacterCard = ({
 
   return (
     <div className="flex items-center space-x-4">
-      <Avatar className="h-12 w-12">
-        <AvatarImage src={character.pfp} alt={character.name} />
+      <Avatar className="h-12 w-12 hover:border-2 hover:border-rounded hover:border-yellow-500 hover:scale-110 transition-all duration-300">
+        <AvatarImage src={character.pfp} alt={character.name} className="" />
         <AvatarFallback>{character.name[0]}</AvatarFallback>
       </Avatar>
       <div className="flex-grow">
         <div className="flex justify-between items-center">
-          <p className="font-semibold">{character.name}</p>
+          <p className="font-semibold hover:underline">{character.name}</p>
           <div className="text-right">
             <p className="text-sm font-semibold">{formatNumber(convertEthToUsd(price))}</p>
             <p className="text-xs text-muted-foreground">{formatNumber(convertEthToUsd(marketCap))}</p>

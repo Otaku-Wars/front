@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -12,7 +12,7 @@ import { TradeList } from './TradeList';
 import { StakeList } from './StakeList';
 import { useCharacter, useCharacterTrades, useCharacterPerformance, useCharacters, useCharacterMatches, useUser, useBattleState, useCharacterHolders } from '../hooks/api';
 import { useCharacterSharesBalance } from '../hooks/contract';
-import { useAddress } from '../hooks/user';
+import { useAddress, useBalance } from '../hooks/user';
 import { Chart } from './Chart';
 import { MatchEndActivity, TradeActivity } from '@memeclashtv/types/activity';
 import ModalStake from './ModalStake'; // Adjust the path as necessary
@@ -26,6 +26,8 @@ import { Badge } from './ui/badge';
 import { Trophy, Target, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { StatusIndicator } from './CharacterList';
 import { useTimeTill } from './WorldStateView';
+import { useFundWallet, usePrivy } from '@privy-io/react-auth';
+import { currentChain } from '../main';
 
 type TimeFrame = 'Live' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'ALL';
 
@@ -146,9 +148,15 @@ export const getMatchesUntilNextMatchForCharacters = (
 
 export const CharacterPage = () => {
     const { id } = useParams();
+    const { authenticated, login } = usePrivy()
+    const { fundWallet } = useFundWallet()
     const [showModal, setShowModal] = useState(false);
     const [modalAction, setModalAction] = useState('Buy');
     const address = useAddress();
+    const { balanceNumber } = useBalance(address);
+    const shouldFund = useMemo(() => {
+        return balanceNumber <= 0;
+    }, [balanceNumber])
     const characterId = parseInt(id);
     const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>('1D');
     const [startTime, setStartTime] = useState<number>(Math.floor(Date.now() / 1000) - 24 * 60 * 60);
@@ -260,10 +268,18 @@ export const CharacterPage = () => {
         }
     }, [selectedTimeFrame]);
 
-    const handleShowModal = (action: 'Buy' | 'Sell') => {
+    const handleShowModal = useCallback((action: 'Buy' | 'Sell') => {
+        if(!authenticated) {
+            login();
+            return;
+        }
+        if(shouldFund) {
+            fundWallet(address, {chain: currentChain});
+            return;
+        }
         setModalAction(action);
         setShowModal(true);
-    };
+    }, [authenticated, login, shouldFund, address, currentChain]);
 
     const handleCloseModal = () => {
         console.log("mounted Calling handle close")
