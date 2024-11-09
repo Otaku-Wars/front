@@ -21,7 +21,7 @@ import { currentChain } from '../main';
 interface ModalBuySellProps {
   show: boolean;
   handleClose: () => void;
-  handleOpen: (action:string) => void;
+  handleOpen: (action:string, characterId: number, characterName: string) => void;
   actionType: 'Buy' | 'Sell';
   characterName: string;
   characterId: number;
@@ -145,7 +145,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
       setInternalShow(false);
       handleClose();
     }else{
-      handleOpen(actionType);
+      handleOpen(actionType, characterId, characterName);
     }
   }
 

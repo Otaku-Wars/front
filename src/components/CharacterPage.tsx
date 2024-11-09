@@ -643,7 +643,7 @@ export const CharacterPage = () => {
                         </div>
                         
                         <div className="mb-4">
-                            <Chart activities={combinedActivities as any} characterId={characterId} />
+                            <Chart activities={combinedActivities as any} characterId={characterId} characters={characters} />
                         </div>
                         {/* <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 mb-6">
                             {['Live', '1D', '1W', '1M', '3M', 'YTD', '1Y', 'ALL'].map((timeFrame) => (

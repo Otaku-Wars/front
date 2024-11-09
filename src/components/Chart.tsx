@@ -3,6 +3,9 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { formatEther, formatNumber } from '../lib/utils';
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { MatchEndActivity, TradeActivity } from '@memeclashtv/types/activity';
+import { Character, User } from '@memeclashtv/types';
+import { truncateWallet } from './NavBar';
+import { buildDataUrl } from './ActivityBar';
 
 enum ActivityType {
     MatchEnd = 'MatchEnd',
@@ -20,14 +23,17 @@ interface ChartDataPoint {
     timestamp: number;
     price: number;
     activity: 'MatchEnd' | 'Trade';
+    change: number;
+    event: Activity;
 }
 
 interface ChartProps {
     activities: Activity[];
     characterId: number;
+    characters: Character[];
 }
 
-export const Chart: React.FC<ChartProps> = ({ activities, characterId }) => {
+export const Chart: React.FC<ChartProps> = ({ activities, characterId, characters }) => {
     const [timeRange, setTimeRange] = useState<string>("all");
     const convertEthToUsd = useConvertEthToUsd();
     const chartData = useMemo(() => {
@@ -39,10 +45,17 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId }) => {
                     (activity as MatchEndActivity).tokenState.newPrice1 : 
                     (activity as MatchEndActivity).tokenState.newPrice2 : 
                 activity.newPrice;
+            const oldPrice = isMatchEnd ? 
+                characterId == (activity as MatchEndActivity).p1 ? 
+                    (activity as MatchEndActivity).tokenState.prevPrice1 : 
+                    (activity as MatchEndActivity).tokenState.prevPrice2 : 
+                activity.prevPrice;
             return {
                 timestamp: activity.timestamp,
                 price: price,
+                change: price - oldPrice,
                 activity: activity.type,
+                event: activity,
             }
         });
 
@@ -77,14 +90,72 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId }) => {
         return startPrice < endPrice ? "#22c55e" : "#ef4444"; // Green for up, red for down
     }, [chartData]);
 
-    const CustomTooltip = ({ active, payload, label }: any) => {
+    const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
+            const price = data.price;
+            const isPositive = data.change >= 0;
+            const percentChange = ((data.change / (data.price - data.change)) * 100).toFixed(2);
+            const event = data.event;
+            console.log("bbcccdd", event)
             return (
-                <div className="bg-gray-800 p-2 rounded shadow-md border border-gray-700">
-                    <p className="font-bold">{new Date(data.timestamp*1000).toLocaleString()}</p>
-                    <p>Price: {formatEther(data.price)} ({formatNumber(convertEthToUsd(data.price))})</p>
-                    <p>Activity: {data.activity}</p>
+                <div className="bg-gray-800 p-3 rounded shadow-md text-xs">
+                    <div className="flex items-center gap-2 mb-1">
+                        <p className={`text-lg font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                            {formatNumber(price)}
+                        </p>
+                        <p className={`text-sm ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                            {isPositive ? '+' : ''}{formatNumber(data.change)} ({isPositive ? '+' : ''}{percentChange}%)
+                        </p>
+                    </div>
+                    <p className="text-gray-400 text-[10px] mb-2">{new Date(data.timestamp * 1000).toLocaleString()}</p>
+                    {event.type === "trade" && (() => {
+                        const character = characters.find(c => c.id === event?.character);
+                        const traderUsername = event?.trader ? truncateWallet(event?.trader) : "";
+                        const traderPfp = buildDataUrl(event?.trader ?? "")
+                        console.log("bbcccdd", event)
+                        return (
+                            <div className="flex items-center text-gray-300 gap-1">
+                                <img src={ traderPfp|| '/placeholder.svg'} alt={traderUsername || 'Trader'} width={16} height={16} className="rounded-full" />
+                                <span>{traderUsername}</span>
+                                <span className={event.isBuy ? 'text-green-400' : 'text-red-400'}>
+                                    {event.isBuy ? "bought" : "sold"}
+                                </span>
+                                <span>{event.shareAmount.toFixed(1)}</span>
+                                <img src={character?.pfp || '/placeholder.svg'} alt={character?.name || 'Character'} width={16} height={16} className="rounded-full" />
+                                <span>{character?.name}</span>
+                                <span>for <span className={event.isBuy ? 'text-red-400' : 'text-green-400'}>{formatNumber(event.ethAmount)}</span></span>
+                            </div>
+                        );
+                    })()}
+                    {event.type === "MatchEnd" && (() => {
+                        const character1 = characters.find(c => c.id === characterId)
+                        const isP1 = characterId == event?.p1;
+                        const character2Id = isP1 ? event.p2 : event.p1;
+                        const character2 = characters.find(c => c.id === character2Id);
+                        const isWin = characterId == event?.winner;
+                        const reward = event?.tokenState?.reward;
+                        console.log("bbcccdd", event)
+                        return (
+                            <div className="flex items-center text-gray-300 gap-1">
+                                <img src={character1?.pfp || '/placeholder.svg'} alt={character1?.name || 'Character'} width={16} height={16} className="rounded-full" />
+                                <span>{character1?.name}</span>
+                                <span className={isWin ? 'text-green-400' : 'text-red-400'}>
+                                    {isWin ? "beat" : "lost to"}
+                            </span>
+                            <img src={character2?.pfp || '/placeholder.svg'} alt={character2?.name || 'Opponent'} width={16} height={16} className="rounded-full" />
+                            <span>{character2?.name}</span>
+                            <span>and</span>
+                            <span className={isWin ? 'text-green-400' : 'text-red-400'}>
+                                {isWin ? "gained" : "lost"}
+                            </span>
+                            <span className={isWin ? 'text-green-400' : 'text-red-400'}>
+                                {formatNumber(Math.abs(reward))}
+                            </span>
+                            <span>in market cap</span>
+                            </div>
+                        );
+                    })()}
                 </div>
             );
         }
