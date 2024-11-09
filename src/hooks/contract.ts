@@ -6,7 +6,8 @@ import { Transport } from '@wagmi/core';
 import { EventData } from '@wagmi/core/internal';
 import { EIP6963ProviderDetail } from 'mipd';
 import { Chain, Client, EIP1193RequestFn } from 'viem';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import { DEFAULT_A, DEFAULT_B, DEFAULT_C } from '../utils';
 
 const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS as `0x${string}` ?? '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
@@ -37,6 +38,47 @@ export function useCharacterSharesBalance(characterId: number, address: string) 
   });
 
     return { data: Number(data), error, isError, isPending, isSuccess };
+}
+
+// Hook to get the scaling factor
+export function useScalingFactor(characterId: number) {
+  const { data } = useReadContract({
+    abi: WorldABI,
+    address: contractAddress,
+    functionName: 'getScalingFactor',
+    args: [characterId],
+  });
+
+  return { data: convertWeiToEth(data as bigint) };
+}
+
+// Hook to get character value
+export function useCharacterCall(characterId: number) {
+  const { data } = useReadContract({
+    abi: WorldABI,
+    address: contractAddress,
+    functionName: 'characters',
+    args: [characterId],
+  });
+  console.log("character call", data)
+  //convert to number
+  return { data: {
+    value: convertWeiToEth((data as any)?.[0]),
+    supply: convertWeiToEth((data as any)?.[1]),
+  } };
+}
+
+//Get original market cap without scaling factor
+export function useOriginalMarketCap(supply: number) {
+  //const { data: characterCall } = useCharacterCall(characterId);
+  //const supply = useMemo(() => characterCall?.supply, [characterCall?.supply]);
+  const { data: originalMarketCap } = useReadContract({
+    abi: WorldABI,
+    address: contractAddress,
+    functionName: 'getCurve',
+    args: [BigInt(0), BigInt(supply), BigInt(DEFAULT_A), BigInt(DEFAULT_B), BigInt(DEFAULT_C)],
+  });
+  return { data: convertWeiToEth(originalMarketCap as bigint) };
 }
 
 // Hook to get the buy price for a specific character's shares

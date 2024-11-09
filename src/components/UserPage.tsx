@@ -289,8 +289,8 @@ export const UserPage = () => {
               
             </div>
             {/* Affiliate section */}
-            <h1 className="text-2xl mt-10 font-bold">Rewards sharing <span className="text-sm text-gray-400">(Earn 50% of trading fees)</span></h1>
-            {isYourAccount && <div className="grid grid-cols-4 gap-4 w-full">
+            {/* <h1 className="text-2xl mt-10 font-bold">Rewards sharing <span className="text-sm text-gray-400">(Earn 50% of trading fees)</span></h1> */}
+            {/* {isYourAccount && <div className="grid grid-cols-4 gap-4 w-full">
               <Button 
                 style={{
                   textShadow: `
@@ -320,8 +320,8 @@ export const UserPage = () => {
               <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
                 <span className="text-xl text-gray-400">Copy your link and share it with friends to earn 50% of their Trading fees!</span>
               </div>
-            </div>}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            </div>} */}
+            {/* <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             
             <div className="col-span-1 bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
                 <Users className="w-8 h-8 text-green-400 mb-2 mx-auto" />
@@ -332,32 +332,32 @@ export const UserPage = () => {
                 <FaMoneyBill className="w-8 h-8 text-green-400 mb-2 mx-auto" />
                 <span className="text-xl text-gray-400">Fees earned</span>
                 <span className="block text-2xl font-bold text-white">{formatNumber(convertEthToUsd(rewards ?? 0))}</span>
-              </div>
+              </div> */}
               {/* <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
                 <Users className="w-8 h-8 text-green-400 mb-2 mx-auto" />
                 <span className="text-xl text-gray-400">Fees Paid</span>
                 <span className="block text-2xl font-bold text-white">{formatNumber(convertEthToUsd(totalFees ?? 0))}</span>
               </div> */}
-            </div>
+            {/* </div> */}
 
             {/* Stake unlock time */}
-            <h1 className="text-2xl mt-10 font-bold">Staking <span className="text-sm text-gray-400">(coming soon)</span></h1>
+            {/* <h1 className="text-2xl mt-10 font-bold">Staking <span className="text-sm text-gray-400">(coming soon)</span></h1>
             <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
               <Lock className="w-8 h-8 text-purple-400 mb-2 mx-auto" />
               <span className="text-xl text-gray-400">Stake Unlock Time</span>
               <span className="block text-lg font-semibold text-white">{ user?.stakeUnlockTime ? new Date(user?.stakeUnlockTime * 1000).toLocaleString() : "No Stake"}</span>
               {user?.stakeUnlockTime && <span className="text-md font-medium text-gray-400">Time until unlock: {getTimeUntilUnlock(timeTill)}</span>}
               {!user?.stakeUnlockTime && <span className="text-md font-medium text-gray-400">Stake is not active</span>}
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>
 
       <Tabs defaultValue="holdings" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="holdings">Holdings</TabsTrigger>
-          <TabsTrigger value="stakes">Stakes</TabsTrigger>
-        </TabsList>
+        {/* <TabsList className="grid w-full grid-cols-2"> */}
+          {/* <TabsTrigger value="holdings">Holdings</TabsTrigger>
+          <TabsTrigger value="stakes">Stakes</TabsTrigger> */}
+        {/* </TabsList> */}
         <TabsContent value="holdings">
           <Card className="bg-gray-900">
             <CardHeader>

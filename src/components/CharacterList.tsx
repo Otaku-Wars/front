@@ -6,13 +6,15 @@ import { useCharacters, useBattleState, useAllCharacterPerformance } from '../ho
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { formatMarketCap, formatNumber, formatPercentage } from '../lib/utils';
 import { getMatchesUntilNextMatchForCharacters } from './CharacterPage';
-import { Character, Status } from '@memeclashtv/types';
+import { Character, CurrentBattleState, Status } from '@memeclashtv/types';
 type SortColumn = 'marketCap' | 'price' | 'performance';
 type SortDirection = 'asc' | 'desc';
 
-export const StatusIndicator = ({ status, matchesLeft, totalMatches }: { status: any, matchesLeft: number, totalMatches: number }) => {
+export const StatusIndicator = ({ status, matchesLeft, totalMatches, p1, p2 }: { status: any, matchesLeft: number, totalMatches: number, p1: number, p2: number }) => {
+  const isStartup = p1 == 0 && p2 == 0;
   console.log("AAbb status", status);
   const getStatusColor = () => {
+    if (isStartup) return 'text-yellow-400';
     if (status === 'battling') return 'text-red-400';
     if (status === 'waiting-to-battle') return 'text-orange-400';
     if (status === 'next') return 'text-yellow-400';
@@ -23,6 +25,7 @@ export const StatusIndicator = ({ status, matchesLeft, totalMatches }: { status:
   };
 
   const getStatusText = () => {
+    if (isStartup) return 'Buy shares NOW';
     if (status === 'battling') return 'In battle';
     if (status === 'waiting-to-battle') return 'Waiting to battle';
     if (status === 'next') return 'Next up';
@@ -97,7 +100,7 @@ const getMatchStatusText = (character, matchesTillNextMatch, battleState) => {
     return 'finished';
   }
 };
-const CharacterRow = ({ character, performance, matchesLeft, status }: { character: Character, performance: number, matchesLeft: number, status: string }) => {
+const CharacterRow = ({ character, performance, matchesLeft, status, battleState }: { character: Character, performance: number, matchesLeft: number, status: string, battleState: CurrentBattleState }) => {
   const [isHovered, setIsHovered] = useState(false);
   const convertEthToUsd = useConvertEthToUsd();
   const navigate = useNavigate();
@@ -118,7 +121,7 @@ const CharacterRow = ({ character, performance, matchesLeft, status }: { charact
     >
       <td className="p-2 sm:p-3 relative">
         <div className="flex items-center my-2">
-          <motion.img src={character.pfp} alt={character.name} className="w-6 h-6 mr-2 font-bold rounded-full bg-gray-700 border-2 border-white/10" whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 300 }} />
+          <motion.img src={character.pfp} alt={character.name} className="w-8 h-8 mr-2 font-bold rounded-full border border-yellow-500" whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 300 }} />
           <div className=""
             
           >
@@ -168,7 +171,7 @@ const CharacterRow = ({ character, performance, matchesLeft, status }: { charact
         </motion.div>
       </td>
       <div className='absolute bottom-0 left-10 pb-2'>
-        <StatusIndicator status={status} matchesLeft={matchesLeft} totalMatches={character.matchCount} />
+        <StatusIndicator status={status} matchesLeft={matchesLeft} totalMatches={character.matchCount} p1={battleState?.p1 ?? 0} p2={battleState?.p2 ?? 0} />
       </div>
     </motion.tr>
   );
@@ -183,16 +186,14 @@ export const CharacterList = () => {
   const convertEthToUsd = useConvertEthToUsd();
   const yesterday = useMemo(() => (new Date().getTime() / 1000) - 86400, []);
   const characterPerformance = useAllCharacterPerformance(characters?.map(c => c.id) ?? [], yesterday);
-  console.log("characterPerformance", characterPerformance);
   const performanceMap = useMemo(() => {
     return characterPerformance?.reduce((acc, curr) => {
       acc[curr.characterId] = curr.data;
       return acc;
-    }, {});
+    }, {} as Record<number, number>);
   }, [characterPerformance]);
   const matchesTillNextMatchArray = useMemo(() => {
     if (!battleState) {
-      console.log("No battle state");
       return {};
     }
     const characterIds = characters?.map(c => String(c.id)) ?? [];
@@ -245,7 +246,7 @@ export const CharacterList = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-gray-300 shadow-lg h-full w-full overflow-hidden border">
+    <div className="bg-gray-900 text-gray-300 shadow-lg h-full w-full overflow-hidden border flex flex-col">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 10px;
@@ -270,35 +271,47 @@ export const CharacterList = () => {
           -ms-overflow-style: none;
         }
       `}</style>
-      <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-700 z-[100]">
-        <div className="flex flex-col items-center py-3 sm:py-4 px-2 sm:px-4 space-y-2 sm:space-y-4 z-[100]">
-          <h2 className="text-2xl font-bold text-white ">Characters</h2>
+      <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-700">
+        <div className="flex flex-col items-center py-3 sm:py-4 px-2 sm:px-4 space-y-2 sm:space-y-4">
+          <h2 className="text-2xl font-bold text-white">Characters</h2>
           <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md">
-            <input type="text" placeholder="Search characters..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full px-3 sm:px-4 py-1 sm:py-2 bg-gray-800 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base " />
+            <input
+              type="text"
+              placeholder="Search characters..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 bg-gray-800 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base"
+            />
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
       </div>
-      <div className="overflow-x-auto overflow-y-auto h-full custom-scrollbar">
+      <div className="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar pb-6">
         <table className="w-full">
           <thead className="sticky top-0 bg-gray-900">
             <tr className="text-gray-400 border-b border-gray-700">
-              <th className="text-left p-2 sm:p-3 text-xs sm:text-sm md:text-base ">Character</th>
-              <th className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base ">
-                <div className="flex items-center space-x-1 cursor-pointer hover:text-white transition-colors duration-200" onClick={() => handleSort('price')}>
+              <th className="text-left p-2 sm:p-3 text-xs sm:text-sm md:text-base">Character</th>
+              <th className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base">
+                <div
+                  className="flex items-center space-x-1 cursor-pointer hover:text-white transition-colors duration-200"
+                  onClick={() => handleSort('price')}
+                >
                   <span>Price</span>
                   <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                 </div>
               </th>
-              <th className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base ">
-                <div className="flex items-center space-x-1 cursor-pointer hover:text-white transition-colors duration-200" onClick={() => handleSort('performance')}>
+              <th className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base">
+                <div
+                  className="flex items-center space-x-1 cursor-pointer hover:text-white transition-colors duration-200"
+                  onClick={() => handleSort('performance')}
+                >
                   <span>24h</span>
                   <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                 </div>
               </th>
-              <th className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base ">
-                <div 
-                  className="flex items-center justify-end space-x-1 cursor-pointer hover:text-white transition-colors duration-200" 
+              <th className="text-right p-2 sm:p-3 text-xs sm:text-sm md:text-base">
+                <div
+                  className="flex items-center justify-end space-x-1 cursor-pointer hover:text-white transition-colors duration-200"
                   onClick={() => handleSort('marketCap')}
                 >
                   <span>MCap</span>
@@ -310,22 +323,35 @@ export const CharacterList = () => {
           <tbody>
             {sortedCharacters.map((character) => {
               const performance = performanceMap[character.id] || 0;
-              console.log("performance", performance);
               const matchesLeft = matchesTillNextMatchArray[character.id] || 0;
               const status = getMatchStatusText(character, matchesLeft, battleState);
               return (
-                <CharacterRow 
-                  key={character.id} 
-                  character={character} 
-                  performance={performance/100} 
-                  matchesLeft={matchesLeft} 
+                <CharacterRow
+                  key={character.id}
+                  character={character}
+                  performance={performance / 100}
+                  matchesLeft={matchesLeft}
                   status={status}
+                  battleState={battleState}
                 />
               );
             })}
+            <motion.tr
+              className="border-t border-gray-700 bg-gray-800 hover:bg-gray-700 transition-colors duration-200"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              transition={{ duration: 0.5 }}
+            >
+              <td
+                colSpan={4}
+                className="p-6 text-center text-lg sm:text-xl md:text-2xl font-semibold text-yellow-400"
+              >
+                More characters coming soon
+              </td>
+            </motion.tr>
           </tbody>
         </table>
       </div>
     </div>
   );
-}
+};

@@ -196,7 +196,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
         className="bg-gray-900"
       >
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white">Trade Shares</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-white">{currentAction} {characterName}</DialogTitle>
           <DialogDescription className="text-gray-400">
             You own: {yourShares} shares of {characterName}
           </DialogDescription>

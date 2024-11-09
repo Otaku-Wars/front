@@ -11,7 +11,7 @@ import { HolderList } from './HolderList';
 import { TradeList } from './TradeList';
 import { StakeList } from './StakeList';
 import { useCharacter, useCharacterTrades, useCharacterPerformance, useCharacters, useCharacterMatches, useUser, useBattleState, useCharacterHolders } from '../hooks/api';
-import { useCharacterSharesBalance } from '../hooks/contract';
+import { useCharacterCall, useScalingFactor, useCharacterSharesBalance, useOriginalMarketCap } from '../hooks/contract';
 import { useAddress, useBalance } from '../hooks/user';
 import { Chart } from './Chart';
 import { MatchEndActivity, TradeActivity } from '@memeclashtv/types/activity';
@@ -174,6 +174,10 @@ export const CharacterPage = () => {
     const { data: holders } = useCharacterHolders(characterId);
     const convertEthToUsd = useConvertEthToUsd();
     const [currentMatchIdLast, setCurrentMatchIdLast] = useState(0);
+
+    const { data: characterCall } = useCharacterCall(characterId);
+    const { data: scalingFactor } = useScalingFactor(characterId);
+    const { data: originalMarketCap } = useOriginalMarketCap(character?.supply ?? 0);
 
     const { data: user } = useUser(address);
 
@@ -555,7 +559,6 @@ export const CharacterPage = () => {
                             ))}
                         </div>
                         <div className="flex items-center mt-6 pt-4 border-t border-gray-700 gap-4 flex-wrap">
-                            <h4 className="font-semibold text-xs lg:text-sm">Next Match:</h4>
                             <div className="flex flex-row items-center gap-4">
                                 <div className="flex flex-col items-center">
                                     <StatusIndicator 
@@ -568,6 +571,8 @@ export const CharacterPage = () => {
                                     } 
                                     matchesLeft={matchesLeft} 
                                     totalMatches={totalMatches} 
+                                    p1={battleState?.p1 ?? 0}
+                                    p2={battleState?.p2 ?? 0}
                                 />
                                 </div>
                                 <div className="text-xs lg:text-sm font-bold">vs</div>

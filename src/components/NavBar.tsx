@@ -139,14 +139,14 @@ export function NavBar() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  useEffect(() => {
-    const param = searchParams.get('ref')
-    if(param){
-      //set local storage
-      localStorage.setItem('referral', param)
-      console.log("referral", param)
-    }
-  }, [searchParams])
+  // useEffect(() => {
+  //   const param = searchParams.get('ref')
+  //   if(param){
+  //     //set local storage
+  //     localStorage.setItem('referral', param)
+  //     console.log("referral", param)
+  //   }
+  // }, [searchParams])
 
   const userApi = useUser(address)
   const pfp = (userApi as any)?.pfp;
@@ -181,32 +181,32 @@ export function NavBar() {
     }
   }, [authenticated, wallets, address, setActiveWallet])
 
-  useEffect(() => {
-    const setAffiliate = async () => {
-      if(affiliateIsSet){
-        localStorage.removeItem('referral')
-        setSearchParams({ref: ''})
-      }else if(address && !affiliateIsSet && authenticated){
-        const affiliateAddress = localStorage.getItem('referral') ?? searchParams.get('ref')
-        if(affiliateAddress && affiliateAddress.toLowerCase() !== address.toLowerCase()){
-          //make api request to set affiliate
-          const accessToken = await getAccessToken()
-          const response = await fetch(`${apiUrl}/users/${address}/set-affiliate`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          },
-          method: 'POST',
-          body: JSON.stringify({affiliate: affiliateAddress}),
-          })
-        }else if(affiliateAddress && affiliateAddress.toLowerCase() == address.toLowerCase()){
-          localStorage.removeItem('referral')
-          setSearchParams({ref: ''})
-        }
+  // useEffect(() => {
+  //   const setAffiliate = async () => {
+  //     if(affiliateIsSet){
+  //       localStorage.removeItem('referral')
+  //       setSearchParams({ref: ''})
+  //     }else if(address && !affiliateIsSet && authenticated){
+  //       const affiliateAddress = localStorage.getItem('referral') ?? searchParams.get('ref')
+  //       if(affiliateAddress && affiliateAddress.toLowerCase() !== address.toLowerCase()){
+  //         //make api request to set affiliate
+  //         const accessToken = await getAccessToken()
+  //         const response = await fetch(`${apiUrl}/users/${address}/set-affiliate`, {
+  //         headers: {
+  //           'Authorization': `Bearer ${accessToken}`
+  //         },
+  //         method: 'POST',
+  //         body: JSON.stringify({affiliate: affiliateAddress}),
+  //         })
+  //       }else if(affiliateAddress && affiliateAddress.toLowerCase() == address.toLowerCase()){
+  //         localStorage.removeItem('referral')
+  //         setSearchParams({ref: ''})
+  //       }
 
-      }
-    }
-    setAffiliate()
-  }, [affiliateIsSet, authenticated, address])
+  //     }
+  //   }
+  //   setAffiliate()
+  // }, [affiliateIsSet, authenticated, address])
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-gray-900 text-gray-300 w-full overflow-y-auto custom-scrollbar">
       <style>{`

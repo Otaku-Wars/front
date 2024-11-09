@@ -394,6 +394,8 @@ export const WorldStateView = () => {
   const isBattling = battleState?.status == Status.Battling || (willStartIn == 0 && battleState?.status == Status.Pending)
   const isPendingMatch = battleState?.status == Status.Pending
 
+  const isStartup = battleState?.p1 == 0 && battleState?.p2 == 0;
+
 
   console.log("battleState winner", winner)
 
@@ -511,9 +513,15 @@ export const WorldStateView = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white">
-      <style>{`
-        @keyframes pulse-win {
+    <>
+    {isStartup && <div className="text-center text-white bg-gray-900 p-4">
+      <h1 className="text-4xl font-bold">Battle's a starting soon...</h1>
+      <p className="text-lg">Buy shares now to be ready!</p>
+    </div>}
+      {!isStartup &&
+        <div className="bg-gray-900 text-white">
+        <style>{`
+          @keyframes pulse-win {
           0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.5)); }
           50% { transform: scale(1.05); filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.7)); }
         }
@@ -598,7 +606,9 @@ export const WorldStateView = () => {
         handleOpen={handleShowModal as any}
         actionType={modalAction as any}
         characterName={characterName}
-      />
-    </div>
+        />
+      </div>
+      }
+    </>
   )
 }

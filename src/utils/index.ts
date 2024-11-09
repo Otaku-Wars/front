@@ -29,6 +29,7 @@ export const getScalingFactor = async (supply: number, value: number, originalVa
 
 export const getBuyPrice = async (supply: number, value: number): Promise<number> => {
     const originalValue = await getCurveCall(0, supply);
+    console.log("ccc originalValue", originalValue)
     const scalingFactor = await getScalingFactor(supply, value, originalValue);
     //console.log("scalingFactor", scalingFactor)
     const price = await getPrice(supply, 1, scalingFactor);
@@ -62,12 +63,16 @@ export const getPriceCall = async (characterId: number): Promise<number> => {
     return convertWeiToEth(amount);
 }
 
+export const DEFAULT_A = 0.05e18;
+export const DEFAULT_B = 50000e18;
+export const DEFAULT_C = 10000000e18;
+
 export const getCurveCall = async (supply: number, amount: number): Promise<number> => {
     const curve = await readContract(config,{
         address: CONTRACT_ADDRESS as `0x${string}`,
         abi: WorldABI,
         functionName: 'getCurve',
-        args: [BigInt(supply), BigInt(amount)],
+        args: [BigInt(supply), BigInt(amount), BigInt(DEFAULT_A), BigInt(DEFAULT_B), BigInt(DEFAULT_C)],
     }) as bigint;
 
     return convertWeiToEth(curve);
