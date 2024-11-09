@@ -28,6 +28,7 @@ import { StatusIndicator } from './CharacterList';
 import { useTimeTill } from './WorldStateView';
 import { useFundWallet, usePrivy } from '@privy-io/react-auth';
 import { currentChain } from '../main';
+import { Bot } from 'lucide-react';
 
 type TimeFrame = 'Live' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'ALL';
 
@@ -495,15 +496,21 @@ export const CharacterPage = () => {
                                 pointer-events: none;
                             }
                         `}</style>
-                        <div className="profile-picture-container mb-1 cursor-pointer" onClick={() => setIsFlipped(!isFlipped)}>
+                        <div className="profile-picture-container mb-1 cursor-pointer relative" onClick={() => setIsFlipped(!isFlipped)}>
                             <div className="absolute inset-0 rounded-full">
                                 <div className={`profile-picture ${isFlipped ? 'rotate-y-180' : ''}`}>
                                     <div className="profile-picture-front relative">
                                         <div className="gloss-effect absolute inset-0 rounded-full"></div>
-                                        <Avatar className="w-full h-full border-2 border-solid bg-gradient-to-br from-yellow-400 via-red-500 to-pink-500 p-2 shadow-lg">
-                                            <AvatarImage src={character.pfp} alt={character.name} className="object-cover rounded-full" />
-                                            <AvatarFallback>{character.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
+                                        <div className="relative w-full h-full">
+                                            <Avatar className="w-full h-full border-2 border-solid bg-gradient-to-br from-yellow-400 via-red-500 to-pink-500 p-2 shadow-lg">
+                                                <AvatarImage src={character.pfp} alt={character.name} className="object-cover rounded-full" />
+                                                <AvatarFallback>{character.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="absolute top-3 right-0 bg-gray-700 rounded-full p-1 border-2 border-blue-500 flex flex-row items-center justify-center">
+                                                <Bot className="w-7 h-7 text-blue-500 bg-gray-700 rounded-full p-1" />
+                                                <h1 className="text-xl font-bold text-blue-500 pr-1">AI</h1>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="profile-picture-back text-2xl lg:text-4xl font-bold">
                                         {character.name.charAt(0)}
