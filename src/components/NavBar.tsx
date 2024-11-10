@@ -19,7 +19,7 @@ import {
 } from "../components/ui/dialog"
 import { apiUrl } from '../main'
 import { useAccount } from 'wagmi'
-import { useSetActiveWallet } from '@privy-io/wagmi'
+import { usePrivyWagmi, useSetActiveWallet } from '@privy-io/wagmi'
 import { useBattleState, useUser } from '../hooks/api'
 
 export const truncateWallet = (wallet: string) => {
@@ -171,10 +171,12 @@ export function NavBar() {
       const wallet = wallets.find((wallet: ConnectedWallet) => wallet.address === address)
       //check if wallet is active wallet
       console.log("wallets", wallets)
+      console.log("address", address)
+      console.log("activeWallet", mainAddress)
       if(wallet){
-        const isActiveWallet = wallet.address.toLowerCase() === mainAddress?.toLowerCase()
+        const isActiveWallet = address.toLowerCase() === wallet?.address?.toLowerCase()
         if(!isActiveWallet){
-          //setActiveWallet(wallet)
+          setActiveWallet(wallet)
           console.log("setting active wallet", wallet)
         }
       }

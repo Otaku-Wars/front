@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { formatEther, formatNumber } from '../lib/utils';
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { MatchEndActivity, TradeActivity } from '@memeclashtv/types/activity';
@@ -164,7 +164,7 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId, character
 
     return (
         <div className="w-full space-y-4">
-            <div className="h-[400px] bg-gray-900 rounded-lg border border-gray-700 bg">
+            <div className="h-[400px] bg-gray-900 rounded-lg  border border-gray-700">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
                         <defs>
@@ -173,6 +173,7 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId, character
                                 <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
                             </linearGradient>
                         </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                         <XAxis dataKey="timestamp" type="number" domain={['dataMin', 'dataMax']} hide />
                         <YAxis domain={yAxisDomain} hide />
                         <Tooltip content={<CustomTooltip />} />

@@ -437,12 +437,34 @@ export const CharacterPage = () => {
     console.log("AAbb character status", characterStatus)
     return (
         <div className="flex flex-col lg:flex-row w-full gap-4 lg:gap-4 items-start justify-center p-2 lg:p-4 min-h-screen">
-            <div className="flex flex-col items-center lg:sticky lg:top-8 w-full lg:w-1/4 bg-card p-4 rounded-lg shadow bg-gray-900 lg:max-h-[calc(100vh-10rem)] overflow-y-auto border border-gray-700">
-                <div className="flex flex-col space-y-4 w-full h-full">
-                    <div className="flex flex-col items-center pb-6">
-                        <style>{`
-                            .profile-picture-container {
-                                perspective: 1000px;
+            <div className="flex flex-col items-center lg:sticky lg:top-8 w-full lg:w-1/4 bg-card p-4 rounded-lg shadow bg-gray-900 lg:max-h-[calc(100vh-10rem)] overflow-y-auto border border-gray-700 custom-scrollbar">
+            <style>{`
+                            /* Webkit (Chrome, Safari, newer versions of Opera) */
+                            .custom-scrollbar::-webkit-scrollbar {
+                                width: 10px;
+                            }
+
+                            .custom-scrollbar::-webkit-scrollbar-track {
+                                background: #1f2937;
+                            }
+
+                            .custom-scrollbar::-webkit-scrollbar-thumb {
+                                background-color: #4b5563;
+                                border-radius: 20px;
+                                border: 3px solid #1f2937;
+                            }
+
+                            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                                background-color: #6b7280;
+                            }
+
+                            /* Firefox */
+                            .custom-scrollbar {
+                                scrollbar-width: thin;
+                                scrollbar-color: #4b5563 #1f2937;
+                            }
+                        .profile-picture-container {
+                            perspective: 1000px;
                                 transform-style: preserve-3d;
                                 width: 150px;
                                 height: 150px;
@@ -496,23 +518,26 @@ export const CharacterPage = () => {
                                 pointer-events: none;
                             }
                         `}</style>
-                        <div className="profile-picture-container mb-1 cursor-pointer relative" onClick={() => setIsFlipped(!isFlipped)}>
+                <div className="flex flex-col space-y-4 w-full h-full custom-scrollbar">
+                    <div className="flex flex-col items-center pb-6">
+                        
+                        <div className="profile-picture-container mb-1 cursor-pointer relative custom-scrollbar" onClick={() => setIsFlipped(!isFlipped)}>
                             <div className="absolute inset-0 rounded-full">
                                 <div className={`profile-picture ${isFlipped ? 'rotate-y-180' : ''}`}>
                                     <div className="profile-picture-front relative">
                                         <div className="gloss-effect absolute inset-0 rounded-full"></div>
                                         <div className="relative w-full h-full">
-                                            <Avatar className="w-full h-full border-2 border-solid bg-gradient-to-br from-yellow-400 via-red-500 to-pink-500 p-2 shadow-lg">
+                                            <Avatar className="w-full h-full border-1 border-solid bg-gradient-to-br from-yellow-400 via-red-500 to-pink-500 p-2 shadow-lg">
                                                 <AvatarImage src={character.pfp} alt={character.name} className="object-cover rounded-full" />
                                                 <AvatarFallback>{character.name.charAt(0)}</AvatarFallback>
                                             </Avatar>
-                                            <div className="absolute top-3 right-0 bg-gray-700 rounded-full p-1 border-2 border-blue-500 flex flex-row items-center justify-center">
+                                            <div className="absolute top-0 right-0 bg-gray-700 rounded-full p-1 border-2 border-blue-500 flex flex-row items-center justify-center">
                                                 <Bot className="w-7 h-7 text-blue-500 bg-gray-700 rounded-full p-1" />
                                                 <h1 className="text-xl font-bold text-blue-500 pr-1">AI</h1>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="profile-picture-back text-2xl lg:text-4xl font-bold">
+                                    <div className="profile-picture-back text-2xl lg:text-5xl font-bold">
                                         {character.name.charAt(0)}
                                     </div>
                                 </div>
@@ -719,7 +744,7 @@ export const CharacterPage = () => {
                 </Card>
                 
                 {/* Tab lists */}
-                <Tabs defaultValue="matches" className="w-full">
+                <Tabs defaultValue="matches" className="w-full bg-gray-900 border border-gray-700">
                     <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="matches">Matches</TabsTrigger>
                         <TabsTrigger value="holders">Holders</TabsTrigger>

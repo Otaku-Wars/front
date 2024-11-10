@@ -193,11 +193,11 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
       <DialogContent 
         onMouseEnter={() => setIsMouseOver(true)} 
         onMouseLeave={() => setIsMouseOver(false)}
-        className="bg-gray-900"
+        className="bg-gray-900 p-8"
       >
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white">{currentAction} {characterName}</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogTitle className="text-3xl font-bold text-white">{currentAction} {characterName}</DialogTitle>
+          <DialogDescription className="text-lg text-gray-400">
             You own: {yourShares} shares of {characterName}
           </DialogDescription>
         </DialogHeader>
@@ -208,149 +208,157 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
           </TabsList>
           <TabsContent value="Buy" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="amount" className="text-sm font-medium text-gray-300">
+              <Label htmlFor="amount" className="text-base font-medium text-gray-300">
                 Amount to Buy
               </Label>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={decrementAmount}
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 px-4 py-2"
                 >
-                  <FaMinus className="h-4 w-4" />
+                  <FaMinus className="h-6 w-6" />
                 </Button>
                 <Input
                   id="amount"
                   value={amount}
                   onChange={handleAmountChange}
-                  className="text-center bg-gray-800 text-white"
+                  className="text-center bg-gray-800 text-white text-lg"
                 />
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={incrementAmount}
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 px-4 py-2"
                 >
-                  <FaPlus className="h-4 w-4" />
+                  <FaPlus className="h-6 w-6" />
                 </Button>
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-300">Cost Breakdown</Label>
+              <Label className="text-base font-medium text-gray-300">
+                Cost Breakdown
+              </Label>
               <div className="space-y-1">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-lg">
                   <span className="text-gray-400">Base Cost:</span>
                   <span className="text-white">{formatNumber(convertEthToUsd(baseCost))}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-lg">
                   <span className="text-gray-400">Fee (2%):</span>
                   <span className="text-white">{formatNumber(convertEthToUsd(feeAmount))}</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between pt-2 border-t border-gray-700">
-                <span className="text-sm font-medium text-gray-300">Total Cost:</span>
-                <div className="flex items-center space-x-2 text-2xl font-bold text-white">
+              <div className="flex items-center justify-between pt-4 border-t border-gray-700">
+                <span className="text-lg font-medium text-gray-300">
+                  Total Cost:
+                </span>
+                <div className="flex items-center space-x-3 text-3xl font-bold text-white">
                   <FaDollarSign className="h-6 w-6" />
                   <span>{formatNumber(convertEthToUsd(totalCost))}</span>
                 </div>
               </div>
-              <p className="text-sm text-gray-500">≈ {formatEther2(totalCost)}</p>
+              <p className="text-md text-gray-500">≈ {formatEther2(totalCost)}</p>
             </div>
           </TabsContent>
           <TabsContent value="Sell" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="amount" className="text-sm font-medium text-gray-300">
+              <Label htmlFor="amount" className="text-base font-medium text-gray-300">
                 Amount to Sell
               </Label>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={decrementAmount}
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 px-4 py-2"
                 >
-                  <FaMinus className="h-4 w-4" />
+                  <FaMinus className="h-6 w-6" />
                 </Button>
                 <Input
                   id="amount"
                   value={amount}
                   onChange={handleAmountChange}
-                  className="text-center bg-gray-800 text-white"
+                  className="text-center bg-gray-800 text-white text-lg"
                 />
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={incrementAmount}
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 px-4 py-2"
                 >
-                  <FaPlus className="h-4 w-4" />
+                  <FaPlus className="h-6 w-6" />
                 </Button>
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-300">Proceeds Breakdown</Label>
+              <Label className="text-base font-medium text-gray-300">
+                Proceeds Breakdown
+              </Label>
               <div className="space-y-1">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-lg">
                   <span className="text-gray-400">Original Sell Price:</span>
                   <span className="text-white">{formatNumber(convertEthToUsd(totalProceeds))}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-lg">
                   <span className="text-gray-400">Fee (2%):</span>
                   <span className="text-white">-{formatNumber(convertEthToUsd(feeProceeds))}</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between pt-2 border-t border-gray-700">
-                <span className="text-sm font-medium text-gray-300">Total Proceeds:</span>
-                <div className="flex items-center space-x-2 text-2xl font-bold text-white">
+              <div className="flex items-center justify-between pt-4 border-t border-gray-700">
+                <span className="text-lg font-medium text-gray-300">
+                  Total Proceeds:
+                </span>
+                <div className="flex items-center space-x-3 text-3xl font-bold text-white">
                   <FaDollarSign className="h-6 w-6" />
                   <span>{formatNumber(convertEthToUsd(finalSellPrice))}</span>
                 </div>
               </div>
-              <p className="text-sm text-gray-500">≈ {formatEther2(finalSellPrice)} ETH</p>
+              <p className="text-md text-gray-500">≈ {formatEther2(finalSellPrice)} ETH</p>
             </div>
           </TabsContent>
         </Tabs>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <FaWallet className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-400">Balance: {formatEther2(parseFloat(userBalance?.balance))} ({formatNumber(convertEthToUsd(parseFloat(userBalance?.balance)))})</span>
+        <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center space-x-3">
+            <FaWallet className="h-6 w-6 text-gray-400" />
+            <span className="text-lg text-gray-400">Balance: {formatEther2(parseFloat(userBalance?.balance))} ({formatNumber(convertEthToUsd(parseFloat(userBalance?.balance)))})</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <FaArrowDown className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-400">1 ETH = {formatNumber(convertEthToUsd(1))}</span>
+          <div className="flex items-center space-x-3">
+            <FaArrowDown className="h-6 w-6 text-gray-400" />
+            <span className="text-lg text-gray-400">1 ETH = {formatNumber(convertEthToUsd(1))}</span>
           </div>
         </div>
         <DialogFooter>
           <Button 
             type="submit" 
-            className={`w-full ${isInBattle ? 'bg-gray-500' : ''} ${currentAction === 'Buy' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} font-bold text-xl`} 
+            className={`w-full ${isInBattle ? 'bg-gray-500 cursor-not-allowed' : ''} ${currentAction === 'Buy' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} font-bold text-2xl py-3`} 
             onClick={handlePlaceTrade}
             disabled={isBuying || isSelling || isInBattle}
           >
             {isInBattle ? 'In Battle' : isBuying ? 'Buying...' : isSelling ? 'Selling...' : currentAction} 
-            {isInBattle && <span className="text-sm text-red-500"> (Cannot buy or sell while in battle)</span>}
+            {isInBattle && <span className="text-base text-red-500"> (Cannot buy or sell while in battle)</span>}
           </Button>
         </DialogFooter>
-        <div className="mt-4 max-w-full overflow-hidden">
-          <div className="max-h-32 overflow-y-auto p-4 bg-gray-800 rounded shadow-md">
+        <div className="mt-6 max-w-full overflow-hidden">
+          <div className="max-h-48 overflow-y-auto p-6 bg-gray-800 rounded shadow-md">
             {buySuccess && currentAction === 'Buy' && (
-              <div className="text-green-500">
+              <div className="text-green-500 text-lg">
                 Successfully bought {amount} shares! <span className="text-green-500 underline"><Link to={`/user/${address}`}>Check balance</Link></span>
               </div>
             )}
             {sellSuccess && currentAction === 'Sell' && (
-              <div className="text-green-500">
+              <div className="text-green-500 text-lg">
                 Successfully sold {amount} shares! <span className="text-green-500 underline"><Link to={`/user/${address}`}>Check balance</Link></span>
               </div>
             )}
             {buyError && currentAction === 'Buy' && (
-              <div className="text-red-500">
+              <div className="text-red-500 text-lg">
                 Error: {buyError.message}
               </div>
             )}
             {sellError && currentAction === 'Sell' && (
-              <div className="text-red-500">
+              <div className="text-red-500 text-lg">
                 Error: {sellError.message}
               </div>
             )}
