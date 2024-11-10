@@ -21,6 +21,7 @@ import { apiUrl } from '../main'
 import { useAccount } from 'wagmi'
 import { usePrivyWagmi, useSetActiveWallet } from '@privy-io/wagmi'
 import { useBattleState, useUser } from '../hooks/api'
+import { useCheckNewActivities } from './ActivityListenerProvider'
 
 export const truncateWallet = (wallet: string) => {
   if (!wallet) {
@@ -102,6 +103,7 @@ export function NavBar() {
   const address = user?.wallet?.address;
   const {setActiveWallet} = useSetActiveWallet()
   const { wallets } = useWallets()
+  const shouldRefetch = useCheckNewActivities()
   const { login } = useLogin({
     onComplete: async (user, isNewUser, wasAlreadyAuthenticated, loginMethod, linkedAccount) => {
       try {

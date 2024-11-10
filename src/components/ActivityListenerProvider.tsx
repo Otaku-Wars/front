@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { BaseActivity } from '@memeclashtv/types/activity';
 import { initActivities } from '../hooks/api';
 import { usePrivy } from '@privy-io/react-auth';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ActivityContextType {
   activities: BaseActivity[];
@@ -67,6 +68,53 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       {children}
     </ActivityContext.Provider>
   );
+};
+
+export const useCheckNewActivities = () => {
+  const activities = useActivities();
+  const queryClient = useQueryClient();
+  
+  const lastRefetchTimeRef = useRef<number>(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const prevActivityCountRef = useRef<number>(activities.length);
+
+  useEffect(() => {
+    const hasNewActivities = activities.length > prevActivityCountRef.current;
+
+    if (hasNewActivities) {
+      const now = Date.now();
+      const elapsed = now - lastRefetchTimeRef.current;
+      const MIN_INTERVAL = 5000; // 5 seconds
+
+      if (elapsed >= MIN_INTERVAL) {
+        // If enough time has passed, refetch immediately
+        queryClient.invalidateQueries();
+        lastRefetchTimeRef.current = now;
+      } else {
+        // Otherwise, schedule a refetch after the remaining time
+        if (!timeoutRef.current) {
+          const remainingTime = MIN_INTERVAL - elapsed;
+          timeoutRef.current = setTimeout(() => {
+            queryClient.invalidateQueries();
+            lastRefetchTimeRef.current = Date.now();
+            timeoutRef.current = null;
+          }, remainingTime);
+        }
+      }
+
+      // Update the previous activity count
+      prevActivityCountRef.current = activities.length;
+    }
+  }, [activities, queryClient]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 };
 
 export const useActivities = () => {

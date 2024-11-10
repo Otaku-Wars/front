@@ -99,13 +99,13 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId, character
             const event = data.event;
             console.log("bbcccdd", event)
             return (
-                <div className="bg-gray-800 p-3 rounded shadow-md text-xs">
+                <div className="bg-gray-800 p-4 rounded shadow-md border border-gray-700 text-xl">
                     <div className="flex items-center gap-2 mb-1">
-                        <p className={`text-lg font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                            {formatNumber(price)}
+                        <p className={`text-3xl font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                            {formatNumber(convertEthToUsd(price))}
                         </p>
                         <p className={`text-sm ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                            {isPositive ? '+' : ''}{formatNumber(data.change)} ({isPositive ? '+' : ''}{percentChange}%)
+                            {isPositive ? '+' : ''}{formatNumber(convertEthToUsd(data.change))} ({isPositive ? '+' : ''}{percentChange}%)
                         </p>
                     </div>
                     <p className="text-gray-400 text-[10px] mb-2">{new Date(data.timestamp * 1000).toLocaleString()}</p>
@@ -116,15 +116,23 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId, character
                         console.log("bbcccdd", event)
                         return (
                             <div className="flex items-center text-gray-300 gap-1">
-                                <img src={ traderPfp|| '/placeholder.svg'} alt={traderUsername || 'Trader'} width={16} height={16} className="rounded-full" />
-                                <span>{traderUsername}</span>
+                                <img
+                                    src={ traderPfp|| '/placeholder.svg'}
+                                    alt={traderUsername || 'Trader'}
+                                    className="rounded-full border  w-5 h-5 object-cover"
+                                />
+                                <span className='font-bold'>{traderUsername}</span>
                                 <span className={event.isBuy ? 'text-green-400' : 'text-red-400'}>
                                     {event.isBuy ? "bought" : "sold"}
                                 </span>
-                                <span>{event.shareAmount.toFixed(1)}</span>
-                                <img src={character?.pfp || '/placeholder.svg'} alt={character?.name || 'Character'} width={16} height={16} className="rounded-full" />
-                                <span>{character?.name}</span>
-                                <span>for <span className={event.isBuy ? 'text-red-400' : 'text-green-400'}>{formatNumber(event.ethAmount)}</span></span>
+                                <span>{event.shareAmount}</span>
+                                <img
+                                    src={character?.pfp || '/placeholder.svg'}
+                                    alt={character?.name || 'Character'}
+                                    className="rounded-full border w-5 h-5 object-cover"
+                                />
+                                <span className='font-bold'>{character?.name}</span>
+                                <span>for <span className={!event.isBuy ? 'text-red-400' : 'text-green-400'}>{formatNumber(convertEthToUsd(event.ethAmount))}</span></span>
                             </div>
                         );
                     })()}
@@ -138,19 +146,27 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId, character
                         console.log("bbcccdd", event)
                         return (
                             <div className="flex items-center text-gray-300 gap-1">
-                                <img src={character1?.pfp || '/placeholder.svg'} alt={character1?.name || 'Character'} width={16} height={16} className="rounded-full" />
-                                <span>{character1?.name}</span>
+                                <img
+                                    src={character1?.pfp || '/placeholder.svg'}     
+                                    alt={character1?.name || 'Character'}
+                                    className="rounded-full border  w-5 h-5 object-cover"
+                                />
+                                <span className='font-bold'>{character1?.name}</span>
                                 <span className={isWin ? 'text-green-400' : 'text-red-400'}>
                                     {isWin ? "beat" : "lost to"}
                             </span>
-                            <img src={character2?.pfp || '/placeholder.svg'} alt={character2?.name || 'Opponent'} width={16} height={16} className="rounded-full" />
-                            <span>{character2?.name}</span>
+                            <img
+                                src={character2?.pfp || '/placeholder.svg'}
+                                alt={character2?.name || 'Opponent'}
+                                className="rounded-full border  w-5 h-5 object-cover"
+                            />
+                            <span className='font-bold'>{character2?.name}</span>
                             <span>and</span>
                             <span className={isWin ? 'text-green-400' : 'text-red-400'}>
                                 {isWin ? "gained" : "lost"}
                             </span>
                             <span className={isWin ? 'text-green-400' : 'text-red-400'}>
-                                {formatNumber(Math.abs(reward))}
+                                {formatNumber(convertEthToUsd(Math.abs(reward)))}
                             </span>
                             <span>in market cap</span>
                             </div>
