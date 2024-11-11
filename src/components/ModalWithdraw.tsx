@@ -80,7 +80,7 @@ export const ModalWithdraw = ({ show, handleClose }: { show: boolean, handleClos
         <DefaultModal
             show={show}
             handleClose={handleClose}
-            title="Withdraw"
+            title="Withdraw Fund"
         >
             <Form.Group controlId="formWalletAddress" className="mb-3">
                 <Form.Label>Wallet Address</Form.Label>

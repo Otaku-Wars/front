@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Input } from "./ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Progress } from "./ui/progress";
 import { Copy, LogOut, Wallet, TrendingUp, WalletIcon, Lock, ArrowUpRight, ArrowDownLeft, Users, Swords, ArrowUpIcon, ArrowDownIcon, ChartPie } from "lucide-react";
@@ -12,7 +12,7 @@ import { useCharacters, useUser, useAllCharacterPerformance, useValueSpent, calc
 import { useAddress, useBalance, useWithdraw } from '../hooks/user';
 import { useParams, Link } from 'react-router-dom';
 import { truncateWallet } from './NavBar';
-import { useFundWallet, useLogout, useWallets } from '@privy-io/react-auth';
+import { useFundWallet, useLogout, usePrivy, useWallets } from '@privy-io/react-auth';
 import { useChainId } from 'wagmi';
 import { currentChain } from '../main';
 import { useConvertEthToUsd } from '../EthPriceProvider';
@@ -37,6 +37,13 @@ export const generateAffiliateLink = (address: string) => {
 
 export const UserPage = () => {
     const { fundWallet } = useFundWallet()
+    const {ready, authenticated, user: privyUser, exportWallet} = usePrivy();
+    // Check that your user is authenticated
+    const isAuthenticated = ready && authenticated;
+    // Check that your user has an embedded wallet
+    const hasEmbeddedWallet = !!privyUser?.linkedAccounts?.find(
+      (account) => account.type === 'wallet' && account.walletClient === 'privy',
+    );
     const { logout } = useLogout();
     const chainId = useChainId();
     const { address } = useParams();
@@ -209,13 +216,14 @@ export const UserPage = () => {
                     Withdraw
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="bg-gray-900 border border-gray-700 text-xl">
                   <DialogHeader>
-                    <DialogTitle>Withdraw Funds</DialogTitle>
+                    <DialogTitle className="text-2xl">Withdraw</DialogTitle>
                   </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <label htmlFor="withdrawAddress" className="text-right">
+                  <DialogDescription className="text-lg">Withdraw funds from your embedded wallet to an external address (Base Mainnet)</DialogDescription>
+                  <div className="flex flex-col gap-4 py-2">
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="withdrawAddress" className="text-left">
                         Address
                       </label>
                       <Input
@@ -224,12 +232,12 @@ export const UserPage = () => {
                         placeholder="Enter address to withdraw"
                         value={withdrawAddress}
                         onChange={(e) => setWithdrawAddress(e.target.value)}
-                        className="col-span-3"
+                        className="w-full text-xl bg-gray-800 border border-gray-700"
                       />
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <label htmlFor="withdrawAmount" className="text-right">
-                        Amount
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="withdrawAmount" className="text-left">
+                        Amount (In ETH) <span className="text-xs text-muted-foreground">Your balance: {formatEther(parseFloat(userBalance ?? "0"))}</span>
                       </label>
                       <Input
                         id="withdrawAmount"
@@ -243,14 +251,15 @@ export const UserPage = () => {
                             setWithdrawAmount(value);
                           }
                         }}
-                        className="col-span-3"
+                        className="w-full text-xl bg-gray-800 border border-gray-700"
                       />
                     </div>
                   </div>
                   {withdrawPending && <div className="text-yellow-500">Processing withdrawal...</div>}
                   {withdrawError && <div className="text-red-500">Error: {withDrawErrorMessage?.message}</div>}
                   {withdrawSuccess && <div className="text-green-500">Withdrawal successful!</div>}
-                  <Button onClick={handleWithdraw} disabled={withdrawPending}>Confirm Withdrawal</Button> {/* Call handleWithdraw on click */}
+                  <Button onClick={handleWithdraw} disabled={withdrawPending} className="w-full text-xl bg-blue-600 text-white text-2xl font-bold transition-all duration-300 relative overflow-hidden group py-10">Confirm Withdrawal</Button> {/* Call handleWithdraw on click */}
+                  {hasEmbeddedWallet && <Button onClick={() => exportWallet({address: user?.address})} className="w-full text-xl bg-gray-800 text-white text-xl font-bold transition-all duration-300 relative overflow-hidden group py-5">Export Wallet</Button>} {/* Call handleWithdraw on click */}
                 </DialogContent>
               </Dialog>
             </div>}

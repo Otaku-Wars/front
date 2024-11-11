@@ -191,7 +191,7 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId, character
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                         <XAxis dataKey="timestamp" type="number" domain={['dataMin', 'dataMax']} hide />
-                        <YAxis domain={yAxisDomain} hide />
+                        <YAxis domain={yAxisDomain} tickCount={10} hide />
                         <Tooltip content={<CustomTooltip />} />
                         <Area
                             type="monotone"
