@@ -121,10 +121,17 @@ const CharacterRow = ({ character, performance, matchesLeft, status, battleState
     >
       <td className="p-2 sm:p-3 relative">
         <div className="flex items-center my-2">
-          <motion.img src={character.pfp} alt={character.name} className="w-8 h-8 mr-2 font-bold rounded-full border border-yellow-500" whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 300 }} />
-          <div className=""
-            
-          >
+          <div className="w-8 h-8 mr-1 rounded-full border border-gray-500 overflow-hidden flex-shrink-0">
+            <motion.img
+              src={character.pfp || '/placeholder.svg'}
+              alt={character.name || 'Character'}
+              className="w-full h-full object-cover"
+              whileHover={{ scale: 1.1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+            />
+          </div>
+          <div>
             <div className="font-bold text-lg sm:text-md md:text-md text-white">
               {character.name}
             </div>
@@ -337,14 +344,14 @@ export const CharacterList = () => {
               );
             })}
             <motion.tr
-              className="border-t border-gray-700 bg-gray-800 hover:bg-gray-700 transition-colors duration-200"
+              className="border-t"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               transition={{ duration: 0.5 }}
             >
               <td
                 colSpan={4}
-                className="p-6 text-center text-lg sm:text-xl md:text-2xl font-semibold text-yellow-400"
+                className="pt-5 text-center text-sm sm:text-base md:text-lg text-gray-400"
               >
                 More characters coming soon
               </td>

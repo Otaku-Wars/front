@@ -132,6 +132,7 @@ export const MatchList: React.FC<MatchListProps> = ({ characterId, characters })
           const isPlayer1 = match.p1 === characterId;
           const playerIndex = isPlayer1 ? '1' : '2';
           const opponentIndex = isPlayer1 ? '2' : '1';
+          console.log("activitybb", match)
 
           return (
             <TableRow key={match.id} ref={index === visibleActivities.length - 1 ? lastActivityRef : null}>
@@ -166,30 +167,31 @@ export const MatchList: React.FC<MatchListProps> = ({ characterId, characters })
               </TableCell>
               <TableCell>
                 <div className="flex items-center">
+                  <span className={match.tokenState[`newPrice${playerIndex}`] > match.tokenState[`prevPrice${playerIndex}`] ? 'text-green-500' : 'text-red-500'}>
+                    {formatNumber(convertEthToUsd(match.tokenState[`newPrice${playerIndex}`]))}
+                  </span>
                   {match.tokenState[`newPrice${playerIndex}`] > match.tokenState[`prevPrice${playerIndex}`] ? (
-                    <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                    <ArrowUpIcon className="h-3 w-3 text-green-500 mr-1" />
                   ) : (
-                    <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                    <ArrowDownIcon className="h-3 w-3 text-red-500 mr-1" />
                   )}
                   <span className={match.tokenState[`newPrice${playerIndex}`] > match.tokenState[`prevPrice${playerIndex}`] ? 'text-green-500' : 'text-red-500'}>
-                    {formatNumber(Math.abs(match.tokenState[`newPrice${playerIndex}`]))}
-                  </span>
-                  <span className="ml-1 text-muted-foreground">
                     ({formatPercentage(Math.abs((match.tokenState[`newPrice${playerIndex}`] - match.tokenState[`prevPrice${playerIndex}`]) / match.tokenState[`prevPrice${playerIndex}`]))})
                   </span>
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center">
+                  
+                  <span className={match.tokenState[`newMarketCap${playerIndex}`] > match.tokenState[`prevMarketCap${playerIndex}`] ? 'text-green-500' : 'text-red-500'}>
+                    {formatNumber(convertEthToUsd(match.tokenState[`newMarketCap${playerIndex}`]))}
+                  </span>
                   {match.tokenState[`newMarketCap${playerIndex}`] > match.tokenState[`prevMarketCap${playerIndex}`] ? (
-                    <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                    <ArrowUpIcon className="h-3 w-3 text-green-500 mr-1" />
                   ) : (
-                    <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                    <ArrowDownIcon className="h-3 w-3 text-red-500 mr-1" />
                   )}
                   <span className={match.tokenState[`newMarketCap${playerIndex}`] > match.tokenState[`prevMarketCap${playerIndex}`] ? 'text-green-500' : 'text-red-500'}>
-                    {formatNumber(Math.abs(match.tokenState[`newMarketCap${playerIndex}`]))}
-                  </span>
-                  <span className="ml-1 text-muted-foreground">
                     ({formatPercentage(Math.abs((match.tokenState[`newMarketCap${playerIndex}`] - match.tokenState[`prevMarketCap${playerIndex}`]) / match.tokenState[`prevMarketCap${playerIndex}`]))})
                   </span>
                 </div>
