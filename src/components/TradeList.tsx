@@ -40,12 +40,12 @@ const TraderCard = ({
       className="flex items-center space-x-4 cursor-pointer" 
       onClick={() => navigate(`/user/${id}`)} // Navigate to user's page on click
     >
-      <Avatar className="h-10 w-10">
+      <Avatar className="h-10 w-10 hover:scale-110 transition-all duration-300">
         <AvatarImage src={pfp ?? "/placeholder.svg?height=40&width=40"} alt={trader} />
         <AvatarFallback>{id}</AvatarFallback>
       </Avatar>
       <div className="flex-grow">
-        <p className="font-semibold">{trader}</p>
+        <p className="font-semibold hover:underline cursor-pointer">{trader}</p>
       </div>
     </div>
   )

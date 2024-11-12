@@ -137,7 +137,7 @@ export function NavBar() {
 
   const navigate = useNavigate()
 
-  const [showHowToModal, setShowHowToModal] = useState(false)
+  const [showHowToModal, setShowHowToModal] = useState(true)
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -258,7 +258,7 @@ export function NavBar() {
               <DialogTrigger asChild>
                 <Button variant="ghost" className="text-2xl" style={{color: '#F6E359'}}>How it works</Button>
               </DialogTrigger>
-              <DialogContent className="bg-gray-900 text-white text-4xl p-8">
+              <DialogContent className="bg-gray-900 text-white text-4xl p-8 max-w-2xl">
                 <DialogHeader>
                   <DialogTitle className="text-4xl font-bold mb-4">Welcome to MemeClash.TV</DialogTitle>
                   <DialogDescription className="text-lg">
@@ -282,10 +282,10 @@ export function NavBar() {
                       <span className="text-yellow-300">Power Ups:</span> Lock your shares to power up your character.
                     </p> */}
                     <p className="mb-4 text-2xl">
-                      <span className="text-blue-400 font-bold flashing-arbitrary">Make Profit:</span> Sell your tokens whenever you want to cash in your gains — just not during battles when shares are locked.
+                      <span className="text-blue-400 font-bold flashing-arbitrary">Make Profit:</span> Sell your tokens whenever you want to cash in your gains — just not during battles when shares are locked. Or HODL shares for the long term!
                     </p>
 
-                    <h2 className="text-2xl font-bold mb-4 text-yellow-300 flashing-arbitrary">BUY A CHARACTER NOW WHILE SHARE PRICES ARE LOW !!!</h2>
+                    <h2 className="text-4xl text-center font-bold mb-4 text-yellow-300 flashing-arbitrary">BUY YOUR FAVORITE CHARACTER NOW !!!</h2>
                   </DialogDescription>
                 </DialogHeader>
                 

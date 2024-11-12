@@ -67,12 +67,12 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
             <TableCell className="font-medium">#{index + 1}</TableCell>
             <TableCell>
               <div className="flex items-center space-x-4">
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-10 w-10 hover:scale-110 transition-all duration-300 cursor-pointer">
                   <AvatarImage src={pfp ?? `/placeholder.svg?height=40&width=40`} alt={`User ${index + 1}`} />
                   <AvatarFallback>{displayName}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-semibold">{displayName}</p>
+                  <p className="font-semibold hover:underline cursor-pointer">{displayName}</p>
                   <p className="text-sm text-muted-foreground">{holder.balance}</p>
                 </div>
               </div>
