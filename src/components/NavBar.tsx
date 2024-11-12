@@ -170,13 +170,15 @@ export function NavBar() {
 
   useEffect(() => {
     if(authenticated && address){
-      const wallet = wallets.find((wallet: ConnectedWallet) => wallet.address === address)
+      const wallet = wallets.find((wallet: ConnectedWallet) => wallet.address.toLowerCase() === address.toLowerCase()) 
+      console.log("wallet", wallet)
       //check if wallet is active wallet
       console.log("wallets", wallets)
       console.log("address", address)
       console.log("activeWallet", mainAddress)
       if(wallet){
-        const isActiveWallet = address.toLowerCase() === wallet?.address?.toLowerCase()
+        const isActiveWallet = mainAddress?.toLowerCase() === wallet?.address?.toLowerCase()
+        console.log("isActiveWallet", isActiveWallet)
         if(!isActiveWallet){
           setActiveWallet(wallet)
           console.log("setting active wallet", wallet)
