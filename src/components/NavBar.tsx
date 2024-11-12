@@ -258,26 +258,34 @@ export function NavBar() {
               <DialogTrigger asChild>
                 <Button variant="ghost" className="text-2xl" style={{color: '#F6E359'}}>How it works</Button>
               </DialogTrigger>
-              <DialogContent className="bg-gray-900 text-white p-6">
+              <DialogContent className="bg-gray-900 text-white text-4xl p-8">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold mb-4">How it works</DialogTitle>
+                  <DialogTitle className="text-4xl font-bold mb-4">Welcome to MemeClash.TV</DialogTitle>
                   <DialogDescription className="text-lg">
-                    <p className="mb-4">
-                      <span className="text-yellow-300">MemeClash.TV is a 24/7 livestream where AI characters battle for market share.</span>
+                    <p className="mb-4 text-2xl">
+                      <span className="text-yellow-300 font-bold">MemeClash.TV is a 24/7 livestream where AI characters battle for market share.</span>
                     </p>
-                    <p className="mb-4">
-                      <span className="text-green-400">Buy Shares:</span> Every character has its own token, and the price rises as more people buy along a simple bonding curve. (y = x/100,000)
+                    <p className="mb-4 text-2xl">
+                      <span
+                       className="text-green-400 font-bold flashing-arbitrary">Buy Shares:</span> Every character has its own token, and the price rises as more people buy along a simple bonding curve.<br />
+                      <span className="text-muted-foreground text-lg bg-gray-800 p-2 rounded-md text-gray-600">P(x) = 0.05*((x-50000)/sqrt(10000000+(x-50000)^2)+1)</span>
                     </p>
-                    <p className="mb-4">
-                      <span className="text-orange-400">Fight and Earn:</span> When a character wins, they take 10% of opponent's market cap, boosting their token's value. The more they win, the higher their token price.
+                    <p className="mb-4 text-2xl">
+                      <span className="text-orange-400 font-bold flashing-arbitrary">Fight and Earn:</span> When a character wins, they take 10% of their opponent's market cap, boosting the price of their token. The more matches your character wins, the higher the value of your shares.
+                    </p>
+
+                    <p className="mb-4 text-2xl">
+                      <span className="text-red-400 font-bold flashing-arbitrary">AI Logic:</span> Each character is a fully open source fighting game bot with unique frame data, animations, and logic. Running within the MUGEN (Ikemen GO) fighting game engine.
                     </p>
                   
                     {/* <p className="mb-4">
                       <span className="text-yellow-300">Power Ups:</span> Lock your shares to power up your character.
                     </p> */}
-                    <p className="mb-4">
-                      <span className="text-blue-400">Make Profit:</span> Sell your tokens whenever you want to cash in your gains — just not during battles when shares are locked.
+                    <p className="mb-4 text-2xl">
+                      <span className="text-blue-400 font-bold flashing-arbitrary">Make Profit:</span> Sell your tokens whenever you want to cash in your gains — just not during battles when shares are locked.
                     </p>
+
+                    <h2 className="text-2xl font-bold mb-4 flashing-arbitrary"> BUY YOUR FAVORITE CHARACTER NOW WHILE SHARE PRICES ARE LOW!</h2>
                   </DialogDescription>
                 </DialogHeader>
                 

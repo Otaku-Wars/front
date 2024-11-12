@@ -82,8 +82,18 @@
   }
 }
 
-.breathing-effect  {
-  animation: breathing-effect 2s ease-in-out infinite;
+/* Breathing effect for arbitrary text color  */
+.breathing-effect-arbitrary {
+  animation: breathing-effect-arbitrary 2s ease-in-out infinite;
+}
+@keyframes breathing-effect-arbitrary  {
+  0%, 100% {
+    transform: scale(1);    
+  }
+  50% {
+    transform: scale(1.1);
+
+  }
 }
 @keyframes breathing-effect  {
   0%, 100% {
@@ -138,6 +148,19 @@
   50% {
     transform: scale(1.1);
     color: rgb(159, 255, 159);
+  }
+}
+
+
+.flashing-arbitrary {
+  animation: flashing-arbitrary 2s ease-in-out infinite;
+}
+@keyframes flashing-arbitrary {
+  0%, 100% {
+  }
+  50% {
+    opacity: 0.5;
+    scale: 1.1;
   }
 }
 

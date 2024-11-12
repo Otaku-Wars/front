@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { truncateWallet } from './NavBar';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { formatNumber } from '../lib/utils';
+import { formatNumber, formatPercentage } from '../lib/utils';
 import { useConvertEthToUsd } from '../EthPriceProvider';
 import { buildDataUrl } from './ActivityBar';
 import { zeroAddress } from 'viem';
@@ -29,7 +29,7 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
     return holders
       ?.map(user => {
         const balance = user.balances.find(b => b.character === characterId)?.balance || 0
-        const value = (balance / characterSupply) * characterMarketCap
+        const value = (balance / characterSupply);
         return { ...user, balance, value }
       })
       .sort((a, b) => b.balance - a.balance)
@@ -54,7 +54,7 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
           <TableHead>Rank</TableHead>
           <TableHead>User</TableHead>
           <TableHead className="text-right">Holdings</TableHead>
-          <TableHead className="text-right">Value</TableHead>
+          <TableHead className="text-right">Percentage</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -79,7 +79,7 @@ export const HolderList: React.FC<HolderListProps> = ({ characterId, characterSu
             </TableCell>
             <TableCell className="text-right font-semibold">{holder.balance.toLocaleString()}</TableCell>
             <TableCell className="text-right">
-              <p className="font-semibold">{formatNumber(convertEthToUsd(holder.value))}</p>
+              <p className="font-semibold">{formatPercentage(holder.value)}</p>
             </TableCell>
           </TableRow>)
         })}

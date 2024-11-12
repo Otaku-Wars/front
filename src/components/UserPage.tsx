@@ -370,7 +370,7 @@ export const UserPage = () => {
         <TabsContent value="holdings">
           <Card className="bg-gray-900">
             <CardHeader>
-              <CardTitle>Your Holdings</CardTitle>
+              <CardTitle>Holdings</CardTitle>
             </CardHeader>
             <CardContent>
               {user?.balances?.map((balance: Balance, index: number) => {
