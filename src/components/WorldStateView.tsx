@@ -62,7 +62,7 @@ const BuyTradeButton = ({ onClick, preNewHoldingsValue, newHoldingsValue, shares
             2px 2px 0 #FFFFFF
           `,
         }}  
-        className="relative z-10 text-shadow-md text-shadow-white"
+        className="relative z-10 text-shadow-md text-shadow-white hover:text-2xl transition-all duration-300"
         >
           BUY NOW
         </span>
@@ -515,8 +515,8 @@ export const WorldStateView = () => {
   return (
     <>
     {isStartup && <div className="text-center text-white bg-gray-900 p-4">
-      <h1 className="text-4xl font-bold">Battle's a starting soon...</h1>
-      <p className="text-lg">Buy shares now to be ready!</p>
+      <h1 className="text-4xl font-bold">Battle's are starting soon...</h1>
+      <p className="text-2xl font-bold flashing-arbitrary text-yellow-300">Buy your favorite character NOW !!!</p>
     </div>}
       {!isStartup &&
         <div className="bg-gray-900 text-white">

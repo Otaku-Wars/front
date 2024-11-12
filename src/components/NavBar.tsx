@@ -285,7 +285,7 @@ export function NavBar() {
                       <span className="text-blue-400 font-bold flashing-arbitrary">Make Profit:</span> Sell your tokens whenever you want to cash in your gains — just not during battles when shares are locked.
                     </p>
 
-                    <h2 className="text-2xl font-bold mb-4 flashing-arbitrary"> BUY YOUR FAVORITE CHARACTER NOW WHILE SHARE PRICES ARE LOW!</h2>
+                    <h2 className="text-2xl font-bold mb-4 text-yellow-300 flashing-arbitrary">BUY A CHARACTER NOW WHILE SHARE PRICES ARE LOW !!!</h2>
                   </DialogDescription>
                 </DialogHeader>
                 

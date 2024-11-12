@@ -408,7 +408,7 @@ export const CharacterPage = () => {
         return (
             <Button
                 style={buttonStyle}
-                className="text-4xl flex-1 breathing-green bg-green-600 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10"
+                className="text-4xl flex-1 breathing-green bg-green-600 text-white text-2xl font-bold hover:bg-green-700 transition-all duration-300 relative overflow-hidden group py-10 hover:text-3xl"
                 onClick={() => handleShowModal('Buy')}
             >
                 BUY NOW
@@ -425,7 +425,7 @@ export const CharacterPage = () => {
         }
         return (
             <Button 
-                className="text-4xl flex-1 bg-red-600 text-white text-2xl font-bold hover:bg-red-700 transition-all duration-300 relative overflow-hidden group py-10"
+                className="text-4xl flex-1 bg-red-600 text-white text-2xl font-bold hover:bg-red-700 transition-all duration-300 relative overflow-hidden group py-10 hover:text-3xl"
                 onClick={() => handleShowModal('Sell')}
             >
                 SELL NOW
