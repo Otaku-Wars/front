@@ -432,7 +432,7 @@ export const WorldStateView = () => {
           </div>
           <div className={`flex flex-col ${isRightSide ? 'items-start ml-1 sm:ml-2' : 'items-end mr-1 sm:mr-2'}`}>
             <h2 className="text-sm sm:text-base md:text-lg font-bold mb-0.5 sm:mb-1">
-              {isRightSide && <span className="mr-2 text-2xl text-ellipsis truncate">{character.name}</span>}
+              {isRightSide && <span className="mr-2 text-2xl text-ellipsis truncate hover:underline cursor-pointer">{character.name}</span>}
               {isRightSide && <TooltipProvider
                 delayDuration={0}
               >
@@ -457,13 +457,13 @@ export const WorldStateView = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>}
-              {!isRightSide && <span className="ml-2 text-2xl text-ellipsis truncate">{character.name}</span>}
+              {!isRightSide && <span className="ml-2 text-2xl text-ellipsis truncate hover:underline cursor-pointer">{character.name}</span>}
 
             </h2>
             
             <CharacterStats character={character} />
           </div>
-          <img src={character.pfp} alt={character.name} className={`w-12 h-12 object-cover sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-2 border-yellow-500 flex-shrink-0 ${isRightSide ? 'ml-1 sm:ml-2' : 'mr-1 sm:mr-2'}`} />
+          <img src={character.pfp} alt={character.name} className={`w-12 h-12 object-cover sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-2 border-yellow-500 flex-shrink-0 hover:scale-110 transition-all duration-300 ${isRightSide ? 'ml-1 sm:ml-2' : 'mr-1 sm:mr-2'}`} />
         </div>
         <div className="w-full">
           <div className={`flex justify-between items-center mb-1 sm:mb-2 ${isRightSide ? 'flex-row' : 'flex-row-reverse'}`}>
