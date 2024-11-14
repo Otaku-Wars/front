@@ -5,13 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+//if less thant 1e-14 set to 0
 export const formatNumber = (num: number) => {
+  const value = Math.abs(num) < 1e-13 ? 0 : num;
   return new Intl.NumberFormat('en-US', { 
     style: 'currency', 
     currency: 'USD',
     maximumFractionDigits: 4,
     maximumSignificantDigits: 4,
-  }).format(num)
+  }).format(value)
 }
 
 export const formatMarketCap = (num: number) => {
@@ -33,8 +35,9 @@ export const formatEther = (num: number) => {
 }
 
 export const formatPercentage = (num: number) => {
+  const value = Math.abs(num) < 1e-10 ? 0 : num;
   return new Intl.NumberFormat('en-US', { 
     style: 'percent', 
     maximumSignificantDigits: 4,
-  }).format(num)
+  }).format(value)
 }
