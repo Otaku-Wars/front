@@ -7,14 +7,14 @@ import {PrivyProvider} from '@privy-io/react-auth';
 import { WagmiProvider } from '@privy-io/wagmi';
 import { createConfig, http } from 'wagmi';
 import { defineChain } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import { base, baseSepolia } from 'viem/chains';
 import "./globals.css"
 import { EthPriceProvider } from './EthPriceProvider.tsx';
 import { ActivityProvider } from './components/ActivityListenerProvider.tsx';
 
 const isProd = import.meta.env.PROD;
 export const currentChain = isProd ?
-  baseSepolia :
+  base :
   defineChain({
     id: 31337,
     name: 'Localhost',
