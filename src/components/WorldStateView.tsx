@@ -289,7 +289,7 @@ export const WorldStateView = () => {
   const navigator = useNavigate()
 
   const isMatchJustEnded = useMemo(() => {
-    return battleState?.status == battleState?.lastMatchResult?.winner !== null
+    return battleState?.lastMatchResult !== undefined
   }, [battleState])
 
   const [character1, character2] = useMemo(() => {
