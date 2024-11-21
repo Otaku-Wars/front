@@ -288,6 +288,10 @@ export const WorldStateView = () => {
 
   const navigator = useNavigate()
 
+  const isMatchJustEnded = useMemo(() => {
+    return battleState?.status == battleState?.lastMatchResult?.winner !== null
+  }, [battleState])
+
   const [character1, character2] = useMemo(() => {
     return [
       characters?.find((c) => c.id === battleState?.p1),
@@ -313,12 +317,18 @@ export const WorldStateView = () => {
   }, [character2])
 
   const character1MarketCap = useMemo(() => {
+    if(isMatchJustEnded){
+      return battleState?.lastMatchResult?.tokenState?.prevMarketCap1 ?? 0
+    }
     return character1 ? character1.value : 0
-  }, [character1])
+  }, [character1, isMatchJustEnded])
 
   const character2MarketCap = useMemo(() => {
+    if(isMatchJustEnded){
+      return battleState?.lastMatchResult?.tokenState?.prevMarketCap2 ?? 0
+    }
     return character2 ? character2.value : 0
-  }, [character2])
+  }, [character2, isMatchJustEnded])
 
   const character1WinMarketCap = useMemo(() => {
     const reward = (character2MarketCap * 0.1)
