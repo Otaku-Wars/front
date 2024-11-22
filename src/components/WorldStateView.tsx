@@ -288,10 +288,6 @@ export const WorldStateView = () => {
 
   const navigator = useNavigate()
 
-  const isMatchJustEnded = useMemo(() => {
-    return battleState?.lastMatchResult !== undefined
-  }, [battleState])
-
   const [character1, character2] = useMemo(() => {
     return [
       characters?.find((c) => c.id === battleState?.p1),
@@ -317,18 +313,12 @@ export const WorldStateView = () => {
   }, [character2])
 
   const character1MarketCap = useMemo(() => {
-    if(isMatchJustEnded){
-      return battleState?.lastMatchResult?.tokenState?.prevMarketCap1 ?? 0
-    }
     return character1 ? character1.value : 0
-  }, [character1, isMatchJustEnded])
+  }, [character1])
 
   const character2MarketCap = useMemo(() => {
-    if(isMatchJustEnded){
-      return battleState?.lastMatchResult?.tokenState?.prevMarketCap2 ?? 0
-    }
     return character2 ? character2.value : 0
-  }, [character2, isMatchJustEnded])
+  }, [character2])
 
   const character1WinMarketCap = useMemo(() => {
     const reward = (character2MarketCap * 0.1)
@@ -381,8 +371,8 @@ export const WorldStateView = () => {
   
   useEffect(() => {
     const fetchValues = async () => {
-      const valueNow = await getSellPriceMc(character1?.supply ?? 0, character1?.value, character1SharesOwnedByYou)
-      const valueNow2 = await getSellPriceMc(character2?.supply ?? 0, character2?.value, character2SharesOwnedByYou)
+      const valueNow = await getSellPriceMc(character1?.supply ?? 0, character1MarketCap, character1SharesOwnedByYou)
+      const valueNow2 = await getSellPriceMc(character2?.supply ?? 0, character2MarketCap, character2SharesOwnedByYou)
       console.log("valueNow", valueNow, "character1SharesOwnedByYou", character1SharesOwnedByYou, "character1?.supply", character1?.supply, "character1?.value", character1?.value)
       const value1Win = await getSellPriceMc(character1?.supply ?? 0, character1WinMarketCap, character1SharesOwnedByYou)
       const value2Win = await getSellPriceMc(character2?.supply ?? 0, character2WinMarketCap, character2SharesOwnedByYou)
@@ -396,7 +386,7 @@ export const WorldStateView = () => {
       setHoldingsValue2(valueNow2)
     }
     fetchValues()
-  }, [character1WinMarketCap, character2WinMarketCap, character1LossMarketCap, character2LossMarketCap, character1SharesOwnedByYou, character2SharesOwnedByYou])
+  }, [character1WinMarketCap, character2WinMarketCap, character1LossMarketCap, character2LossMarketCap, character1SharesOwnedByYou, character2SharesOwnedByYou, character1MarketCap, character2MarketCap])
 
 
   const winner = battleState?.lastMatchResult?.winner ?? null
