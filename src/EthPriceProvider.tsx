@@ -31,11 +31,13 @@ export const EthPriceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return (
         <EthPriceContext.Provider value={ethPrice}>
             {isLoading ? (
-                <div className="breathing-text">PLEASE STANDBY</div>
+                <div className="flex flex-col justify-center items-center h-screen">
+                    <div className="breathing-effect-arbitrary text-center font-bold text-4xl text-yellow-200">PLEASE STANDBY</div>
+                </div>
             ) : isError ? (
                 <div className="flex flex-col justify-center items-center h-screen">
-                    <div className="breathing-text text-center">PLEASE STANDBY</div>
-                    <div className="text-center">Everything is fine, we'll be back up in a bit</div>
+                    <div className="breathing-effect-arbitrary text-center font-bold text-4xl text-yellow-200">PLEASE STANDBY</div>
+                    <div className="text-center">Fighters are resting. Your funds are safe. we'll be back up in a bit</div>
                 </div>
             ) : (
                 children
