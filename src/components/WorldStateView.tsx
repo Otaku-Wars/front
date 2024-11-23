@@ -295,6 +295,12 @@ export const WorldStateView = () => {
     ]
   }, [characters, battleState])
 
+
+  const isMatchJustEnded = useMemo(() => {
+    return battleState?.lastMatchResult;
+  }, [battleState])
+
+
   const character1SharesOwnedByYou = useMemo(() => {
     return user?.balances?.find((b) => b.character == character1?.id)?.balance ?? 0
   }, [user, character1])
@@ -305,20 +311,32 @@ export const WorldStateView = () => {
   }, [user, character2])
 
   const character1Price = useMemo(() => {
+    if(isMatchJustEnded) {
+      return battleState?.lastMatchResult?.tokenState.prevPrice1 ?? 0
+    }
     return character1 ? character1.price : 0
-  }, [character1])
+  }, [character1, isMatchJustEnded])
 
   const character2Price = useMemo(() => {
+    if(isMatchJustEnded) {
+      return battleState?.lastMatchResult?.tokenState.prevPrice2 ?? 0
+    }
     return character2 ? character2.price : 0
-  }, [character2])
+  }, [character2, isMatchJustEnded])
 
   const character1MarketCap = useMemo(() => {
+    if(isMatchJustEnded) {
+      return battleState?.lastMatchResult?.tokenState.prevMarketCap1 ?? 0
+    }
     return character1 ? character1.value : 0
-  }, [character1])
+  }, [character1, isMatchJustEnded])
 
   const character2MarketCap = useMemo(() => {
+    if(isMatchJustEnded) {
+      return battleState?.lastMatchResult?.tokenState.prevMarketCap2 ?? 0
+    }
     return character2 ? character2.value : 0
-  }, [character2])
+  }, [character2, isMatchJustEnded])
 
   const character1WinMarketCap = useMemo(() => {
     const reward = (character2MarketCap * 0.1)
@@ -399,10 +417,10 @@ export const WorldStateView = () => {
 
   console.log("battleState winner", winner)
 
-  const renderCharacterInfo = (character: Character | undefined, sharesOwned: number, isRightSide: boolean) => {
+  const renderCharacterInfo = (character: Character | undefined, sharesOwned: number, isRightSide: boolean, characterPrice: number, characterValue: number) => {
     if (!character) return null
 
-    const currentPrice = convertEthToUsd(character.price)
+    const currentPrice = convertEthToUsd(characterPrice)
     const winPrice = !isRightSide ? convertEthToUsd(character1WinPrice) : convertEthToUsd(character2WinPrice)
     const losePrice = !isRightSide ? convertEthToUsd(character1LossPrice) : convertEthToUsd(character2LossPrice)
     const winHoldingsValue = !isRightSide ? yourShares1WinValue : yourShares2WinValue
@@ -471,7 +489,7 @@ export const WorldStateView = () => {
               currentPrice={currentPrice} 
               winPrice={winPrice}
               losePrice={losePrice} 
-              value={character.value} 
+              value={characterValue} 
               supply={character.supply}
               isRightSide={isRightSide}
               isWinner={isWinner}
@@ -574,7 +592,7 @@ export const WorldStateView = () => {
       `}</style>
       <div className="max-w-7xl mx-auto bg-gray-900 border p-2 sm:p-4 md:p-6 shadow-lg">
         <div className="flex flex-row justify-between items-center">
-          {renderCharacterInfo(character1, character1SharesOwnedByYou, false)}
+          {renderCharacterInfo(character1, character1SharesOwnedByYou, false, character1Price, character1MarketCap)}
           <div className="flex flex-col items-center justify-center ">
             <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-1 sm:mb-2 text-yellow-400 relative">
               <span className="relative z-10">VS</span>
@@ -595,7 +613,7 @@ export const WorldStateView = () => {
               </div>
             )}
           </div>
-          {renderCharacterInfo(character2, character2SharesOwnedByYou, true)}
+          {renderCharacterInfo(character2, character2SharesOwnedByYou, true, character2Price, character2MarketCap)}
         </div>
       </div>
       <ModalBuySell 

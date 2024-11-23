@@ -30,7 +30,16 @@ export const EthPriceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     return (
         <EthPriceContext.Provider value={ethPrice}>
-            {isLoading ? <div>Loading...</div> : isError ? <div>Error fetching ETH price</div> : children}
+            {isLoading ? (
+                <div className="breathing-text">PLEASE STANDBY</div>
+            ) : isError ? (
+                <div className="flex flex-col justify-center items-center h-screen">
+                    <div className="breathing-text text-center">PLEASE STANDBY</div>
+                    <div className="text-center">Everything is fine, we'll be back up in a bit</div>
+                </div>
+            ) : (
+                children
+            )}
         </EthPriceContext.Provider>
     );
 };
