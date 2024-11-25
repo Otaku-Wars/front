@@ -41,7 +41,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   const { fundWallet } = useFundWallet()
   console.log('mounted ModalBuySell with show:', show);
   const [internalShow, setInternalShow] = useState(show);
-  const [amount, setAmount] = useState<any>(0);
+  const [amount, setAmount] = useState<string>('0');
   const [buyError, setBuyError] = useState<any>(null);
   const [sellError, setSellError] = useState<any>(null);
   const [buySuccess, setBuySuccess] = useState<boolean>(false);
@@ -110,14 +110,18 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow empty string or valid number
-    if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
-      setAmount(value); // Set amount directly to the input value
-      // Reset error and success states
-      setBuyError(null);
-      setSellError(null);
-      setBuySuccess(false);
-      setSellSuccess(false);
+    // Allow only empty string or digits
+    try {
+      if (value === '' || /^[0-9]+$/.test(value)) {
+        setAmount(value); // Set amount directly to the input value
+        // Reset error and success states
+        setBuyError(null);
+        setSellError(null);
+        setBuySuccess(false);
+        setSellSuccess(false);
+      }
+    } catch (error) {
+      console.error("Error parsing amount:", error);
     }
   };
 
