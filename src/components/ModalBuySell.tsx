@@ -41,7 +41,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
   const { fundWallet } = useFundWallet()
   console.log('mounted ModalBuySell with show:', show);
   const [internalShow, setInternalShow] = useState(show);
-  const [amount, setAmount] = useState<string>('0');
+  const [amount, setAmount] = useState<any>('0');
   const [buyError, setBuyError] = useState<any>(null);
   const [sellError, setSellError] = useState<any>(null);
   const [buySuccess, setBuySuccess] = useState<boolean>(false);
