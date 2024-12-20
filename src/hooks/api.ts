@@ -1,4 +1,4 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery, useMutation, QueryClient } from "@tanstack/react-query";
 import { apiUrl } from "../main";
 import { Balance, Character, CurrentBattleState, PortfolioEntry, User } from "@memeclashtv/types";
 import { Activity, ActivityType, MatchEndActivity, StakeActivity, TradeActivity } from "@memeclashtv/types/activity";
@@ -6,6 +6,11 @@ import { useEthPrice } from "../EthPriceProvider";
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { getSellPriceMc } from "../utils";
 
+interface PowerUpParams {
+  characterId: number
+  attribute: number // 2 for attack, 3 for defense
+  pointsToSpend: number
+}
 
 export const getTrade = async (characterId: number): Promise<TradeActivity | undefined> => {
     const response = await fetch(`${apiUrl}/trades/character/${characterId}`);
@@ -74,16 +79,16 @@ export const useCharacterTrades = (characterId: number): { data: TradeActivity[]
 
     return { data, isLoading, isError };
 }
-export const useCharacterPerformance = (characterId: number, start:number): { data: number | undefined, isLoading: boolean, isError: boolean } => {
+export const useCharacterPerformance = (characterId: number, start:number) => {
     const { data: dataReturned, isLoading, isError } = useQuery({
         queryKey: ['character', characterId, 'performance', start],
         queryFn: async () => {
             const response = await fetch(`${apiUrl}/trades/character/${characterId}/performance/after/${parseInt(start.toString())}`);
             return response.json()
         },
-        staleTime: 10000, // Data is fresh for 10 seconds
-        refetchOnWindowFocus: false, // Disable refetch on window focus
-        refetchOnReconnect: false, // Disable refetch on network reconnect
+        staleTime: 10000,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
     });
 
     const performance  = dataReturned?.pricePerformance ?? 0;
@@ -118,14 +123,17 @@ export const useAllCharacterPerformance = (characterIds: number[], start: number
     });
 };
 
-export const useBattleState = (): { data: CurrentBattleState | undefined, isLoading: boolean, isError: boolean } => {
+export const useBattleState = () => {
     const { data, isLoading, isError } = useQuery({
         queryKey: ['battleState'],
         queryFn: async () => {
             const response = await fetch(`${apiUrl}/battle`);
             return response.json();
         },
-        refetchInterval: 5000,
+        refetchInterval: 10000,
+        staleTime: 5000,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false
     });
 
     console.log("battleState: ", data)
@@ -497,4 +505,38 @@ export const calculatePnL = (
         percentageChange,
         absoluteChange,
     };
+}
+
+const queryClient = new QueryClient()
+
+export const usePowerUp = (address: string) => {
+  const mutation = useMutation({
+    mutationFn: async ({ characterId, attribute, pointsToSpend }: PowerUpParams) => {
+      const response = await fetch(`${apiUrl}/characters/${characterId}/power-up`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('privyToken')}`,
+        },
+        body: JSON.stringify({
+          user: address,
+          attribute,
+          pointsToSpend,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to power up character')
+      }
+
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['characters'] })
+      queryClient.invalidateQueries({ queryKey: ['user'] })
+    },
+  })
+
+  return mutation
 }

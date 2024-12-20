@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ModalBuySell } from './ModalBuySell';
@@ -774,6 +774,8 @@ export const CharacterPage = () => {
                 handleOpen={handleShowModal}
                 actionType={modalAction as any}
                 characterName={character?.name}
+                matchesLeft={matchesLeft}
+                timeLeft={willStartIn}
             />
 
             <ModalStake 

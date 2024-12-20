@@ -16,6 +16,7 @@ import { truncateWallet } from './NavBar'
 import { Avatar } from './ui/avatar'
 import Jazzicon from '@raugfer/jazzicon';
 import { zeroAddress } from 'viem'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 // builds an image data url for embedding
 export function buildDataUrl(address: string): string {
@@ -35,8 +36,10 @@ export enum ActivityType {
 const formatTime = (timestamp: number) => format(new Date(timestamp), 'h:mm a')
 
 // Activity renderer component
-const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activity: BaseActivity, characters: Character[], convertEthToUsd: any, users: User[]}) => {
+export const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activity: BaseActivity, characters: Character[], convertEthToUsd: any, users: User[]}) => {
   const navigate = useNavigate()
+  const isMobile = useMediaQuery('(max-width: 768px)')
+
   const renderContent = () => {
     const time = (
       <span className="text-xs text-gray-500 flex items-center mr-2 min-w-[40px]">
@@ -279,6 +282,16 @@ export const ActivityBar = () => {
         .custom-scrollbar {
           scrollbar-width: thin;
           scrollbar-color: #4b5563 #1f2937;
+        }
+
+        @keyframes glow {
+          0% { box-shadow: 0 0 5px rgba(255,255,255,0.3); }
+          50% { box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+          100% { box-shadow: 0 0 5px rgba(255,255,255,0.3); }
+        }
+
+        .animate-glow {
+          animation: glow 2s ease-in-out infinite;
         }
       `}</style>
       <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-700">

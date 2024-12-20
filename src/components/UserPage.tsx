@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { User, Balance, Stake, Attribute, Character } from '@memeclashtv/types'
 import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -147,7 +147,6 @@ export const UserPage = () => {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
             <CardTitle className="text-2xl font-bold">@{displayName}</CardTitle>
-            <CardDescription>{truncateWallet(user?.address ?? address)}</CardDescription>
           </div>
           <Avatar className="h-20 w-20">
             <AvatarImage src={pfp ??"/placeholder.svg"} alt="Profile" />

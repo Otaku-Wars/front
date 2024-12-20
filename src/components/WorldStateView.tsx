@@ -13,13 +13,13 @@ import { ModalBuySell } from './ModalBuySell'
 import { useFundWallet, usePrivy } from '@privy-io/react-auth'
 import { currentChain } from '../main'
 
-export const useTimeTill = (time: number) => {
+export const useTimeTill = (timestamp: number) => {
   const [timeTill, setTimeTill] = useState<number | null>(null)
 
   useEffect(() => {
     const updateTimeTill = () => {
       const now = Date.now() / 1000
-      const currentTimeTill = Math.floor(time - now)
+      const currentTimeTill = Math.floor(timestamp - now)
       setTimeTill(Math.max(0, currentTimeTill))
     }
 
@@ -27,7 +27,7 @@ export const useTimeTill = (time: number) => {
     const interval = setInterval(updateTimeTill, 1000)
 
     return () => clearInterval(interval)
-  }, [time])
+  }, [timestamp])
 
   return timeTill
 }

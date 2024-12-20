@@ -11,6 +11,7 @@ import { base, baseSepolia } from 'viem/chains';
 import "./globals.css"
 import { EthPriceProvider } from './EthPriceProvider.tsx';
 import { ActivityProvider } from './components/ActivityListenerProvider.tsx';
+import { TimerProvider } from './contexts/TimerContext.tsx';
 
 const isProd = import.meta.env.PROD;
 export const currentChain = isProd ?
@@ -66,7 +67,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <WagmiProvider config={config}>
           <EthPriceProvider> 
             <ActivityProvider>
-              <App />
+              <TimerProvider>
+                <App />
+              </TimerProvider>
             </ActivityProvider>
           </EthPriceProvider>
         </WagmiProvider>
