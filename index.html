@@ -29,61 +29,6 @@
       app.expand();
     </script>
     
-    <script>
-      // Create a buffer for early logs
-      window.__LOG_BUFFER__ = [];
-      
-      // Store original console methods
-      window.__ORIGINAL_CONSOLE__ = {
-        log: console.log,
-        error: console.error,
-        warn: console.warn,
-        info: console.info,
-        debug: console.debug,
-        trace: console.trace
-      };
-
-      // Override console methods to capture early logs
-      function createEarlyLogger(type) {
-        return function(...args) {
-          window.__ORIGINAL_CONSOLE__[type].apply(console, args);
-          window.__LOG_BUFFER__.push({
-            type,
-            args,
-            timestamp: new Date(),
-            stack: new Error().stack
-          });
-        };
-      }
-
-      // Override all console methods
-      console.log = createEarlyLogger('log');
-      console.error = createEarlyLogger('error');
-      console.warn = createEarlyLogger('warn');
-      console.info = createEarlyLogger('info');
-      console.debug = createEarlyLogger('debug');
-      console.trace = createEarlyLogger('trace');
-
-      // Capture early errors
-      window.addEventListener('error', function(event) {
-        window.__LOG_BUFFER__.push({
-          type: 'error',
-          args: [`${event.message}\n${event.error?.stack || ''}`],
-          timestamp: new Date(),
-          stack: event.error?.stack
-        });
-      });
-
-      window.addEventListener('unhandledrejection', function(event) {
-        window.__LOG_BUFFER__.push({
-          type: 'error',
-          args: [`Unhandled Promise Rejection: ${event.reason}`],
-          timestamp: new Date(),
-          stack: event.reason?.stack
-        });
-      });
-    </script>
-    
   </head>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B7Q5Q35N6M"></script>

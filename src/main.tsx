@@ -12,7 +12,6 @@ import "./globals.css"
 import { EthPriceProvider } from './EthPriceProvider.tsx';
 import { ActivityProvider } from './components/ActivityListenerProvider.tsx';
 import { TimerProvider } from './contexts/TimerContext.tsx';
-import { ErrorLogger } from './components/ErrorLogger';
 
 const isProd = import.meta.env.PROD;
 export const currentChain = isProd ?
@@ -51,7 +50,6 @@ export const config = createConfig({
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ErrorLogger />
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
         appId="clzlu1sf0009xediwgtczg7yq"
@@ -70,7 +68,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <EthPriceProvider> 
             <ActivityProvider>
               <TimerProvider>
-                <div className="bg-background"></div>
+                <App />
               </TimerProvider>
             </ActivityProvider>
           </EthPriceProvider>
