@@ -51,6 +51,7 @@ export const config = createConfig({
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    <ErrorLogger />
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
         appId="clzlu1sf0009xediwgtczg7yq"
@@ -69,7 +70,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <EthPriceProvider> 
             <ActivityProvider>
               <TimerProvider>
-                <ErrorLogger />
+                <App />
               </TimerProvider>
             </ActivityProvider>
           </EthPriceProvider>

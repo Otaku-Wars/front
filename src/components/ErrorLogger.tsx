@@ -148,79 +148,81 @@ export function ErrorLogger() {
     scrollToBottom();
   }, [logs]);
 
-  // Store original console methods
-  const originalConsole = {
-    log: console.log,
-    error: console.error,
-    warn: console.warn,
-    info: console.info,
-    debug: console.debug,
-    trace: console.trace,
-  };
+  useEffect(() => {
+    // Store original console methods
+    const originalConsole = {
+      log: console.log,
+      error: console.error,
+      warn: console.warn,
+      info: console.info,
+      debug: console.debug,
+      trace: console.trace,
+    };
 
-  // Create log handler
-  const createLogHandler = (type: LogEntry['type']) => (...args: any[]) => {
-    originalConsole[type]?.(...args);
-    setLogs(prev => [...prev, {
-      type,
-      message: args.map(safeToString).join(' '),
-      timestamp: new Date(),
-      stack: new Error().stack?.split('\n').slice(2).join('\n') // Capture stack trace
-    }]);
-  };
+    // Create log handler
+    const createLogHandler = (type: LogEntry['type']) => (...args: any[]) => {
+      originalConsole[type]?.(...args);
+      setLogs(prev => [...prev, {
+        type,
+        message: args.map(safeToString).join(' '),
+        timestamp: new Date(),
+        stack: new Error().stack?.split('\n').slice(2).join('\n') // Capture stack trace
+      }]);
+    };
 
-  // Override all console methods
-  console.log = createLogHandler('log');
-  console.error = createLogHandler('error');
-  console.warn = createLogHandler('warn');
-  console.info = createLogHandler('info');
-  console.debug = createLogHandler('debug');
-  console.trace = createLogHandler('debug');
+    // Override all console methods
+    console.log = createLogHandler('log');
+    console.error = createLogHandler('error');
+    console.warn = createLogHandler('warn');
+    console.info = createLogHandler('info');
+    console.debug = createLogHandler('debug');
+    console.trace = createLogHandler('debug');
 
-  // Handle uncaught errors and unhandled rejections
-  const errorHandler = (event: ErrorEvent | PromiseRejectionEvent) => {
-    const isErrorEvent = event instanceof ErrorEvent;
-    const error = isErrorEvent ? event.error : event.reason;
-    
-    setLogs(prev => [...prev, {
-      type: 'error',
-      message: isErrorEvent 
-        ? event.message
-        : `Unhandled Promise Rejection: ${safeToString(error)}`,
-      stack: error?.stack || new Error().stack,
-      timestamp: new Date()
-    }]);
-  };
-
-  // Handle console.assert failures
-  const originalAssert = console.assert;
-  console.assert = (condition: boolean, ...args: any[]) => {
-    originalAssert(condition, ...args);
-    if (!condition) {
+    // Handle uncaught errors and unhandled rejections
+    const errorHandler = (event: ErrorEvent | PromiseRejectionEvent) => {
+      const isErrorEvent = event instanceof ErrorEvent;
+      const error = isErrorEvent ? event.error : event.reason;
+      
       setLogs(prev => [...prev, {
         type: 'error',
-        message: `Assertion failed: ${args.map(safeToString).join(' ')}`,
-        timestamp: new Date(),
-        stack: new Error().stack
+        message: isErrorEvent 
+          ? event.message
+          : `Unhandled Promise Rejection: ${safeToString(error)}`,
+        stack: error?.stack || new Error().stack,
+        timestamp: new Date()
       }]);
-    }
-  };
+    };
 
-  window.addEventListener('error', errorHandler);
-  window.addEventListener('unhandledrejection', errorHandler);
+    // Handle console.assert failures
+    const originalAssert = console.assert;
+    console.assert = (condition: boolean, ...args: any[]) => {
+      originalAssert(condition, ...args);
+      if (!condition) {
+        setLogs(prev => [...prev, {
+          type: 'error',
+          message: `Assertion failed: ${args.map(safeToString).join(' ')}`,
+          timestamp: new Date(),
+          stack: new Error().stack
+        }]);
+      }
+    };
 
-  // Cleanup
-  const cleanup = () => {
-    console.log = originalConsole.log;
-    console.error = originalConsole.error;
-    console.warn = originalConsole.warn;
-    console.info = originalConsole.info;
-    console.debug = originalConsole.debug;
-    console.trace = originalConsole.trace;
-    console.assert = originalAssert;
-    window.removeEventListener('error', errorHandler);
-    window.removeEventListener('unhandledrejection', errorHandler);
-  };
+    window.addEventListener('error', errorHandler);
+    window.addEventListener('unhandledrejection', errorHandler);
+
+    // Cleanup
+    return () => {
+      console.log = originalConsole.log;
+      console.error = originalConsole.error;
+      console.warn = originalConsole.warn;
+      console.info = originalConsole.info;
+      console.debug = originalConsole.debug;
+      console.trace = originalConsole.trace;
+      console.assert = originalAssert;
+      window.removeEventListener('error', errorHandler);
+      window.removeEventListener('unhandledrejection', errorHandler);
+    };
+  }, []); // Empty dependency array to only run once on mount
 
   const clearLogs = () => setLogs([]);
 
