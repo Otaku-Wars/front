@@ -57,7 +57,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           defaultChain: currentChain,
           supportedChains: [currentChain],
           // Display email and wallet as login methods
-          loginMethods: ['email', 'wallet', 'twitter'],
+          //loginMethods: ['email', 'wallet', 'twitter'],
           // Customize Privy's appearance in your app
           appearance: {
             theme: 'dark',
