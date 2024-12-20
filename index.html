@@ -2,17 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Security-Policy" 
-      content="
-        default-src 'self'; 
-        script-src 'self' https://telegram.org; 
-        frame-src 'self' https://oauth.telegram.org; 
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
-        font-src 'self' https://fonts.gstatic.com; 
-        img-src 'self' https://memeclash.tv data:;
-        connect-src 'self'; 
-        object-src 'none';
-      ">
+    <meta http-equiv="Content-Security-Policy" content="
+  default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
+  script-src * 'unsafe-inline' 'unsafe-eval' data: blob:;
+  style-src * 'unsafe-inline' data:;
+  img-src * data:;
+  frame-src *;
+  connect-src *;
+  font-src * data:;
+  object-src *;
+">
     <link rel="icon" type="image/svg+xml" href="/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
