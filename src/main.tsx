@@ -70,7 +70,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <EthPriceProvider> 
             <ActivityProvider>
               <TimerProvider>
-                <App />
+                <div className="bg-background"></div>
               </TimerProvider>
             </ActivityProvider>
           </EthPriceProvider>

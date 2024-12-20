@@ -148,9 +148,24 @@ export function ErrorLogger() {
     scrollToBottom();
   }, [logs]);
 
+  // Process early logs
   useEffect(() => {
-    // Store original console methods
-    const originalConsole = {
+    if (window.__LOG_BUFFER__) {
+      const earlyLogs = window.__LOG_BUFFER__.map((log: any) => ({
+        type: log.type as LogEntry['type'],
+        message: log.args.map(safeToString).join(' '),
+        timestamp: new Date(log.timestamp),
+        stack: log.stack
+      }));
+      
+      setLogs(prev => [...earlyLogs, ...prev]);
+      window.__LOG_BUFFER__ = null; // Clear the buffer
+    }
+  }, []);
+
+  useEffect(() => {
+    // Get the original console methods from our global storage
+    const originalConsole = window.__ORIGINAL_CONSOLE__ || {
       log: console.log,
       error: console.error,
       warn: console.warn,
@@ -374,4 +389,24 @@ export function ErrorLogger() {
       </div>
     </div>
   );
+} 
+
+// Add TypeScript declarations
+declare global {
+  interface Window {
+    __LOG_BUFFER__: Array<{
+      type: string;
+      args: any[];
+      timestamp: string;
+      stack?: string;
+    }> | null;
+    __ORIGINAL_CONSOLE__: {
+      log: typeof console.log;
+      error: typeof console.error;
+      warn: typeof console.warn;
+      info: typeof console.info;
+      debug: typeof console.debug;
+      trace: typeof console.trace;
+    };
+  }
 } 
