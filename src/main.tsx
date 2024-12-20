@@ -12,6 +12,7 @@ import "./globals.css"
 import { EthPriceProvider } from './EthPriceProvider.tsx';
 import { ActivityProvider } from './components/ActivityListenerProvider.tsx';
 import { TimerProvider } from './contexts/TimerContext.tsx';
+import { ErrorLogger } from './components/ErrorLogger';
 
 const isProd = import.meta.env.PROD;
 export const currentChain = isProd ?
@@ -68,7 +69,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <EthPriceProvider> 
             <ActivityProvider>
               <TimerProvider>
-                <App />
+                <ErrorLogger />
               </TimerProvider>
             </ActivityProvider>
           </EthPriceProvider>
