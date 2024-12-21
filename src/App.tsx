@@ -32,6 +32,10 @@ function WebApp() {
 export default function App() {
   const isMobile = useMediaQuery('(max-width: 768px)')
 
+  // Debug logging
+  console.log('Current URL:', window.location.href);
+  console.log('Hash:', window.location.hash);
+
   return (
     <div>
       login test
