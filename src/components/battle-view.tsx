@@ -15,6 +15,7 @@ import { getBuyPrice, getSellPriceMc } from '../utils'
 import { ModalBuySell } from "./ModalBuySell"
 import { useFundWallet, usePrivy } from "@privy-io/react-auth"
 import { currentChain } from "../main"
+import { StreamEmbed } from "./StreamView"
 
 interface CharacterInfoProps {
   name: string
@@ -557,11 +558,12 @@ export function BattleView() {
     <div className="space-y-2">
       <Card className="overflow-hidden">
         <div className="relative" style={{ paddingBottom: '75%' }}>
-          <iframe 
+          {/* <iframe 
             src={import.meta.env.VITE_EMBED_ID ?? 'https://lvpr.tv?v=6950nisrggh4cvk1&muted=false&lowLatency=force&autoplay=true'}
             className="absolute top-0 left-0 w-full h-full"
             allow="autoplay; fullscreen"
-          />
+          /> */}
+          <StreamEmbed />
           <div className="absolute top-2 left-2 flex items-center space-x-2 bg-black/50 rounded-full px-2 py-1 z-10">
             <Radio className="w-3 h-3 text-red-500 animate-pulse" />
             <span className="text-xs font-semibold text-white">LIVE</span>

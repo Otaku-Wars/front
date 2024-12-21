@@ -67,6 +67,7 @@ export default function App() {
   
   useEffect(() => {
     if (isMobile) {
+      //alert('Mobile detected');
       document.body.classList.add('mobile')
     } else {
       document.body.classList.remove('mobile')

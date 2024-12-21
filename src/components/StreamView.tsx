@@ -30,14 +30,14 @@ export const StreamEmbed = () => {
     const isMobile = useMediaQuery('(max-width: 768px)');
     const isTelegramWebView = window.Telegram?.WebApp !== undefined;
 
-    // For mobile/Telegram WebView, use HLS instead of WebRTC
-    const embedUrl = new URL('https://lvpr.tv');
-    embedUrl.searchParams.set('v', '53c80nobwpuzre6e');
-    embedUrl.searchParams.set('muted', 'false');
-    embedUrl.searchParams.set('autoplay', 'true');
-    // Only force WebRTC on desktop
-    if (!isMobile) {
-        embedUrl.searchParams.set('lowLatency', 'force');
+    // Get base URL from environment variable
+    const embedUrl = new URL(import.meta.env.VITE_EMBED_ID);
+    
+    // Modify lowLatency parameter based on mobile detection
+    if (isMobile) {
+        embedUrl.searchParams.set('lowLatency', 'false');
+        //alert(`Mobile detected: ${embedUrl.toString()}`);
+
     }
 
     return (
@@ -45,7 +45,7 @@ export const StreamEmbed = () => {
         src={embedUrl.toString()}
         allowFullScreen 
         allow="autoplay; encrypted-media; picture-in-picture" 
-        className="h-full w-full"
+        className={`h-full w-full ${isMobile ? 'absolute top-0 left-0 w-full h-full' : ''}`}
         // Remove sandbox for mobile/Telegram WebView
         {...(!isTelegramWebView && {
           sandbox: "allow-scripts allow-same-origin allow-presentation"
