@@ -36,14 +36,8 @@ const useHlsStream = (playbackId: string | null, videoRef: React.RefObject<HTMLV
             if (!playbackId || !videoRef.current) return;
 
             try {
-                const playbackInfo = await livepeer.playback.get(playbackId);
-                const sources = playbackInfo.playbackInfo.meta.source;
-                const hlsSource = sources.find(s => s.type === "html5/application/vnd.apple.mpegurl");
-                
-                if (!hlsSource) {
-                    console.error("No HLS source found");
-                    return;
-                }
+                // Use direct HLS URL instead of fetching playback info
+                const hlsUrl = `https://cdn.livepeer.com/hls/${playbackId}/index.m3u8`;
 
                 if (Hls.isSupported()) {
                     if (hlsRef.current) {
@@ -53,22 +47,42 @@ const useHlsStream = (playbackId: string | null, videoRef: React.RefObject<HTMLV
                     const hls = new Hls({
                         enableWorker: true,
                         lowLatencyMode: false,
-                        backBufferLength: 90
+                        backBufferLength: 90,
+                        xhrSetup: (xhr) => {
+                            // Add CORS headers
+                            xhr.withCredentials = false;
+                        }
                     });
                     
-                    hls.loadSource(hlsSource.url);
+                    hls.loadSource(hlsUrl);
                     hls.attachMedia(videoRef.current);
                     hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        videoRef.current?.play().catch(console.error);
+                        videoRef.current?.play().catch(error => {
+                            console.error("Playback error:", error);
+                            // If autoplay fails, show controls to let user initiate playback
+                            if (videoRef.current) {
+                                videoRef.current.controls = true;
+                            }
+                        });
                     });
 
                     hlsRef.current = hls;
                 } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
-                    videoRef.current.src = hlsSource.url;
-                    videoRef.current.play().catch(console.error);
+                    // For Safari - use direct HLS URL
+                    videoRef.current.src = hlsUrl;
+                    videoRef.current.play().catch(error => {
+                        console.error("Safari playback error:", error);
+                        if (videoRef.current) {
+                            videoRef.current.controls = true;
+                        }
+                    });
                 }
             } catch (error) {
-                console.error("Error setting up stream:", error);
+                console.error("Stream setup error:", error);
+                // Show controls if stream setup fails
+                if (videoRef.current) {
+                    videoRef.current.controls = true;
+                }
             }
         };
 
@@ -80,7 +94,7 @@ const useHlsStream = (playbackId: string | null, videoRef: React.RefObject<HTMLV
                 hlsRef.current = null;
             }
         };
-    }, [playbackId]); // Only re-run if playbackId changes
+    }, [playbackId]);
 };
 
 export const StreamEmbed = React.memo(() => {
@@ -105,10 +119,15 @@ export const StreamEmbed = React.memo(() => {
             <video
                 ref={videoRef}
                 className="absolute top-0 left-0 h-full w-full"
-                controls={false}
                 playsInline
                 autoPlay
                 muted={false}
+                controls={false}
+                crossOrigin="anonymous"
+                style={{
+                    objectFit: 'contain',
+                    backgroundColor: 'black'
+                }}
             />
         );
     }
