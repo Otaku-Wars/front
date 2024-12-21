@@ -33,6 +33,9 @@ declare global {
             username?: string;
           };
         };
+        platform?: string;
+        version?: string;
+        colorScheme?: string;
       };
     };
   }
@@ -82,10 +85,19 @@ export default function App() {
 
     const twa = window.Telegram?.WebApp;
     if (twa) {
-      console.log('Telegram WebApp Data:', {
+      console.log('Telegram WebApp Found:', {
+        // Log all available data
         initData: twa.initData,
-        initDataUnsafe: twa.initDataUnsafe
+        initDataRaw: decodeURIComponent(twa.initData),
+        platform: window.Telegram?.WebApp?.platform,
+        version: window.Telegram?.WebApp?.version,
+        colorScheme: window.Telegram?.WebApp?.colorScheme,
       });
+
+      // Try to parse the initData
+      const searchParams = new URLSearchParams(twa.initData);
+      const entries = Array.from(searchParams.entries());
+      console.log('Parsed initData entries:', entries);
     } else {
       console.log('Telegram WebApp not found');
     }
