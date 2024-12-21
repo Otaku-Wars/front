@@ -32,7 +32,7 @@ export const StreamEmbed = () => {
 
     // For mobile/Telegram WebView, use HLS instead of WebRTC
     const embedUrl = new URL('https://lvpr.tv');
-    embedUrl.searchParams.set('v', '6950nisrggh4cvk1');
+    embedUrl.searchParams.set('v', '53c80nobwpuzre6e');
     embedUrl.searchParams.set('muted', 'false');
     embedUrl.searchParams.set('autoplay', 'true');
     // Only force WebRTC on desktop
