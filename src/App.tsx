@@ -1,24 +1,12 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { useMediaQuery } from './hooks/use-media-query'
 import StreamView from './components/StreamView'
 import { CharacterList } from './components/CharacterList'
 import { ActivityBar } from './components/ActivityBar'
 import { WorldStateView } from './components/WorldStateView'
 import { NavBar } from './components/NavBar'
-import { CharacterPage } from './components/CharacterPage'
-import { UserPage } from './components/UserPage'
 import { MainLayout } from './layouts/MainLayout'
-
-import "./globals.css"
-import "./styles/mobile.css"
 import { Home } from './pages/Home'
-import { Rewards } from './pages/Rewards'
-import { Character } from './pages/Character'
-import { Wallet } from './pages/Wallet'
 import { useEffect } from 'react'
-import { ActivityToast } from './components/ActivityToast'
-import { Toaster } from "./components/ui/toaster"
-
 
 function WebApp() {
   return (
@@ -45,6 +33,10 @@ export default function App() {
   const isMobile = useMediaQuery('(max-width: 768px)')
   
   useEffect(() => {
+    // Debug logging
+    console.log('Current URL:', window.location.href);
+    console.log('Hash:', window.location.hash);
+
     if (isMobile) {
       document.body.classList.add('mobile')
     } else {
@@ -53,28 +45,17 @@ export default function App() {
   }, [isMobile])
 
   return (
-    <Router>
+    <div>
       {isMobile ? (
         <MainLayout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/rewards" element={<Rewards />} />
-            <Route path="/character/:id" element={<Character />} />
-            <Route path="/wallet" element={<Wallet />} />
-          </Routes>
+          <Home />
         </MainLayout>
       ) : (
         <div>
           <NavBar/>
-          <Routes>
-            <Route path="/" element={<WebApp />} />
-            <Route path="/character/:id" element={<CharacterPage />} />
-            <Route path="/user/:address" element={<UserPage />} />
-          </Routes>
+          <WebApp />
         </div>
       )}
-      {/* <ActivityToast />
-      <Toaster /> */}
-    </Router>
+    </div>
   )
 }
