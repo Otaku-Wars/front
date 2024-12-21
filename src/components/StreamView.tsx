@@ -32,6 +32,8 @@ export const StreamEmbed = () => {
         allowFullScreen 
         allow="autoplay; encrypted-media; picture-in-picture" 
         className="h-full w-full"
+        referrerPolicy="origin"
+        sandbox="allow-scripts allow-same-origin allow-presentation"
       >
       </iframe>
     )
