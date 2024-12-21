@@ -60,12 +60,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           appearance: {
             theme: 'dark',
           },
-          onSuccess: (user) => {
-            console.log('Privy Auth Success:', user);
-          },
-          onError: (error) => {
-            console.error('Privy Auth Error:', error);
-          }
         }}
       >
         <WagmiProvider config={config}>
