@@ -19,6 +19,24 @@ import { useEffect } from 'react'
 import { ActivityToast } from './components/ActivityToast'
 import { Toaster } from "./components/ui/toaster"
 
+// Type declaration for Telegram
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: {
+        initData: string;
+        initDataUnsafe?: {
+          user?: {
+            id: number;
+            first_name: string;
+            last_name?: string;
+            username?: string;
+          };
+        };
+      };
+    };
+  }
+}
 
 function WebApp() {
   return (
@@ -51,6 +69,27 @@ export default function App() {
       document.body.classList.remove('mobile')
     }
   }, [isMobile])
+
+  useEffect(() => {
+    // Debug Telegram WebApp data
+    console.log('Window Location:', {
+      href: window.location.href,
+      hash: window.location.hash,
+      search: window.location.search
+    });
+
+    
+
+    const twa = window.Telegram?.WebApp;
+    if (twa) {
+      console.log('Telegram WebApp Data:', {
+        initData: twa.initData,
+        initDataUnsafe: twa.initDataUnsafe
+      });
+    } else {
+      console.log('Telegram WebApp not found');
+    }
+  }, []);
 
   return (
     <Router>

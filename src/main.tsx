@@ -56,12 +56,16 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         config={{
           defaultChain: currentChain,
           supportedChains: [currentChain],
-          // Display email and wallet as login methods
-          //loginMethods: ['email', 'wallet', 'twitter'],
-          // Customize Privy's appearance in your app
+          loginMethods: ['telegram'],
           appearance: {
             theme: 'dark',
           },
+          onSuccess: (user) => {
+            console.log('Privy Auth Success:', user);
+          },
+          onError: (error) => {
+            console.error('Privy Auth Error:', error);
+          }
         }}
       >
         <WagmiProvider config={config}>
