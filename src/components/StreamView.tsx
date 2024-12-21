@@ -8,6 +8,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { PropsWithChildren, forwardRef, CSSProperties } from "react";
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import React from "react";
+import { useMediaQuery } from '../hooks/use-media-query';
 
 const livepeer = new Livepeer({
   apiKey: "7ac51e94-e027-4664-b624-821673c7305c",
@@ -26,16 +27,30 @@ export const getPlaybackSource = async (playbackId: string): Promise<Src[] | nul
 };
 
 export const StreamEmbed = () => {
+    const isMobile = useMediaQuery('(max-width: 768px)');
+    const isTelegramWebView = window.Telegram?.WebApp !== undefined;
+
+    // For mobile/Telegram WebView, use HLS instead of WebRTC
+    const embedUrl = new URL('https://lvpr.tv');
+    embedUrl.searchParams.set('v', '6950nisrggh4cvk1');
+    embedUrl.searchParams.set('muted', 'false');
+    embedUrl.searchParams.set('autoplay', 'true');
+    // Only force WebRTC on desktop
+    if (!isMobile) {
+        embedUrl.searchParams.set('lowLatency', 'force');
+    }
+
     return (
       <iframe 
-        src={import.meta.env.VITE_EMBED_ID ?? 'https://lvpr.tv?v=6950nisrggh4cvk1&muted=false&lowLatency=force&autoplay=true'}
+        src={embedUrl.toString()}
         allowFullScreen 
         allow="autoplay; encrypted-media; picture-in-picture" 
         className="h-full w-full"
-        referrerPolicy="origin"
-        sandbox="allow-scripts allow-same-origin allow-presentation"
-      >
-      </iframe>
+        // Remove sandbox for mobile/Telegram WebView
+        {...(!isTelegramWebView && {
+          sandbox: "allow-scripts allow-same-origin allow-presentation"
+        })}
+      />
     )
 }
 
@@ -547,6 +562,8 @@ const Seek = forwardRef<HTMLButtonElement, Player.SeekProps>(
 
 export default () => {
     const [ src, setSrc ] = useState<Src[] | null>(null);
+    const isMobile = useMediaQuery('(max-width: 768px)');
+    
     useEffect(() => {
         getPlaybackSource(playbackId).then(setSrc);
     }, []);
@@ -554,7 +571,10 @@ export default () => {
     if (!src) {
         return <div>Loading...</div>;
     }
-    return (<div className="h-full w-full border border-gray-700">
+
+    return (
+      <div className="h-full w-full border border-gray-700">
         <StreamEmbed />
-    </div>);
+      </div>
+    );
 }
