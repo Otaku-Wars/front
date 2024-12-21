@@ -61,6 +61,12 @@ function WebApp() {
 
 export default function App() {
   const isMobile = useMediaQuery('(max-width: 768px)')
+
+  return (
+    <div>
+      <h1>Hello World</h1>
+    </div>
+  )
   
   useEffect(() => {
     if (isMobile) {
