@@ -55,7 +55,8 @@
     "use-eth-price": "^1.1.0",
     "vaul": "^1.1.2",
     "viem": "^2.19.3",
-    "wagmi": "^2.12.5"
+    "wagmi": "^2.12.5",
+    "hls.js": "^1.4.12"
   },
   "devDependencies": {
     "@shadcn/ui": "^0.0.4",

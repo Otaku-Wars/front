@@ -3,12 +3,13 @@ import { getSrc } from "@livepeer/react/external";
 import { Src } from "@livepeer/react";
 import { Livepeer } from "livepeer";
 import { LoadingIcon, MuteIcon, PauseIcon, PlayIcon, SettingsIcon, UnmuteIcon } from "@livepeer/react/assets";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { PropsWithChildren, forwardRef, CSSProperties } from "react";
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import React from "react";
 import { useMediaQuery } from '../hooks/use-media-query';
+import Hls from 'hls.js';
 
 const livepeer = new Livepeer({
   apiKey: "7ac51e94-e027-4664-b624-821673c7305c",
@@ -26,33 +27,106 @@ export const getPlaybackSource = async (playbackId: string): Promise<Src[] | nul
   return src;
 };
 
-export const StreamEmbed = () => {
+// Custom hook for HLS setup
+const useHlsStream = (playbackId: string | null, videoRef: React.RefObject<HTMLVideoElement>) => {
+    const hlsRef = useRef<Hls | null>(null);
+
+    useEffect(() => {
+        const setupStream = async () => {
+            if (!playbackId || !videoRef.current) return;
+
+            try {
+                const playbackInfo = await livepeer.playback.get(playbackId);
+                const sources = playbackInfo.playbackInfo.meta.source;
+                const hlsSource = sources.find(s => s.type === "html5/application/vnd.apple.mpegurl");
+                
+                if (!hlsSource) {
+                    console.error("No HLS source found");
+                    return;
+                }
+
+                if (Hls.isSupported()) {
+                    if (hlsRef.current) {
+                        hlsRef.current.destroy();
+                    }
+
+                    const hls = new Hls({
+                        enableWorker: true,
+                        lowLatencyMode: false,
+                        backBufferLength: 90
+                    });
+                    
+                    hls.loadSource(hlsSource.url);
+                    hls.attachMedia(videoRef.current);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        videoRef.current?.play().catch(console.error);
+                    });
+
+                    hlsRef.current = hls;
+                } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+                    videoRef.current.src = hlsSource.url;
+                    videoRef.current.play().catch(console.error);
+                }
+            } catch (error) {
+                console.error("Error setting up stream:", error);
+            }
+        };
+
+        setupStream();
+
+        return () => {
+            if (hlsRef.current) {
+                hlsRef.current.destroy();
+                hlsRef.current = null;
+            }
+        };
+    }, [playbackId]); // Only re-run if playbackId changes
+};
+
+export const StreamEmbed = React.memo(() => {
     const isMobile = useMediaQuery('(max-width: 768px)');
     const isTelegramWebView = window.Telegram?.WebApp !== undefined;
+    const videoRef = useRef<HTMLVideoElement>(null);
 
-    // Get base URL from environment variable
-    const embedUrl = new URL(import.meta.env.VITE_EMBED_ID);
-    
-    // Modify lowLatency parameter based on mobile detection
+    // Memoize URL parsing to prevent re-renders
+    const { playbackId, embedUrl } = useMemo(() => {
+        const url = new URL(import.meta.env.VITE_EMBED_ID);
+        return {
+            playbackId: url.searchParams.get('v'),
+            embedUrl: import.meta.env.VITE_EMBED_ID
+        };
+    }, []); // Empty deps since env var won't change
+
+    // Use HLS hook for mobile
+    useHlsStream(isMobile ? playbackId : null, videoRef);
+
     if (isMobile) {
-        embedUrl.searchParams.set('lowLatency', 'false');
-        //alert(`Mobile detected: ${embedUrl.toString()}`);
-
+        return (
+            <video
+                ref={videoRef}
+                className="absolute top-0 left-0 h-full w-full"
+                controls={false}
+                playsInline
+                autoPlay
+                muted={false}
+            />
+        );
     }
 
     return (
-      <iframe 
-        src={embedUrl.toString()}
-        allowFullScreen 
-        allow="autoplay; encrypted-media; picture-in-picture" 
-        className={`h-full w-full ${isMobile ? 'absolute top-0 left-0 w-full h-full' : ''}`}
-        // Remove sandbox for mobile/Telegram WebView
-        {...(!isTelegramWebView && {
-          sandbox: "allow-scripts allow-same-origin allow-presentation"
-        })}
-      />
-    )
-}
+        <iframe 
+            src={embedUrl}
+            allowFullScreen 
+            allow="autoplay; encrypted-media; picture-in-picture" 
+            className="h-full w-full"
+            {...(!isTelegramWebView && {
+                sandbox: "allow-scripts allow-same-origin allow-presentation"
+            })}
+        />
+    );
+});
+
+StreamEmbed.displayName = 'StreamEmbed';
 
 export const StreamPlayer = ({ src }: { src: Src[] | null }) => {
     return (
@@ -70,7 +144,7 @@ export const StreamPlayer = ({ src }: { src: Src[] | null }) => {
             }}
           >
             <Player.Video
-              title="Agent 327"
+              title="Live Stream"
               style={{
                 height: "100%",
                 width: "100%",
@@ -92,123 +166,105 @@ export const StreamPlayer = ({ src }: { src: Src[] | null }) => {
                   "linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6))",
                 padding: "0.5rem 1rem",
                 display: "flex",
-                flexDirection: "column-reverse",
-                gap: 5,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
             >
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "between",
-                  gap: 20,
+                  alignItems: "center",
+                  gap: 10,
                 }}
               >
-                <div
+                <Player.PlayPauseTrigger
                   style={{
-                    display: "flex",
-                    flex: 1,
-                    alignItems: "center",
-                    gap: 10,
+                    width: 25,
+                    height: 25,
                   }}
                 >
-                  <Player.PlayPauseTrigger
+                  <Player.PlayingIndicator asChild matcher={false}>
+                    <PlayIcon />
+                  </Player.PlayingIndicator>
+                  <Player.PlayingIndicator asChild>
+                    <PauseIcon />
+                  </Player.PlayingIndicator>
+                </Player.PlayPauseTrigger>
+
+                <Player.LiveIndicator
+                  style={{ display: "flex", alignItems: "center", gap: 5 }}
+                >
+                  <div
                     style={{
-                      width: 25,
-                      height: 25,
+                      backgroundColor: "#ef4444",
+                      height: 8,
+                      width: 8,
+                      borderRadius: 9999,
                     }}
-                  >
-                    <Player.PlayingIndicator asChild matcher={false}>
-                      <PlayIcon />
-                    </Player.PlayingIndicator>
-                    <Player.PlayingIndicator asChild>
-                      <PauseIcon />
-                    </Player.PlayingIndicator>
-                  </Player.PlayPauseTrigger>
-    
-                  <Player.LiveIndicator
-                    style={{ display: "flex", alignItems: "center", gap: 5 }}
-                  >
-                    <div
-                      style={{
-                        backgroundColor: "#ef4444",
-                        height: 8,
-                        width: 8,
-                        borderRadius: 9999,
-                      }}
-                    />
-                    <span style={{ fontSize: 12, userSelect: "none" }}>LIVE</span>
-                  </Player.LiveIndicator>
-    
-                  <Player.MuteTrigger
+                  />
+                  <span style={{ fontSize: 12, userSelect: "none" }}>LIVE</span>
+                </Player.LiveIndicator>
+
+                <Player.MuteTrigger
+                  style={{
+                    width: 25,
+                    height: 25,
+                  }}
+                >
+                  <Player.VolumeIndicator asChild matcher={false}>
+                    <MuteIcon />
+                  </Player.VolumeIndicator>
+                  <Player.VolumeIndicator asChild matcher={true}>
+                    <UnmuteIcon />
+                  </Player.VolumeIndicator>
+                </Player.MuteTrigger>
+                <Player.Volume
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    flexGrow: 1,
+                    height: 25,
+                    alignItems: "center",
+                    maxWidth: 120,
+                    touchAction: "none",
+                    userSelect: "none",
+                  }}
+                >
+                  <Player.Track
                     style={{
-                      width: 25,
-                      height: 25,
-                    }}
-                  >
-                    <Player.VolumeIndicator asChild matcher={false}>
-                      <MuteIcon />
-                    </Player.VolumeIndicator>
-                    <Player.VolumeIndicator asChild matcher={true}>
-                      <UnmuteIcon />
-                    </Player.VolumeIndicator>
-                  </Player.MuteTrigger>
-                  <Player.Volume
-                    style={{
+                      backgroundColor: "rgba(255, 255, 255, 0.7)",
                       position: "relative",
-                      display: "flex",
                       flexGrow: 1,
-                      height: 25,
-                      alignItems: "center",
-                      maxWidth: 120,
-                      touchAction: "none",
-                      userSelect: "none",
+                      borderRadius: 9999,
+                      height: "2px",
                     }}
                   >
-                    <Player.Track
+                    <Player.Range
                       style={{
-                        backgroundColor: "rgba(255, 255, 255, 0.7)",
-                        position: "relative",
-                        flexGrow: 1,
-                        borderRadius: 9999,
-                        height: "2px",
-                      }}
-                    >
-                      <Player.Range
-                        style={{
-                          position: "absolute",
-                          backgroundColor: "white",
-                          borderRadius: 9999,
-                          height: "100%",
-                        }}
-                      />
-                    </Player.Track>
-                    <Player.Thumb
-                      style={{
-                        display: "block",
-                        width: 12,
-                        height: 12,
+                        position: "absolute",
                         backgroundColor: "white",
                         borderRadius: 9999,
+                        height: "100%",
                       }}
                     />
-                  </Player.Volume>
-                </div>
-                <Settings />
+                  </Player.Track>
+                  <Player.Thumb
+                    style={{
+                      display: "block",
+                      width: 12,
+                      height: 12,
+                      backgroundColor: "white",
+                      borderRadius: 9999,
+                    }}
+                  />
+                </Player.Volume>
               </div>
-              <Seek
-                style={{
-                  position: "relative",
-                  height: 20,
-                  display: "flex",
-                  alignItems: "center",
-                  userSelect: "none",
-                  touchAction: "none",
-                }}
-              />
+              <Settings />
             </Player.Controls>
           </Player.Container>
         </Player.Root>
-      );
+    );
 };
 
 const Seek = forwardRef<HTMLButtonElement, Player.SeekProps>(
