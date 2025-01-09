@@ -38,7 +38,7 @@ const formatTime = (timestamp: number) => format(new Date(timestamp), 'h:mm a')
 // Activity renderer component
 export const ActivityItem = ({ activity, characters, convertEthToUsd, users }: { activity: BaseActivity, characters: Character[], convertEthToUsd: any, users: User[]}) => {
   const navigate = useNavigate()
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const isMobile = useMediaQuery('(max-width: 1100px)')
 
   const renderContent = () => {
     const time = (

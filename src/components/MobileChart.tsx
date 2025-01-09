@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { formatEther, formatNumber, formatPercentage } from '../lib/utils';
 import { useConvertEthToUsd } from '../EthPriceProvider';
@@ -6,6 +6,8 @@ import { MatchEndActivity, TradeActivity } from '@memeclashtv/types/activity';
 import { Character } from '@memeclashtv/types';
 import { truncateWallet } from './NavBar';
 import { buildDataUrl } from './ActivityBar';
+import { cn } from '../lib/utils';
+import { haptics } from '../utils/haptics';
 
 type Activity = MatchEndActivity | TradeActivity;
 
@@ -16,6 +18,12 @@ interface ChartProps {
   height?: number;
 }
 
+interface TouchState {
+  touching: boolean;
+  coordinate?: { x: number; y: number };
+  payload?: any[];
+}
+
 export const MobileChart: React.FC<ChartProps> = ({ 
   activities, 
   characterId, 
@@ -24,6 +32,21 @@ export const MobileChart: React.FC<ChartProps> = ({
 }) => {
   const [timeRange, setTimeRange] = useState<string>("1d");
   const convertEthToUsd = useConvertEthToUsd();
+  const [touchState, setTouchState] = useState<TouchState>({
+    touching: false
+  });
+  const touchTimeout = useRef<NodeJS.Timeout>();
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const timeRanges = {
+    "1h": 60 * 60,
+    "4h": 4 * 60 * 60,
+    "1d": 24 * 60 * 60,
+    "1w": 7 * 24 * 60 * 60,
+    "1m": 30 * 24 * 60 * 60,
+    "max": Infinity
+  };
 
   const chartData = useMemo(() => {
     const sortedActivities = activities.sort((a, b) => a.timestamp - b.timestamp);
@@ -51,19 +74,16 @@ export const MobileChart: React.FC<ChartProps> = ({
     if (timeRange === "all") return data;
 
     const lastTimestamp = data[data.length - 1]?.timestamp || Date.now()/1000;
-    const timeRanges = {
-      "1h": 60 * 60,
-      "1d": 24 * 60 * 60,
-      "1w": 7 * 24 * 60 * 60,
-      "1m": 30 * 24 * 60 * 60,
-    };
-    
-    const filtered = data.filter(point => 
-      point.timestamp >= lastTimestamp - timeRanges[timeRange]
-    );
+    const filtered = data.filter(point => {
+      if (timeRange === "max") return true;
+      const cutoffTime = lastTimestamp - timeRanges[timeRange as keyof typeof timeRanges];
+      return point.timestamp >= cutoffTime;
+    });
 
     return filtered.length > 0 ? filtered : data;
   }, [activities, timeRange]);
+
+  console.log(chartData);
 
   const chartColor = useMemo(() => {
     if (chartData.length < 2) return "#4F46E5";
@@ -72,8 +92,52 @@ export const MobileChart: React.FC<ChartProps> = ({
     return startPrice < endPrice ? "#22C55E" : "#EF4444";
   }, [chartData]);
 
+  const handleTouchStart = (e: TouchEvent) => {
+    document.body.classList.add('no-selection');
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
+    
+    const timer = setTimeout(() => {
+      haptics.light();
+      setTouchState(prev => ({ ...prev, touching: true }));
+    }, 200);
+    
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchEnd = () => {
+    document.body.classList.remove('no-selection');
+    document.body.style.userSelect = '';
+    document.body.style.webkitUserSelect = '';
+    
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    
+    setTouchState({ touching: false });
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    // Prevent scrolling only when tooltip is active
+    if (touchState.touching) {
+      e.preventDefault();
+    }
+
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    
+    if (!touchState.touching) {
+      document.body.classList.remove('no-selection');
+      document.body.style.userSelect = '';
+      document.body.style.webkitUserSelect = '';
+    }
+  };
+
   const CustomTooltip = ({ active, payload, coordinate }: any) => {
-    if (!active || !payload?.length) return null;
+    if (!active || !payload?.length || !touchState.touching) return null;
 
     const data = payload[0].payload;
     const isPositive = data.change >= 0;
@@ -100,11 +164,28 @@ export const MobileChart: React.FC<ChartProps> = ({
       <div 
         className={`
           bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-100 
-          absolute w-[200px] transform 
+          absolute w-[200px] transform select-none
           ${shouldFlipVertical ? 'translate-y-0' : '-translate-y-full'}
           ${shouldFlipHorizontal ? '-translate-x-full' : 'translate-x-0'}
         `}
-        style={getPosition()}
+        style={{
+          ...getPosition(),
+          pointerEvents: 'none', // Prevents tooltip from capturing events
+          userSelect: 'none', // Additional selection prevention
+          WebkitUserSelect: 'none', // For Safari support
+        }}
+        onTouchStart={(e) => {
+          e.preventDefault(); // Prevent any touch events on tooltip
+          e.stopPropagation();
+        }}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onTouchMove={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
       >
         <div className="flex flex-col gap-2">
           <div>
@@ -187,34 +268,81 @@ export const MobileChart: React.FC<ChartProps> = ({
     );
   };
 
+  const getPriceChangeForRange = (data: any[], range: string) => {
+    if (data.length < 2) return 0;
+    const lastTimestamp = data[data.length - 1].timestamp;
+    const cutoffTime = range === "max" ? 0 : lastTimestamp - timeRanges[range as keyof typeof timeRanges];
+    
+    const filteredData = data.filter(point => point.timestamp >= cutoffTime);
+    if (filteredData.length < 1) return 0;
+    
+    const startPrice = filteredData[0].price;
+    const endPrice = filteredData[filteredData.length - 1].price;
+    return ((endPrice - startPrice) / startPrice) * 100;
+  };
+
+  useEffect(() => {
+    return () => {
+      if (touchTimeout.current) {
+        clearTimeout(touchTimeout.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Handler to prevent scrolling on parent elements
+    const preventScroll = (e: TouchEvent) => {
+      if (touchState.touching && chartRef.current?.contains(e.target as Node)) {
+        e.preventDefault();
+      }
+    };
+
+    // Add event listener with passive: false to allow preventDefault
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+
+    return () => {
+      document.removeEventListener('touchmove', preventScroll);
+    };
+  }, [touchState.touching]);
+
   return (
     <div className="w-full">
       {/* Chart */}
-      <div className={`w-full h-[${height}px]`}>
+      <div 
+        ref={chartRef}
+        onTouchStart={handleTouchStart as any}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove as any}
+        style={{ height: `${height}px` }}
+        className="w-full"
+      >
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 0, right: -5, left: -5, bottom: 0 }}>
+          <AreaChart 
+            data={chartData} 
+            margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+          >
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={chartColor} stopOpacity={0.1}/>
                 <stop offset="95%" stopColor={chartColor} stopOpacity={0.01}/>
               </linearGradient>
             </defs>
-            <CartesianGrid 
-              strokeDasharray="3 3" 
-              stroke="#f0f0f0" 
-              vertical={false} 
-            />
             <XAxis 
               dataKey="timestamp" 
               type="number" 
               domain={['dataMin', 'dataMax']} 
               hide 
             />
-            <YAxis hide />
+            <YAxis 
+              hide 
+              domain={['dataMin - dataMin * 0.3', 'dataMax + dataMax * 0.1']}
+              padding={{ top: 20, bottom: 20 }}
+            />
             <Tooltip 
               content={<CustomTooltip />}
-              cursor={{ stroke: '#ddd' }}
+              cursor={touchState.touching ? { stroke: '#ddd' } : false}
               position={{ x: 0, y: 0 }}
+              isAnimationActive={false}
             />
             <Area
               type="monotone"
@@ -223,28 +351,40 @@ export const MobileChart: React.FC<ChartProps> = ({
               fillOpacity={1}
               fill="url(#colorPrice)"
               strokeWidth={1.5}
+              activeDot={touchState.touching ? { r: 4, fill: chartColor } : false}
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Time Range Buttons */}
+      {/* Updated Time Range Buttons */}
       <div className="flex justify-between w-full gap-1 p-1">
-        {["1h", "1d", "1w", "1m", "all"].map(range => (
-          <button
-            key={range}
-            onClick={() => setTimeRange(range)}
-            className={`
-              px-3 py-1 text-xs font-medium transition-all w-full
-              ${timeRange === range 
-                ? 'bg-gray-900 text-white' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }
-            `}
-          >
-            {range.toUpperCase()}
-          </button>
-        ))}
+        {["1H", "4H", "1D", "1W", "1M", "MAX"].map(range => {
+          const rangeKey = range.toLowerCase();
+          const priceChange = getPriceChangeForRange(chartData, rangeKey);
+          const isPositive = priceChange >= 0;
+          
+          return (
+            <button
+              key={range}
+              onClick={() => {
+                haptics.medium();
+                setTimeRange(rangeKey);
+              }}
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                timeRange === rangeKey
+                  ? cn(
+                      "text-white",
+                      isPositive ? "bg-green-500" : "bg-red-500"
+                    )
+                  : "text-gray-500 hover:text-gray-700"
+              )}
+            >
+              {range}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

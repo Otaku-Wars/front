@@ -6,19 +6,20 @@ interface AIAvatarProps {
   alt: string
   size?: "sm" | "md" | "lg"
   className?: string
+  renderBadge?: boolean
 }
 
-export function AIAvatar({ src, alt, size = "md", className }: AIAvatarProps) {
+export function AIAvatar({ src, alt, size = "md", className, renderBadge = true }: AIAvatarProps) {
   const sizeClasses = {
     sm: "w-10 h-10",
     md: "w-12 h-12",
-    lg: "w-16 h-16"
+    lg: "w-20 h-20"
   }
 
   const badgeSizeClasses = {
     sm: "h-4 px-1",
     md: "h-5 px-1.5",
-    lg: "h-6 px-2"
+    lg: "h-4 px-2"
   }
 
   const iconSizeClasses = {
@@ -30,7 +31,7 @@ export function AIAvatar({ src, alt, size = "md", className }: AIAvatarProps) {
   return (
     <div className={cn("relative", className)}>
       <div className={cn(
-        "rounded-full overflow-hidden border-2 border-primary/10",
+        "rounded-full overflow-hidden border-2 border-[#2a2a5a]",
         sizeClasses[size]
       )}>
         <img 
@@ -39,20 +40,22 @@ export function AIAvatar({ src, alt, size = "md", className }: AIAvatarProps) {
           className="w-full h-full object-cover"
         />
       </div>
-      <div className={cn(
-        "absolute -top-1 -right-1 bg-blue-500 rounded-full flex items-center gap-0.5",
-        badgeSizeClasses[size]
-      )}>
+      {renderBadge && (
+        <div className={cn(
+          "absolute top-1 -right-[-1px] bg-blue-500 rounded-full flex items-center gap-0.3",
+          badgeSizeClasses[size]
+        )}>
         <Robot className={cn("text-white", iconSizeClasses[size])} />
         <span className={cn(
           "text-white font-medium",
           size === "sm" && "text-[8px]",
           size === "md" && "text-[10px]",
-          size === "lg" && "text-xs"
+          size === "lg" && "text-[10px]"
         )}>
           AI
-        </span>
-      </div>
+          </span>
+        </div>
+      )}
     </div>
   )
 }

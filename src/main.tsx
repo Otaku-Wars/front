@@ -12,6 +12,8 @@ import "./globals.css"
 import { EthPriceProvider } from './EthPriceProvider.tsx';
 import { ActivityProvider } from './components/ActivityListenerProvider.tsx';
 import { TimerProvider } from './contexts/TimerContext.tsx';
+import './styles/global.css'
+import './styles/animations.css'
 
 const isProd = import.meta.env.PROD;
 export const currentChain = isProd ?
@@ -47,6 +49,18 @@ export const config = createConfig({
     [currentChain.id]: http()
   } as any
 })
+
+const setViewportHeight = () => {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+};
+
+setViewportHeight();
+
+window.addEventListener('resize', setViewportHeight);
+window.addEventListener('orientationchange', () => {
+  setTimeout(setViewportHeight, 100);
+});
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

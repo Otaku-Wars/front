@@ -200,7 +200,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
     }
   }, [shouldFundOnBuyAmount, currentAction, buyShares, sellShares, address, fundWallet]);
 
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery('(max-width: 1100px)');
 
   useEffect(() => {
     if (internalShow && isMobile) {

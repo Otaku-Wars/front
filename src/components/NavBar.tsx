@@ -103,7 +103,6 @@ export function NavBar() {
   const address = user?.wallet?.address;
   const {setActiveWallet} = useSetActiveWallet()
   const { wallets } = useWallets()
-  const shouldRefetch = useCheckNewActivities()
   const { login } = useLogin({
     onComplete: async (user, isNewUser, wasAlreadyAuthenticated, loginMethod, linkedAccount) => {
       try {
@@ -141,14 +140,18 @@ export function NavBar() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // useEffect(() => {
-  //   const param = searchParams.get('ref')
-  //   if(param){
-  //     //set local storage
-  //     localStorage.setItem('referral', param)
-  //     console.log("referral", param)
-  //   }
-  // }, [searchParams])
+
+  //set referral in local storage
+  useEffect(() => {
+    const param = searchParams.get('ref')
+    const referral = localStorage.getItem('referral')
+    console.log("affiliate existing referral", referral)
+    if(param && param !== referral){
+      //set local storage
+      localStorage.setItem('referral', param)
+      console.log("affiliate referral", param)
+    }
+  }, [searchParams])
 
   const userApi = useUser(address)
   const pfp = (userApi as any)?.pfp;
@@ -160,10 +163,10 @@ export function NavBar() {
       "Loading..."
     "Loading.."
 
-  const affiliateIsSet = useMemo(() => {
+  const affiliateIsAlreadySet = useMemo(() => {
     if(userApi && !userApi.isError && userApi.data){
       const userFromApi = userApi.data
-      return userFromApi.affiliate !== null
+      return userFromApi.affiliate != null
     }
     return false
   }, [userApi]) 
@@ -187,32 +190,50 @@ export function NavBar() {
     }
   }, [authenticated, wallets, address, setActiveWallet])
 
-  // useEffect(() => {
-  //   const setAffiliate = async () => {
-  //     if(affiliateIsSet){
-  //       localStorage.removeItem('referral')
-  //       setSearchParams({ref: ''})
-  //     }else if(address && !affiliateIsSet && authenticated){
-  //       const affiliateAddress = localStorage.getItem('referral') ?? searchParams.get('ref')
-  //       if(affiliateAddress && affiliateAddress.toLowerCase() !== address.toLowerCase()){
-  //         //make api request to set affiliate
-  //         const accessToken = await getAccessToken()
-  //         const response = await fetch(`${apiUrl}/users/${address}/set-affiliate`, {
-  //         headers: {
-  //           'Authorization': `Bearer ${accessToken}`
-  //         },
-  //         method: 'POST',
-  //         body: JSON.stringify({affiliate: affiliateAddress}),
-  //         })
-  //       }else if(affiliateAddress && affiliateAddress.toLowerCase() == address.toLowerCase()){
-  //         localStorage.removeItem('referral')
-  //         setSearchParams({ref: ''})
-  //       }
-
-  //     }
-  //   }
-  //   setAffiliate()
-  // }, [affiliateIsSet, authenticated, address])
+  useEffect(() => {
+    const setAffiliate = async () => {
+      if(affiliateIsAlreadySet){
+        //already set an affiliate for this user
+        localStorage.removeItem('referral')
+        const params = new URLSearchParams(searchParams)
+        params.delete('ref')
+        setSearchParams(params)
+        console.log("already set an affiliate for this user")
+      } else if(address && !affiliateIsAlreadySet && authenticated) {
+        console.log("setting affiliate")
+        const affiliateAddress = localStorage.getItem('referral') ?? searchParams.get('ref')
+        console.log("affiliateAddress", affiliateAddress)
+        if(affiliateAddress && affiliateAddress.toLowerCase() !== address.toLowerCase()) {
+          try {
+            const accessToken = await getAccessToken()
+            const response = await fetch(`${apiUrl}/users/${address}/set-affiliate`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ affiliate: affiliateAddress })
+            })
+            console.log("response affiliate", response)
+            if (response.ok) {
+              localStorage.removeItem('referral')
+              const params = new URLSearchParams(searchParams)
+              params.delete('ref')
+              setSearchParams(params)
+            }
+          } catch (error) {
+            console.error('Error setting affiliate:', error)
+          }
+        } else if(affiliateAddress && affiliateAddress.toLowerCase() === address.toLowerCase()) {
+          localStorage.removeItem('referral')
+          const params = new URLSearchParams(searchParams)
+          params.delete('ref')
+          setSearchParams(params)
+        }
+      }
+    }
+    setAffiliate()
+  }, [affiliateIsAlreadySet, authenticated, address, getAccessToken, searchParams, setSearchParams])
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-gray-900 text-gray-300 w-full overflow-y-auto custom-scrollbar">
       <style>{`

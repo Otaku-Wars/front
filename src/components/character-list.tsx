@@ -1,7 +1,7 @@
 import { Card } from "./ui/card"
 import { Button } from "./ui/button"
 import { AIAvatar } from "./ai-avatar"
-import { cn, formatPercentage } from "../lib/utils"
+import { cn, formatPercentage, formatCompactNumber } from "../lib/utils"
 import { useNavigate } from "react-router-dom"
 import { ArrowDown, ArrowUp, ArrowUpRight } from 'lucide-react'
 import { useCharacters, useBattleState, useAllCharacterPerformance } from '../hooks/api'
@@ -12,6 +12,7 @@ import { getMatchesUntilNextMatchForCharacters } from '../components/CharacterPa
 import { Status } from '@memeclashtv/types'
 import { motion, AnimatePresence } from "framer-motion"
 import { Swords, AlertTriangle } from 'lucide-react'
+import { haptics } from '../utils/haptics'
 
 function StatusBadge({ 
   status, 
@@ -131,7 +132,7 @@ function StatusBadge({
       <AnimatePresence>
         {(urgencyLevel > 0.5 || status === 'waiting-to-battle') && (
           <motion.span
-            className="text-xs sm:text-sm"
+            className="text-md"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 10 }}
@@ -192,8 +193,10 @@ export function CharacterList() {
   if (!characters) return null
 
   return (
-    <Card className="overflow-hidden divide-y divide-border">
-      {characters.map((character) => {
+    <div className="flex flex-col gap-1">
+      <h1 className="text-xl font-bold p-0 m-0">Characters</h1>
+      <div className="overflow-hidden">
+        {characters.map((character) => {
         const matchesLeft = matchesTillNextMatchArray[character.id] || 0
         const status = getCharacterStatus(character.id, matchesLeft)
         const performance = (characterPerformance?.find(p => p.characterId === character.id)?.data ?? 0) / 100
@@ -202,21 +205,24 @@ export function CharacterList() {
           <Button
             key={character.id}
             variant="ghost"
-            className="w-full justify-between px-4 py-3 h-auto rounded-none hover:bg-accent/50 flex items-center gap-2"
-            onClick={() => navigate(`/character/${character.id}`)}
+            className="w-full justify-between py-3 m-0 h-auto rounded-none hover:bg-accent/50 flex items-center gap-2 px-1"
+            onClick={() => {
+              haptics.medium();
+              navigate(`/character/${character.id}`);
+            }}
           >
-            <div className="flex items-center gap-3 flex-1">
+            <div className="flex items-center gap-2 flex-1">
               <AIAvatar
                 src={character.pfp}
                 alt={character.name}
-                size="sm"
-                className="h-10 w-10"
+                size="md"
+                renderBadge={false}
               />
-              <div className="flex-1 text-left">
+              <div className="flex flex-col justify-between h-full gap-1">
                 <div className="flex items-baseline">
-                  <span className="font-medium text-sm">{character.name}</span>
+                  <span className="font-large font-bold text-md">{character.name}</span>
                   <span className="text-xs text-muted-foreground ml-2">
-                    {formatNumber(convertEthToUsd(character.value))} MCap
+                    ${formatCompactNumber(convertEthToUsd(character.value))} <span className="text-muted-foreground">MCAP</span>
                   </span>
                 </div>
                 <StatusBadge 
@@ -228,34 +234,29 @@ export function CharacterList() {
                 />
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right items-center">
               <div className="flex items-center gap-2">
-                <div className="text-right">
+                <div className="text-right gap-1 flex flex-col">
                   <div className="text-sm font-bold">
                     {formatNumber(convertEthToUsd(character.price))}
                   </div>
                   <div className={cn(
-                    "text-xs",
-                    performance > 0 ? "text-green-600" : "text-red-600"
+                    "text-xs font-bold",
+                    performance > 0 ? "text-green-500 bg-green-500/10 rounded-md px-1" : "text-red-400 bg-red-400/10 rounded-md px-1"
                   )}>
                     {performance > 0 ? "+" : ""}{formatPercentage(performance)}
                   </div>
-                </div>
-                <div
-                  className="h-8 w-8 rounded-full bg-yellow-400/90 hover:bg-yellow-500/90 animate-flash-pulse flex items-center justify-center cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    navigate(`/character/${character.id}?action=buy`)
-                  }}
-                >
-                  <ArrowUpRight className="h-4 w-4 text-black" />
                 </div>
               </div>
             </div>
           </Button>
         )
       })}
-    </Card>
+      <div className="h-20 text-center text-sm font-bold text-muted-foreground pt-10">
+        More characters coming soon!
+      </div>
+    </div>
+    </div>
   )
 }
 

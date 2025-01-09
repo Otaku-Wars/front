@@ -4,6 +4,7 @@ import { BaseActivity } from '@memeclashtv/types/activity';
 import { initActivities } from '../hooks/api';
 import { usePrivy } from '@privy-io/react-auth';
 import { useQueryClient } from '@tanstack/react-query';
+import { useMediaQuery } from '../hooks/use-media-query';
 
 interface ActivityContextType {
   activities: BaseActivity[];
@@ -16,6 +17,7 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const { getAccessToken, authenticated } = usePrivy();
   const [activities, setActivities] = useState<BaseActivity[]>([]);
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const isMobile = useMediaQuery('(max-width: 1100px)');
 
   useEffect(() => {
     initActivities(100).then(setActivities);
@@ -36,11 +38,11 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     onOpen: () => console.log('WebSocket connection opened'),
     onClose: () => console.log('WebSocket connection closed'),
     onError: (error) => console.error('WebSocket error:', error),
-    shouldReconnect: () => true, // Will attempt to reconnect on all close events
+    shouldReconnect: () => true,
   });
 
   const trueSendMessage = useCallback(async (message: string) => {
-    if (!authenticated || !authToken) {
+    if (!authenticated || !authToken || isMobile) {
       return;
     }
     
@@ -50,7 +52,7 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     sendMessage(JSON.stringify(msg));
     console.log('sent message', JSON.stringify(msg));
-  }, [sendMessage, authToken, authenticated]);
+  }, [sendMessage, authToken, authenticated, isMobile]);
 
   // Handle incoming messages
   useEffect(() => {
@@ -64,7 +66,7 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [lastMessage]);
 
   return (
-    <ActivityContext.Provider value={{ activities, sendMessage: trueSendMessage }}>
+    <ActivityContext.Provider value={{ activities, sendMessage: isMobile ? null : trueSendMessage }}>
       {children}
     </ActivityContext.Provider>
   );

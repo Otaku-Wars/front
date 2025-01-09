@@ -2,7 +2,7 @@ import { Card } from "./ui/card"
 import { Shield, Flame, Radio, ArrowDown, ArrowUp, ChevronUpIcon, Clock, LockIcon } from 'lucide-react'
 import { Button } from "./ui/button"
 import { cn, formatPercentage } from "../lib/utils"
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react'
 import { Link } from 'react-router-dom'
 import { AIAvatar } from "./ai-avatar"
 import { useBattleState, useCharacters, useUser } from "../hooks/api"
@@ -16,6 +16,9 @@ import { ModalBuySell } from "./ModalBuySell"
 import { useFundWallet, usePrivy } from "@privy-io/react-auth"
 import { currentChain } from "../main"
 import { StreamEmbed } from "./StreamView"
+import { MobileBuySellModal } from "./MobileBuySellModal"
+
+const PENDING_MATCH_DELAY = 240000;
 
 interface CharacterInfoProps {
   name: string
@@ -33,39 +36,20 @@ function CharacterInfo({ name, winChance, image, isReversed = false, battleState
   const isBattling = battleState?.status === Status.Battling
 
   return (
-    <div className={cn("flex items-center gap-2 relative", isReversed && "flex-row-reverse text-right")}>
-      <div className="relative">
-        <div className={cn(
-          "rounded-full p-0.5",
-          isWinner && "bg-green-500/50 animate-pulse",
-          isLoser && "bg-red-500/50 animate-pulse"
-        )}>
-          <AIAvatar
-            src={image}
-            alt={name}
-            size="sm"
-            className="w-10 h-10"
-          />
-        </div>
-        {matchOver && (
+    <div className={cn("flex items-center gap-2 relative p-1", isReversed && "flex-row-reverse text-right p-1")}>
+      {matchOver && (
           <div className={cn(
-            "absolute left-1/2 -translate-x-1/2 text-xs font-bold animate-bounce z-100",
+            "absolute left-1/2 translate-x-1/2 text-xs font-bold animate-bounce",
             isWinner && "text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]",
             isLoser && "text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]"
           )}
           >
             {isWinner ? "WON" : "LOST"}
-          </div>
-        )}
-        {isBattling && (
-          <div className="absolute left-1/2 -translate-x-1/2 font-bold animate-bounce z-100 text-gray-500 text-[8px]">
-            BATTLING
-          </div>
-        )}
-      </div>
+        </div>
+      )}
       <div>
-        <div className="font-bold text-xs leading-tight">{name}</div>
-        <div className="text-[10px] text-muted-foreground">{winChance.toFixed(2)}%</div>
+        <div className={cn("font-bold text-lg leading-tight", isWinner && "text-green-400 animate-glow", isLoser && "text-red-400 animate-glow")}>{name}</div>
+        <div className="text-[10px] text-muted-foreground font-bold">{winChance.toFixed(2)}% WIN RATE</div>
       </div>
     </div>
   )
@@ -80,12 +64,15 @@ interface CharacterStatsProps {
   winPrice: number
   losePrice: number
   preHoldingsValue: number
-  newHoldingsValue: number
+  isP1: boolean
+  isLoadingPrices: boolean
 }
 
-function CharacterStats({ address, character, shares, timeLeft, battleState, winPrice, losePrice, preHoldingsValue, newHoldingsValue }: CharacterStatsProps) {
+function CharacterStats({ address, character, shares, timeLeft, battleState, winPrice, losePrice, preHoldingsValue, isP1, isLoadingPrices }: CharacterStatsProps) {
   const convertEthToUsd = useConvertEthToUsd()
-  const currentPrice = character.price
+  const isMatchJustEnded = battleState?.lastMatchResult !== undefined
+  const tokenState = battleState?.lastMatchResult?.tokenState;
+  const currentPrice = isMatchJustEnded ? tokenState[isP1 ? "prevPrice1" : "prevPrice2"] : character.price
   const { authenticated, login } = usePrivy()
   const { fundWallet } = useFundWallet()
   
@@ -97,7 +84,25 @@ function CharacterStats({ address, character, shares, timeLeft, battleState, win
   const isPendingMatch = battleState?.status === Status.Pending
   
 
+  //calculate new holdings value should be the same as the preHoldingsValue if the match is not over
+  //if the match is over, then it should be the percentage change in price times the preHoldingsValue
+  
   const isWinner = battleState?.lastMatchResult?.winner === character.id
+  console.log("1234: preHoldingsValue", preHoldingsValue)
+  const newHoldingsValue = useMemo(() => {
+    if (!isMatchJustEnded || preHoldingsValue === 0) return preHoldingsValue;
+    
+    return isWinner 
+      ? preHoldingsValue * (1 + (winPrice - currentPrice) / currentPrice)
+      : preHoldingsValue * (1 + (losePrice - currentPrice) / currentPrice);
+  }, [isMatchJustEnded, isWinner, preHoldingsValue, winPrice, losePrice, currentPrice]);
+
+  console.log("1234: holdings values:", {
+    preHoldingsValue,
+    newHoldingsValue,
+    isWinner,
+    isMatchJustEnded
+  });
 
   const { balanceNumber } = useBalance(address as `0x${string}`);
   const shouldFund = useMemo(() => {
@@ -147,7 +152,7 @@ function CharacterStats({ address, character, shares, timeLeft, battleState, win
           isBattling={isBattling}
         />
       </div> */}
-      <div className="bg-background/50 rounded-lg mb-1">
+      <div className="rounded-lg mb-1">
         <PriceInfo 
           currentPrice={currentPrice} 
           losePrice={losePrice} 
@@ -155,6 +160,7 @@ function CharacterStats({ address, character, shares, timeLeft, battleState, win
           isBattling={isBattling} 
           isWinner={isWinner}
           battleState={battleState}
+          isLoading={isLoadingPrices}
         />
       </div>
       <div className="text-[10px] text-muted-foreground text-center">
@@ -172,7 +178,7 @@ function CharacterStats({ address, character, shares, timeLeft, battleState, win
         newHoldingsValue={newHoldingsValue}
         sharesOwned={shares}
       />
-      <ModalBuySell 
+      <MobileBuySellModal 
         isInBattle={isBattling}
         characterId={character.id}
         show={showModal}
@@ -238,55 +244,90 @@ interface PriceInfoProps {
   isBattling: boolean
   isWinner?: boolean
   battleState: CurrentBattleState
+  isLoading?: boolean
 }
 
-function PriceInfo({ currentPrice, losePrice, winPrice, isBattling, isWinner, battleState }: PriceInfoProps) {
+const PriceInfo = memo(function PriceInfo({ 
+  currentPrice, 
+  losePrice, 
+  winPrice, 
+  isBattling, 
+  isWinner, 
+  battleState, 
+  isLoading 
+}: PriceInfoProps) {
   const convertEthToUsd = useConvertEthToUsd()
-  const losePercentage = ((losePrice - currentPrice) / currentPrice) * 100
-  const winPercentage = ((winPrice - currentPrice) / currentPrice) * 100
+  
+  // Memoize both the calculations and the conversion to USD
+  const priceData = useMemo(() => {
+    const winPercentage = ((winPrice - currentPrice) / currentPrice) * 100
+    const losePercentage = ((losePrice - currentPrice) / currentPrice) * 100
+    
+    return {
+      currentPriceUsd: formatNumber(convertEthToUsd(currentPrice)),
+      winPercentage,
+      losePercentage,
+      winPriceUsd: formatNumber(convertEthToUsd(winPrice)),
+      losePriceUsd: formatNumber(convertEthToUsd(losePrice))
+    }
+  }, [currentPrice, losePrice, winPrice, convertEthToUsd])
 
   const battleEnded = battleState?.lastMatchResult !== undefined
 
   return (
-    <div className="flex flex-col text-[10px] bg-white rounded-lg p-2 border">
+    <div className="flex flex-col p-1">
       <div className="flex justify-between items-center mb-1">
-        <span className="text-muted-foreground">Current price</span>
-        <span className="font-bold text-xs">{formatNumber(convertEthToUsd(currentPrice))}</span>
+        <span className="text-muted-foreground text-sm">Current price</span>
+        <span className="font-bold text-md font-bold">{priceData.currentPriceUsd}</span>
       </div>
-      <div className="flex justify-between space-x-1">
-        <PriceOutcome 
-          label="If Win" 
-          price={winPrice} 
-          percentage={winPercentage} 
-          icon={ArrowUp} 
-          disabled={battleEnded && !isWinner}
-        />
-        <PriceOutcome 
-          label="If Lose" 
-          price={losePrice} 
-          percentage={losePercentage} 
-          icon={ArrowDown} 
-          disabled={battleEnded && isWinner}
-        />
+      <div className="flex flex-col justify-between gap-2">
+        {isLoading ? (
+          <>
+            <div className="h-6 bg-gray-500/20 rounded animate-pulse transition-opacity ease-in-out" />
+            <div className="h-6 bg-gray-500/20 rounded animate-pulse transition-opacity ease-in-out" />
+          </>
+        ) : (
+          <>
+            <PriceOutcome 
+              label="If Win"
+              formattedPrice={priceData.winPriceUsd}
+              percentage={priceData.winPercentage}
+              icon={ArrowUp}
+              disabled={battleEnded && !isWinner}
+            />
+            <PriceOutcome 
+              label="If Lose"
+              formattedPrice={priceData.losePriceUsd}
+              percentage={priceData.losePercentage}
+              icon={ArrowDown}
+              disabled={battleEnded && isWinner}
+            />
+          </>
+        )}
       </div>
     </div>
   )
-}
+})
 
 interface PriceOutcomeProps {
   label: string
-  price: number
+  formattedPrice: string // Changed from number to pre-formatted string
   percentage: number
   icon: typeof ArrowDown | typeof ArrowUp
   disabled?: boolean
 }
 
-function PriceOutcome({ label, price, percentage, icon: Icon, disabled }: PriceOutcomeProps) {
-  const convertEthToUsd = useConvertEthToUsd()
+const PriceOutcome = memo(function PriceOutcome({ 
+  label, 
+  formattedPrice, 
+  percentage, 
+  icon: Icon, 
+  disabled 
+}: PriceOutcomeProps) {
   const isPositive = percentage > 0
-  const color = isPositive ? "text-green-500/90" : "text-red-500/90"
+  const color = isPositive ? "text-green-400" : "text-red-400"
   const glowColor = isPositive ? "drop-shadow-[0_0_2px_rgba(34,197,94,0.3)]" : "drop-shadow-[0_0_2px_rgba(239,68,68,0.3)]"
-  const plusOrMinus = isPositive ? "+" : ""
+  const plusOrMinus = isPositive ? "+" : "-"
   const contentRef = useRef<HTMLDivElement>(null)
   const [isOverflowing, setIsOverflowing] = useState(false)
 
@@ -300,18 +341,29 @@ function PriceOutcome({ label, price, percentage, icon: Icon, disabled }: PriceO
     checkOverflow()
     window.addEventListener('resize', checkOverflow)
     return () => window.removeEventListener('resize', checkOverflow)
-  }, [price, percentage])
+  }, [])
+
+  const formattedPercentage = useMemo(() => 
+    Math.abs(percentage).toFixed(2)
+  , [percentage])
 
   return (
     <div className={cn(
-      "flex flex-col items-start flex-1 min-w-0",
+      "flex flex-row items-center w-full justify-between",
       disabled && "opacity-30"
     )}>
-      <span className="text-[8px] text-muted-foreground">{label}</span>
       <div className={cn(
-        "flex items-center text-[9px] font-semibold w-full overflow-hidden",
+        "text-[10px] text-muted-foreground inline-block",
+        disabled && "opacity-30",
+        color
+      )}>{isPositive ? '▲' : '▼'}{label}</div>
+      <div className={cn(
+        "flex items-center text-[12px] font-bold overflow-hidden",
         color,
         glowColor,
+        isPositive && "bg-green-500/10",
+        !isPositive && "bg-red-500/10",
+        "rounded-full px-1 py-0.5",
         "animate-price-pulse"
       )}>
         <div
@@ -322,18 +374,18 @@ function PriceOutcome({ label, price, percentage, icon: Icon, disabled }: PriceO
           )}
         >
           <span className="inline-block">
-            {formatNumber(convertEthToUsd(price))} ({plusOrMinus}{Math.abs(percentage).toFixed(2)}%)
+            {formattedPrice} ({plusOrMinus}{formattedPercentage}%)
           </span>
           {isOverflowing && (
             <span className="inline-block ml-4">
-              {formatNumber(convertEthToUsd(price))} ({plusOrMinus}{Math.abs(percentage).toFixed(2)}%)
+              {formattedPrice} ({plusOrMinus}{formattedPercentage}%)
             </span>
           )}
         </div>
       </div>
     </div>
   )
-}
+})
 
 const formatTime = (seconds: number) => {
   if (seconds >= 60) {
@@ -399,7 +451,7 @@ function BuyNowButton({
   return (
     <Button
       className={cn(
-        "w-full bg-gray-700 text-lg",
+        "w-full bg-gray-700 text-lg animate-pulse animate-glow",
         gainedNothing 
           ? 'text-gray-400' 
           : (increased ? 'text-green-400 animate-pulse-win' : 'text-red-400 animate-pulse-lose')
@@ -409,7 +461,7 @@ function BuyNowButton({
         gainedNothing 
           ? 'animate-pulse text-gray-400' 
           : (increased ? 'text-green-400 animate-pulse-win' : 'text-red-400 animate-pulse-lose'),
-        'font-bold text-[10px]'
+        'font-bold text-[10px] animate-glow animate-pulse'
       )}>
         {gainedNothing ? 'Gained NOTHING' : (increased ? 'Earned' : 'Lost')} {formatNumber(convertEthToUsd(amountChange))}{increased ? '↑' : '↓'} ({formatPercentage(percentChange)})
       </span>
@@ -422,25 +474,27 @@ function BattleTimer({ timeLeft }: { timeLeft: number }) {
   const matchOver = battleState?.lastMatchResult !== undefined
 
   return (
-    <div className="text-center">
-      <div className="font-extrabold text-base bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500">VS</div>
-      <div className="text-[8px] text-muted-foreground">
-        {timeLeft > 0 ? "Starts in" : `Match #${battleState?.currentMatch}`}
-      </div>
-      <div className="text-sm font-bold flex items-center justify-center text-orange-500 animate-aggressive-pulse">
-        {timeLeft > 0 ? (
-          <>
+    <div className="text-center flex flex-col items-center justify-end p-0 relative z-10">
+      <div className="relative">
+        {/* Diagonal line behind VS */}
+        <div 
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[2px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent animate-pulse"
+          style={{ 
+            transform: 'translate(-50%, -50%) rotate(-65deg)',
+          }}
+        />
+        
+        {/* VS text */}
+        {timeLeft > 0 ?
+          <div className="font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500 text-[32px] p-3 m-0 italic relative animate-glow">
             <Clock className="w-3 h-3 mr-0.5" />
-            <span className="text-shadow-glow">{formatTime(timeLeft)}</span>
-          </>
-        ) : (
-          <span className={cn(
-            "text-shadow-glow text-[8px]",
-            matchOver ? "text-green-500" : "text-orange-500"
-          )}>
-            {matchOver ? "COMPLETE" : "BATTLING"}
-          </span>
-        )}
+            {formatTime(timeLeft)}
+          </div>
+        :
+          <div className="font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500 text-[32px] p-3 m-0 italic relative animate-glow">
+            VS
+          </div>
+        }
       </div>
     </div>
   )
@@ -469,115 +523,222 @@ export function BattleView() {
 
   // Get user's shares for each character
   const character1Shares = useMemo(() => {
-    return user?.balances?.find((b) => b.character === character1?.id)?.balance ?? 0
+    const balance = user?.balances?.find((b) => b.character == character1?.id)?.balance ?? 0
+    console.log("1234: user balances", user?.balances)
+    console.log("1234: character1 id", character1?.id)
+    console.log("1234: found balance", balance)
+    return balance
   }, [user, character1])
 
   const character2Shares = useMemo(() => {
-    return user?.balances?.find((b) => b.character === character2?.id)?.balance ?? 0
+    return user?.balances?.find((b) => b.character == character2?.id)?.balance ?? 0
   }, [user, character2])
+
+  // Match just ended
+  const isMatchJustEnded = useMemo(() => {
+    return battleState?.lastMatchResult !== undefined;
+  }, [battleState]);
+
+  const character1Value = useMemo(() => {
+    if(isMatchJustEnded) {
+      return battleState?.lastMatchResult?.tokenState?.prevMarketCap1 ?? 0
+    }
+    return character1?.value ?? 0
+  }, [character1, isMatchJustEnded, battleState])
+
+  const character2Value = useMemo(() => {
+    if(isMatchJustEnded) {
+      return battleState?.lastMatchResult?.tokenState?.prevMarketCap2 ?? 0
+    }
+    return character2?.value ?? 0
+  }, [character2, isMatchJustEnded, battleState])
+
+  const [isLoadingPrices, setIsLoadingPrices] = useState(true)
+  
+  // Calculate holdings values
+  const [character1HoldingsValue, setCharacter1HoldingsValue] = useState(0)
+  const [character2HoldingsValue, setCharacter2HoldingsValue] = useState(0)
 
   useEffect(() => {
     const calculatePrices = async () => {
       if (!character1 || !character2) return
+      const isMatchPending = battleState?.willStartAt > 0;
+      const now = new Date().getTime()/1000
+      const timeLeft = battleState?.willStartAt - now
+      const tenSecondsPastSincePending = timeLeft >= PENDING_MATCH_DELAY-10
+      if(isMatchPending && tenSecondsPastSincePending) {
+        setIsLoadingPrices(true)
+      }
+      try {
+        const c1Value = character1Value
+        const c2Value = character2Value
 
-      // Character 1 wins (gets 10% of character2's market cap)
-      const c1WinPrice = await getSellPriceMc(
-        character1.supply,
-        character1.value + (character2.value * 0.1),
-        1
-      )
-      // Character 1 loses (loses 10% of market cap)
-      const c1LosePrice = await getSellPriceMc(
-        character1.supply,
-        character1.value * 0.9,
-        1
-      )
-      // Character 2 wins (gets 10% of character1's market cap)
-      const c2WinPrice = await getSellPriceMc(
-        character2.supply,
-        character2.value + (character1.value * 0.1),
-        1
-      )
-      // Character 2 loses (loses 10% of market cap)
-      const c2LosePrice = await getSellPriceMc(
-        character2.supply,
-        character2.value * 0.9,
-        1
-      )
+        console.log("c1Value", c1Value)
+        console.log("c2Value", c2Value)
 
-      setCharacter1WinPrice(c1WinPrice)
-      setCharacter1LosePrice(c1LosePrice)
-      setCharacter2WinPrice(c2WinPrice)
-      setCharacter2LosePrice(c2LosePrice)
+        // Character 1 wins (gets 10% of character2's market cap)
+        const c1WinPrice = await getSellPriceMc(
+          character1.supply,
+          c1Value + (c2Value * 0.1),
+          1
+        )
+
+        console.log("c1WinPrice", c1WinPrice)
+        
+        // Character 1 loses (loses 10% of market cap)
+        const c1LosePrice = await getSellPriceMc(
+          character1.supply,
+          c1Value * 0.9,
+          1
+        )
+
+        console.log("c1LosePrice", c1LosePrice)
+
+        // Character 2 wins (gets 10% of character1's market cap)
+        const c2WinPrice = await getSellPriceMc(
+          character2.supply,
+          c2Value + (c1Value * 0.1),
+          1
+        )
+
+        console.log("c2WinPrice", c2WinPrice)
+
+        // Character 2 loses (loses 10% of market cap)
+        const c2LosePrice = await getSellPriceMc(
+          character2.supply,
+          c2Value * 0.9,
+          1
+        )
+
+        console.log("c2LosePrice", c2LosePrice)
+
+        setCharacter1WinPrice(c1WinPrice)
+        setCharacter1LosePrice(c1LosePrice)
+        setCharacter2WinPrice(c2WinPrice)
+        setCharacter2LosePrice(c2LosePrice)
+      } finally {
+        setIsLoadingPrices(false)
+      }
     }
 
     calculatePrices()
-  }, [character1, character2])
+  }, [character1, character2, character1Value, character2Value, battleState])
 
-  // Calculate holdings values
-  const [character1Holdings, setCharacter1Holdings] = useState({ pre: 0, new: 0 })
-  const [character2Holdings, setCharacter2Holdings] = useState({ pre: 0, new: 0 })
 
   useEffect(() => {
     const calculateHoldings = async () => {
-      if (!character1 || !character2) return
+      // Only calculate if we have all required data
+      if (!character1?.supply || !character2?.supply || !character1Value || !character2Value || !user?.balances?.length) {
+        console.log("1234: Missing required data for holdings calc:", {
+          character1Supply: character1?.supply,
+          character2Supply: character2?.supply,
+          character1Value,
+          character2Value,
+          userBalances: user?.balances
+        });
+        return;
+      }
 
-      const c1Pre = await getSellPriceMc(
-        character1.supply - character1Shares,
-        character1.value,
-        character1Shares
-      )
-      const c1New = await getSellPriceMc(
-        character1.supply,
-        character1.value,
-        character1Shares
-      )
-      const c2Pre = await getSellPriceMc(
-        character2.supply - character2Shares,
-        character2.value,
-        character2Shares
-      )
-      const c2New = await getSellPriceMc(
-        character2.supply,
-        character2.value,
-        character2Shares
-      )
+      const c1Shares = user.balances.find((b) => b.character === character1.id)?.balance ?? 0;
+      const c2Shares = user.balances.find((b) => b.character === character2.id)?.balance ?? 0;
 
-      setCharacter1Holdings({ pre: c1Pre, new: c1New })
-      setCharacter2Holdings({ pre: c2Pre, new: c2New })
+      console.log("1234: Calculating holdings with:", {
+        c1Shares,
+        c2Shares,
+        character1Supply: character1.supply,
+        character2Supply: character2.supply,
+        character1Value,
+        character2Value
+      });
+
+      try {
+        const [c1Value, c2Value] = await Promise.all([
+          getSellPriceMc(character1.supply, character1Value, c1Shares),
+          getSellPriceMc(character2.supply, character2Value, c2Shares)
+        ]);
+
+        console.log("1234: Setting holdings values:", { c1Value, c2Value });
+        setCharacter1HoldingsValue(c1Value);
+        setCharacter2HoldingsValue(c2Value);
+      } catch (error) {
+        console.error("Error calculating holdings:", error);
+      }
+    };
+
+    calculateHoldings();
+  }, [character1?.supply, character2?.supply, character1Value, character2Value, user?.balances]);
+
+  // Memoize all price calculations
+  const priceCalculations = useMemo(() => {
+    if (!character1 || !character2) return null;
+
+    return {
+      character1: {
+        winPrice: character1WinPrice,
+        losePrice: character1LosePrice,
+        currentPrice: character1?.price ?? 0,
+      },
+      character2: {
+        winPrice: character2WinPrice,
+        losePrice: character2LosePrice,
+        currentPrice: character2?.price ?? 0,
+      }
     }
-
-    calculateHoldings()
-  }, [character1, character2, character1Shares, character2Shares])
-
-  
+  }, [
+    character1?.price,
+    character2?.price,
+    character1WinPrice,
+    character1LosePrice,
+    character2WinPrice,
+    character2LosePrice
+  ]);
 
   if (!character1 || !character2) return null
 
   return (
     <div className="space-y-2">
-      <Card className="overflow-hidden">
-        <div className="relative" style={{ paddingBottom: '75%' }}>
-          {/* <iframe 
-            src={import.meta.env.VITE_EMBED_ID ?? 'https://lvpr.tv?v=6950nisrggh4cvk1&muted=false&lowLatency=force&autoplay=true'}
-            className="absolute top-0 left-0 w-full h-full"
-            allow="autoplay; fullscreen"
-          /> */}
+      <div className="z-1">
+        <div className="relative" style={{}}>
           <StreamEmbed />
           <div className="absolute top-2 left-2 flex items-center space-x-2 bg-black/50 rounded-full px-2 py-1 z-10">
             <Radio className="w-3 h-3 text-red-500 animate-pulse" />
             <span className="text-xs font-semibold text-white">LIVE</span>
           </div>
         </div>
-      </Card>
+      </div>
 
-      <Card className="p-2 relative overflow-hidden bg-gradient-to-br from-purple-600/5 to-blue-600/5">
-        <div className="relative z-10">
-          <div className="flex justify-between items-center mb-2">
+      <div className="relative bg-gradient-to-br from-purple-600/5 to-blue-600/5 rounded-lg">
+        <div className="absolute inset-0 flex">
+          <div className="w-1/2 relative h-[43%]">
+            <div 
+              className="absolute inset-0 bg-cover bg-center opacity-40"
+              style={{ 
+                backgroundImage: `url(${character1?.pfp})`,
+                maskImage: 'linear-gradient(to right, black 50%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, black 50%, transparent 100%)'
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
+          </div>
+          <div className="w-1/2 relative h-[43%]">
+            <div 
+              className="absolute inset-0 bg-cover bg-center opacity-40"
+              style={{ 
+                backgroundImage: `url(${character2?.pfp})`,
+                maskImage: 'linear-gradient(to left, black 50%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to left, black 50%, transparent 100%)'
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-l from-black/50 to-transparent" />
+          </div>
+        </div>
+
+        <div className="relative z-10 p-1">
+          <div className="flex justify-between items-center mb-4">
             <div className="w-[35%]">
               <CharacterInfo 
                 name={character1.name} 
-                winChance={51.12} 
+                winChance={(character1.winCount / character1.matchCount) * 100}
                 image={character1.pfp}
                 battleState={battleState}
                 characterId={character1.id}
@@ -589,7 +750,7 @@ export function BattleView() {
             <div className="w-[35%]">
               <CharacterInfo 
                 name={character2.name} 
-                winChance={48.88} 
+                winChance={(character2.winCount / character2.matchCount) * 100}
                 image={character2.pfp} 
                 isReversed 
                 battleState={battleState}
@@ -604,10 +765,11 @@ export function BattleView() {
               shares={character1Shares}
               timeLeft={timeLeft}
               battleState={battleState}
-              winPrice={character1WinPrice}
-              losePrice={character1LosePrice}
-              preHoldingsValue={character1Holdings.pre}
-              newHoldingsValue={character1Holdings.new}
+              winPrice={priceCalculations?.character1.winPrice ?? 0}
+              losePrice={priceCalculations?.character1.losePrice ?? 0}
+              preHoldingsValue={character1HoldingsValue}
+              isP1={true}
+              isLoadingPrices={isLoadingPrices}
             />
             <CharacterStats 
               address={address}
@@ -615,14 +777,15 @@ export function BattleView() {
               shares={character2Shares}
               timeLeft={timeLeft}
               battleState={battleState}
-              winPrice={character2WinPrice}
-              losePrice={character2LosePrice}
-              preHoldingsValue={character2Holdings.pre}
-              newHoldingsValue={character2Holdings.new}
+              winPrice={priceCalculations?.character2.winPrice ?? 0}
+              losePrice={priceCalculations?.character2.losePrice ?? 0}
+              preHoldingsValue={character2HoldingsValue}
+              isP1={false}
+              isLoadingPrices={isLoadingPrices}
             />
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   )
 }

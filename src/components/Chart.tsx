@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { formatEther, formatNumber } from '../lib/utils';
 import { useConvertEthToUsd } from '../EthPriceProvider';
@@ -6,6 +6,7 @@ import { MatchEndActivity, TradeActivity } from '@memeclashtv/types/activity';
 import { Character, User } from '@memeclashtv/types';
 import { truncateWallet } from './NavBar';
 import { buildDataUrl } from './ActivityBar';
+import { haptics } from '../utils/haptics';
 
 enum ActivityType {
     MatchEnd = 'MatchEnd',
@@ -91,6 +92,12 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId, character
     }, [chartData]);
 
     const CustomTooltip = ({ active, payload }: any) => {
+        useEffect(() => {
+            if (active) {
+                haptics.light();
+            }
+        }, [active]);
+
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             const price = data.price;
@@ -208,7 +215,10 @@ export const Chart: React.FC<ChartProps> = ({ activities, characterId, character
                 {["1h", "1d", "1w", "1m", "all"].map(range => (
                     <button
                         key={range}
-                        onClick={() => setTimeRange(range)}
+                        onClick={() => {
+                            haptics.medium();
+                            setTimeRange(range);
+                        }}
                         className={`w-full py-2 ${timeRange === range ? 'bg-gray-700 text-white' : 'bg-gray-800'}`}
                         aria-label={`Toggle ${range} view`}
                     >

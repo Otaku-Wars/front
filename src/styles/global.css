@@ -1,0 +1,63 @@
+/* Mobile viewport fixes */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: manipulation;
+  height: 100%;
+  font-size: 16px; /* Base font size */
+}
+
+body {
+  min-height: 100vh;
+  /* mobile viewport bug fix */
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Fix for iOS Safari viewport height */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Prevent pull-to-refresh */
+:root {
+  overscroll-behavior-y: none;
+}
+
+/* Improve touch targets */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Fix for mobile 100vh issue */
+.h-screen {
+  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+/* Prevent text size adjustment */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fix for iOS input zooming */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+@media screen and (max-width: 768px) {
+  html {
+    /* Prevent zooming on focus */
+    touch-action: manipulation;
+  }
+  
+  /* Ensure proper sizing on mobile */
+  body {
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+} 

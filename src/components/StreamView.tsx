@@ -46,7 +46,7 @@ const useHlsStream = (playbackId: string | null, videoRef: React.RefObject<HTMLV
 
                     const hls = new Hls({
                         enableWorker: true,
-                        lowLatencyMode: false,
+                        lowLatencyMode: true,
                         backBufferLength: 90,
                         xhrSetup: (xhr) => {
                             // Add CORS headers
@@ -99,7 +99,11 @@ const useHlsStream = (playbackId: string | null, videoRef: React.RefObject<HTMLV
 
 export const StreamEmbed = React.memo(() => {
     const isMobile = useMediaQuery('(max-width: 768px)');
-    const isTelegramWebView = window.Telegram?.WebApp !== undefined;
+    const isTelegramWebView = (
+      typeof window !== "undefined" &&
+      typeof window.Telegram !== "undefined" &&
+      navigator?.userAgent?.includes("Telegram")
+    );
     const videoRef = useRef<HTMLVideoElement>(null);
 
     // Memoize URL parsing to prevent re-renders
@@ -116,19 +120,17 @@ export const StreamEmbed = React.memo(() => {
 
     if (isMobile) {
         return (
-            <video
-                ref={videoRef}
-                className="absolute top-0 left-0 h-full w-full"
-                playsInline
-                autoPlay
-                muted={false}
-                controls={false}
-                crossOrigin="anonymous"
-                style={{
-                    objectFit: 'contain',
-                    backgroundColor: 'black'
-                }}
-            />
+          <div className="relative w-full" style={{ paddingTop: '75%' }}>
+          <iframe 
+              src={embedUrl}
+              allowFullScreen 
+              allow="autoplay; encrypted-media; picture-in-picture; muted" 
+              className="absolute top-0 left-0 w-full h-full"
+              {...(!isTelegramWebView && {
+                  sandbox: "allow-scripts allow-same-origin allow-presentation"
+              })}
+          />
+      </div>
         );
     }
 
@@ -136,12 +138,12 @@ export const StreamEmbed = React.memo(() => {
         <iframe 
             src={embedUrl}
             allowFullScreen 
-            allow="autoplay; encrypted-media; picture-in-picture" 
-            className="h-full w-full"
-            {...(!isTelegramWebView && {
-                sandbox: "allow-scripts allow-same-origin allow-presentation"
-            })}
-        />
+          allow="autoplay; encrypted-media; picture-in-picture; muted" 
+          className="w-full h-full"
+          {...(!isTelegramWebView && {
+              sandbox: "allow-scripts allow-same-origin allow-presentation"
+          })}
+      />
     );
 });
 

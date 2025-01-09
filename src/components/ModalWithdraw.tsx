@@ -23,7 +23,7 @@ export const ModalWithdraw = ({ show, handleClose }: { show: boolean, handleClos
         isSuccess 
     } = useWithdraw();
 
-    const isMobile = useMediaQuery('(max-width: 768px)');
+    const isMobile = useMediaQuery('(max-width: 1100px)');
 
     useEffect(() => {
         if (show && isMobile) {

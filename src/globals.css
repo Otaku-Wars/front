@@ -56,117 +56,117 @@
   
   /* Only apply mobile styles when .mobile class is present */
   body.mobile {
-    @apply bg-white text-foreground;
-    font-family: system-ui, -apple-system, sans-serif;
+    @apply bg-[#12122c] text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
   }
 }
 
-/* Mobile Theme */
+/* Mobile Theme - Update the colors for dark mode */
 @layer base {
   .mobile {
-    /* Light theme colors */
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;  /* Changed to white */
-    --card-foreground: 240 10% 3.9%;  /* Dark text */
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 10% 3.9%;  /* Dark color for primary */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 5% 96%;  /* Light gray for secondary */
-    --secondary-foreground: 240 10% 3.9%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 5% 96%;
-    --accent-foreground: 240 10% 3.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5% 64.9%;
+    /* Dark theme colors */
+    --background: 240 32% 12%; /* #12122c */
+    --foreground: 210 40% 98%; /* Light text */
+    --card: 240 32% 15%;  /* Slightly lighter than background */
+    --card-foreground: 210 40% 98%;  /* Light text */
+    --popover: 240 32% 15%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;  /* Light color for primary */
+    --primary-foreground: 240 32% 12%;
+    --secondary: 240 32% 20%;  /* Slightly lighter for secondary */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 240 32% 20%;
+    --muted-foreground: 215 20.2% 75.1%;
+    --accent: 240 32% 20%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 240 32% 20%;
+    --input: 240 32% 20%;
+    --ring: 240 32% 70%;
   }
 }
 
-/* Mobile specific styles */
+/* Update mobile specific styles */
 body.mobile {
-  @apply bg-white text-foreground;
+  @apply bg-[#12122c] text-foreground;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* Component-specific mobile overrides */
+/* Update component-specific mobile overrides */
 body.mobile {
   /* Cards */
   .card {
-    @apply bg-white border border-gray-200 shadow-sm;
+    @apply bg-[#16163a] border-[#2a2a5a];
   }
 
   /* Buttons */
   .button {
-    @apply bg-white text-foreground border border-gray-200;
+    @apply bg-[#16163a] text-foreground border-[#2a2a5a];
   }
 
   /* Navigation */
   .nav-bar {
-    @apply bg-white border-b border-gray-200;
+    @apply bg-[#16163a] border-[#2a2a5a];
   }
 
   /* Bottom navigation */
   .bottom-nav {
-    @apply bg-white border-t border-gray-200;
+    @apply bg-[#16163a] border-[#2a2a5a];
   }
 
   /* Modals */
   .dialog {
-    @apply bg-white;
+    @apply bg-[#16163a];
   }
 
   /* Lists */
   .character-list {
-    @apply bg-white;
+    @apply bg-[#16163a];
   }
 
   /* Inputs */
   .input {
-    @apply bg-white border-gray-200;
+    @apply bg-[#16163a] border-[#2a2a5a];
   }
 
   /* Tabs */
   .tabs {
-    @apply bg-white;
+    @apply bg-[#16163a];
   }
 
   /* Battle view specific */
   .battle-card {
-    @apply bg-white;
+    @apply bg-[#16163a];
   }
 
   /* Price info cards */
   .price-info {
-    @apply bg-white border-gray-200;
+    @apply bg-[#16163a] border-[#2a2a5a];
   }
 }
 
-/* Ensure text colors are appropriate for light theme */
+/* Update text colors for dark theme */
 body.mobile {
   .text-primary {
-    @apply text-gray-900;
+    @apply text-gray-100;
   }
   
   .text-secondary {
-    @apply text-gray-600;
+    @apply text-gray-300;
   }
   
   .text-muted {
-    @apply text-gray-500;
+    @apply text-gray-400;
   }
 }
 
-/* Update card styles for mobile */
+/* Update card styles for mobile dark theme */
 body.mobile .card {
-  @apply bg-white border border-gray-200;
+  @apply bg-[#16163a] border-[#2a2a5a];
 }
 
 /* Existing animations... */

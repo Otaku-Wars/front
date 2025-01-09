@@ -29,7 +29,7 @@ console.log("getting balance", data)
 export const useWithdraw = () => {
   const { sendTransaction, data, isError, isPending, isSuccess, error } = useSendTransaction();
 
-  const withdraw = (to: `0x{string}`, amount: number) => {
+  const withdraw = (to: `0x${string}`, amount: number) => {
     sendTransaction({
       to,
       value: parseUnits(amount.toString(), 'ether').toBigInt(),

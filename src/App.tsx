@@ -17,7 +17,9 @@ import { Character } from './pages/Character'
 import { Wallet } from './pages/Wallet'
 import { useEffect } from 'react'
 import { ActivityToast } from './components/ActivityToast'
-import { Toaster } from "./components/ui/toaster"
+import { AffiliateHandler } from './components/AffiliateHandler'
+import { Rankings } from './pages/Rankings'
+import { useCheckNewActivities } from './components/ActivityListenerProvider'
 
 // Type declaration for Telegram
 declare global {
@@ -63,7 +65,8 @@ function WebApp() {
 }
 
 export default function App() {
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const shouldRefetch = useCheckNewActivities()
+  const isMobile = useMediaQuery('(max-width: 1100px)')
   
   useEffect(() => {
     if (isMobile) {
@@ -108,12 +111,29 @@ export default function App() {
     <Router>
       {isMobile ? (
         <MainLayout>
+          <AffiliateHandler />
+
+          <style>
+          {`
+            @keyframes rotateHue {
+              0% {
+                filter: hue-rotate(0deg);
+              }
+              100% {
+                filter: hue-rotate(360deg);
+              }
+            }
+          `}
+          </style>
+
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/rewards" element={<Rewards />} />
             <Route path="/character/:id" element={<Character />} />
             <Route path="/wallet" element={<Wallet />} />
+            <Route path="/rankings" element={<Rankings />} />
           </Routes>
+          <ActivityToast />
         </MainLayout>
       ) : (
         <div>
@@ -125,8 +145,6 @@ export default function App() {
           </Routes>
         </div>
       )}
-      {/* <ActivityToast />
-      <Toaster /> */}
     </Router>
   )
 }

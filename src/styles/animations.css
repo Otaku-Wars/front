@@ -1,0 +1,68 @@
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes aggressivePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes textPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s linear infinite;
+}
+
+.animate-aggressive-pulse {
+  animation: aggressivePulse 2s ease-in-out infinite;
+}
+
+.animate-text-pulse {
+  animation: textPulse 2s ease-in-out infinite;
+}
+
+.sparkle-container {
+  position: absolute;
+  inset: -8px;
+  pointer-events: none;
+  z-index: 20;
+  overflow: visible;
+}
+
+.sparkle {
+  position: absolute;
+  animation: sparkle 1.5s linear infinite;
+  color: #FFF;
+  font-size: 1.25rem;
+  text-shadow: 
+    0 0 8px rgba(255, 215, 0, 0.8),
+    0 0 12px rgba(255, 215, 0, 0.4);
+  z-index: 30;
+}
+
+.s1 { top: -8px; left: -8px; animation-delay: 0s; }
+.s2 { top: -8px; right: -8px; animation-delay: 0.4s; }
+.s3 { bottom: -8px; left: -8px; animation-delay: 0.8s; }
+.s4 { bottom: -8px; right: -8px; animation-delay: 1.2s; }
+
+@keyframes sparkle {
+  0% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.4) rotate(180deg); }
+  100% { opacity: 0; transform: scale(0.5) rotate(360deg); }
+} 
