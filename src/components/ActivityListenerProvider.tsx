@@ -32,13 +32,46 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // WebSocket URL
   const socketUrl = import.meta.env.VITE_WS_API_URL as string;
 
+  // Ensure WebSocket URL has correct protocol
+  const getWebSocketUrl = useCallback(() => {
+    try {
+      const url = new URL(socketUrl);
+      // Force WSS for production and Safari
+      if (url.protocol === 'http:' || /^(iPhone|iPad|iPod|Safari)/.test(navigator.userAgent)) {
+        url.protocol = 'wss:';
+      } else if (url.protocol === 'https:') {
+        url.protocol = 'wss:';
+      } else if (url.protocol === 'ws:' || url.protocol === 'wss:') {
+        // Keep existing WebSocket protocol
+        return socketUrl;
+      }
+      return url.toString();
+    } catch (e) {
+      console.error('Invalid WebSocket URL:', e);
+      return socketUrl;
+    }
+  }, [socketUrl]);
+
   // Use the useWebSocket hook to connect to the WebSocket
-  const { lastMessage, sendMessage } = useWebSocket(socketUrl, {
+  const { lastMessage, sendMessage } = useWebSocket(getWebSocketUrl(), {
     onMessage: (message) => console.log('WebSocket message received:', message),
     onOpen: () => console.log('WebSocket connection opened'),
     onClose: () => console.log('WebSocket connection closed'),
-    onError: (error) => console.error('WebSocket error:', error),
-    shouldReconnect: () => true,
+    onError: (error) => {
+      console.error('WebSocket error:', error);
+      // Add specific error handling for Safari
+      if (/^(iPhone|iPad|iPod|Safari)/.test(navigator.userAgent)) {
+        console.log('Safari detected, attempting to reconnect with WSS');
+      }
+    },
+    shouldReconnect: (closeEvent) => {
+      // Don't reconnect on specific close codes that indicate permanent failure
+      if (closeEvent.code === 1008 || closeEvent.code === 1011) return false;
+      return true;
+    },
+    reconnectAttempts: 5,
+    reconnectInterval: 3000,
+    retryOnError: true,
   });
 
   const trueSendMessage = useCallback(async (message: string) => {
