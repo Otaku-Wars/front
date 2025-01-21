@@ -701,7 +701,7 @@ export const ModalBuySell: React.FC<ModalBuySellProps> = ({
                           ? 'Finished'
                           : matchesLeft === 1
                             ? 'Next up'
-                            : `${matchesLeft} matches left`
+                            : matchesLeft ? `${matchesLeft} matches left` : 'battling soon'
                       }
                     </span>
                   </>
