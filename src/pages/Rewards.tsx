@@ -20,6 +20,7 @@ export function Rewards() {
     typeof window.Telegram !== "undefined" &&
     navigator?.userAgent?.includes("Telegram")
   );
+  
 
   const generateAffiliateLinkWeb = (address: string) => {
     return `${window.location.host}/#/?ref=${address}`
@@ -34,6 +35,10 @@ export function Rewards() {
 
   const shareAffiliateLink = () => {
     console.log("WebApp available:", !!window.Telegram?.WebApp);
+      //if not telegram web view return window?ref=address
+      navigator.clipboard.writeText(generateAffiliateLinkWeb(address as string));
+      alert(`Copied ${generateAffiliateLinkWeb(address as string)} to clipboard`);
+      return ''
     if (window.Telegram?.WebApp) {
       const tgWebApp = window.Telegram.WebApp;
       console.log("Init data:", tgWebApp.initData);
