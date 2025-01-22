@@ -160,7 +160,7 @@ export const ActivityToast = () => {
           
           const remaining = tradesUntilNextPoint(user.points.buySharesAccumulated);
           const toAddIfRemaining = `${remaining} more trades until your next point!`
-          toast(`${trade.isBuy ? 'Bought' : 'Sold'} ${trade.shareAmount} ${character?.name} for $${amount} ${remaining > 0 ? `(${toAddIfRemaining})` : ''}`, {
+          toast(`${trade.isBuy ? 'Bought' : 'Sold'} ${trade.shareAmount} ${character?.name} for ${amount} ${remaining > 0 ? `(${toAddIfRemaining})` : ''}`, {
             duration: DURATION_TOAST_TRADE,
             id: `trade-${activityToProcess.timestamp}`,
           });

@@ -1,6 +1,7 @@
 import { FaTwitter, FaTelegram, FaQuestionCircle } from 'react-icons/fa'
 import { cn } from '../../lib/utils'
 import { User } from '@memeclashtv/types'
+import { buildDataUrl } from '../ActivityBar'
 
 interface UserAvatarProps {
   user: User
@@ -23,13 +24,16 @@ export function UserAvatar({ user, size = 'md', className }: UserAvatarProps) {
             src={user.pfp} 
             alt={user.username || user.address} 
             className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = buildDataUrl(user.address)
+            }}
           />
         ) : (
-          <div className={cn("bg-muted flex items-center justify-center", sizeClasses[size])}>
-            <span className="text-muted-foreground">
-              {(user.username?.[0] || user.address[0]).toUpperCase()}
-            </span>
-          </div>
+          <img
+            src={buildDataUrl(user.address)}
+            alt={user.username || user.address}
+            className="w-full h-full"
+          />
         )}
       </div>
       
