@@ -7,15 +7,27 @@ import { useConvertEthToUsd } from '../EthPriceProvider'
 import { formatNumber } from '../lib/utils'
 import { SHARES_PER_POINT_BOUGHT, SHARES_PER_POINT_HELD, AFFILIATE_SHARES_PER_POINT } from '@memeclashtv/types'
 import { RotatingCoin, SmallRotatingCoin } from "../components/ui/rotating-coin"
+import { usePrivy } from "@privy-io/react-auth"
 const BOT_USERNAME = 'memeclashtv_bot'
 
 export function Rewards() {
   const address = useAddress()
   const { data: user } = useUser(address)
   const convertEthToUsd = useConvertEthToUsd()
+  const {authenticated, login} = usePrivy()
+  const isTelegramWebView = (
+    typeof window !== "undefined" &&
+    typeof window.Telegram !== "undefined" &&
+    navigator?.userAgent?.includes("Telegram")
+  );
+
+  const generateAffiliateLinkWeb = (address: string) => {
+    return `${window.location.host}/#/?ref=${address}`
+  }
 
   const generateAffiliateLink = (userId?: string) => {
     if (!userId) return ''
+    
     const botLink = `https://t.me/${BOT_USERNAME}?start=${userId}`
     return `https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent('Join me on MemeClash TV! 🎮')}`
   }
@@ -33,6 +45,12 @@ export function Rewards() {
         const user = JSON.parse(initDataParsed.user);
         console.log("User:", user);
         const userId = user.id;
+        if(!isTelegramWebView) {
+          //if not telegram web view return window?ref=address
+          navigator.clipboard.writeText(generateAffiliateLinkWeb(address as string));
+          alert(`Copied ${generateAffiliateLinkWeb(address as string)} to clipboard`);
+          return ''
+        }
         window.open(generateAffiliateLink(userId.toString()), '_blank')
       } catch (e) {
         console.error("Parse error:", e);
